@@ -44,30 +44,35 @@ def parse_row(row_text):
     if len(parts) < 5 or not parts[0].isdigit():
         return None
 
-    # Ambil nilai line_total dan unit_price dari belakang
     try:
+        # Ambil line_total dan unit_price dari belakang
         line_total = parts[-1]
         unit_price = parts[-3] + parts[-2]
 
-        # Jika ada angka tambahan (seperti '1'), maka quantity ada di posisi -3
+        # Cari quantity
         try:
-            float(parts[-3])  # cek apakah ini angka (dummy)
+            float(parts[-3])  # Jika -3 adalah angka
             quantity = parts[-4]
             desc_end_index = -4
         except ValueError:
             quantity = parts[-3]
             desc_end_index = -3
 
-        # product_number selalu di index 0
         product_number = parts[0]
-
-        # deskripsi adalah semua kata dari index 1 sampai sebelum quantity
         description = " ".join(parts[1:desc_end_index])
 
+        # Validasi quantity, unit_price, line_total harus angka valid
+        if not (quantity.replace('.', '', 1).isdigit() and 
+                unit_price.replace('.', '', 1).isdigit() and 
+                line_total.replace('.', '', 1).isdigit()):
+            return None  # Jika ada yang bukan angka, skip row ini
+
         return (product_number, description, quantity, unit_price, line_total)
+
     except Exception as e:
         print(f"Gagal parsing baris: {row_text}. Error: {e}")
         return None
+
 
 
 # Fungsi untuk mengekstrak tabel dari PDF
