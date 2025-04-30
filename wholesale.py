@@ -1,7 +1,8 @@
 import pdfplumber
-import re
+import pytesseract
 from sqlalchemy import create_engine, Column, Integer, Float, String
 from sqlalchemy.orm import declarative_base, sessionmaker
+import re
 
 # Konfigurasi database
 DATABASE_URL = "mysql+pymysql://root:@localhost/python"
@@ -22,10 +23,10 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Fungsi untuk parsing nilai dengan validasi
+# Fungsi parsing nilai dengan validasi
 def parse_value(value, value_type, default=None):
     try:
-        if value is None or value == "":
+        if value is None or value.strip() == "":
             return default
         if value_type == int:
             return int(value.replace(",", "").strip())
@@ -36,73 +37,82 @@ def parse_value(value, value_type, default=None):
     except (ValueError, AttributeError):
         return default
 
-# Fungsi untuk memisahkan data 
+# Fungsi untuk parsing baris data
 def parse_row(row_text):
-    parts = row_text.strip().split()
-
-    # Cek jika baris terlalu pendek
-    if len(parts) < 5 or not parts[0].isdigit():
-        return None
-
     try:
-        # Ambil line_total dan unit_price dari belakang
-        line_total = parts[-1]
-        unit_price = parts[-3] + parts[-2]
-
-        # Cari quantity
-        try:
-            float(parts[-3])  # Jika -3 adalah angka
-            quantity = parts[-4]
-            desc_end_index = -4
-        except ValueError:
-            quantity = parts[-3]
-            desc_end_index = -3
+        # Bersihkan karakter aneh
+        row_text = re.sub(r"[|/~]", " ", row_text)
+        parts = row_text.split()
+        
+        # Validasi minimal elemen dalam baris
+        if len(parts) < 5 or not parts[0]:
+            return None
 
         product_number = parts[0]
-        description = " ".join(parts[1:desc_end_index])
+        line_total = parts[-1]
 
-        # Validasi quantity, unit_price, line_total harus angka valid
-        if not (quantity.replace('.', '', 1).isdigit() and 
-                unit_price.replace('.', '', 1).isdigit() and 
-                line_total.replace('.', '', 1).isdigit()):
-            return None  # Jika ada yang bukan angka, skip row ini
+        # Coba mengidentifikasi quantity dan unit price
+        try:
+            # Asumsikan line_total selalu berada di posisi terakhir
+            # dan quantity adalah angka mendekati akhir baris
+            quantity = int(parts[-4])
+            unit_price = float(parts[-3] + parts[-2])
+            description = " ".join(parts[1:-4])
+        except ValueError:
+            # Penanganan jika quantity/unit_price tidak sesuai
+            # Misal terjadi penggabungan dengan description
+            quantity = int(parts[-3])
+            unit_price = float(parts[-2])
+            description = " ".join(parts[1:-3])
 
-        return (product_number, description, quantity, unit_price, line_total)
-
+        return (product_number, description, str(quantity), str(unit_price), line_total)
     except Exception as e:
-        print(f"Gagal parsing baris: {row_text}. Error: {e}")
+        print(f"Kesalahan parsing baris: {row_text}. Error: {e}")
         return None
 
+# Fungsi OCR
+def extract_text_with_ocr(page):
+    try:
+        page_image = page.to_image()
+        pil_image = page_image.original
+        config = "--psm 6"  # Mode untuk tabel sederhana
+        return pytesseract.image_to_string(pil_image, config=config)
+    except Exception as e:
+        print(f"Kesalahan OCR: {e}")
+        return ""
 
-
-# Fungsi untuk mengekstrak tabel dari PDF
+# Fungsi untuk ekstrak tabel
 def extract_table_from_pdf(pdf_path):
-
     if not pdf_path.endswith('.pdf'):
-        print(f"File bukan PDF : {pdf_path}")
+        print(f"File bukan PDF: {pdf_path}")
         return
-
     with pdfplumber.open(pdf_path) as pdf:
         for page_number, page in enumerate(pdf.pages, start=1):
-            # Ekstrak teks dari halaman
             text = page.extract_text()
             if not text:
-                print(f"Tidak ada teks di halaman: {page_number}")
+                print(f"Halaman {page_number} menggunakan OCR karena tidak ada teks.")
+                text = extract_text_with_ocr(page)
+            if not text:
+                print(f"Tidak ada teks di halaman {page_number}.")
                 continue
-            
-            # Pisahkan baris dalam teks
+
             rows = text.split("\n")
             for row in rows:
+                parsed_row = parse_row(row)
+
+                if not parsed_row:
+                    print(f"Baris tidak valid: {row}")
+                    continue
+                print(parsed_row)
+                    
                 try:
-                    # Parsing baris dengan regex
-                    parsed_row = parse_row(row)
-                    if not parsed_row:
+                    product_number, description, quantity, unit_price, line_total = parsed_row
+                    
+                    # Validasi sebelum menambah ke database
+                    if quantity is None or unit_price is None or line_total is None:
+                        print(f"Data tidak lengkap: {row}")
                         continue
 
-                    # Unpack hasil parsing
-                    product_number, description, quantity, unit_price, line_total = parsed_row
-
-                    # Parsing dan simpan ke database
                     product = ProductTable(
                         product_number=parse_value(product_number, str),
                         description=parse_value(description, str),
@@ -110,13 +120,13 @@ def extract_table_from_pdf(pdf_path):
                         unit_price=parse_value(unit_price, float),
                         line_total=parse_value(line_total, float),
                     )
-
                     session.add(product)
                     session.commit()
-                    print(f"Baris berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
                 except Exception as e:
-                    print(f"Kesalahan pada baris: {row}. Error: {e}")
-    print("Data berhasil ditambahkan ke database.")
+                    print(f"Kesalahan saat menyimpan ke database: {e}")
+                    session.rollback()
+                    continue
 
 # Jalankan fungsi untuk file PDF
+extract_table_from_pdf("sample/wholesale_scan.pdf")
 extract_table_from_pdf("sample/wholesale-produce-distributor-invoice.pdf")
