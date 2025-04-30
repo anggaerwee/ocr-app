@@ -1,0 +1,4 @@
+pytesseract
+pdfplumber
+sqlalchemy
+pdf2image
