@@ -1,4 +1,6 @@
 pytesseract
 pdfplumber
 sqlalchemy
+psycopg2
+pillow
 pdf2image
