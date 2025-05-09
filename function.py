@@ -43,11 +43,11 @@ def parse_value(value, value_type, default=None):
 # Fungsi untuk parsing tabel secara fleksibel (hilangkan kolom diskon jika ada)
 def parse_row(row_text):
     try: 
-        row_text = re.sub(r"[|/~]", " ", row_text)
+        row_text = re.sub(r"[|/~=_—]", " ", row_text)
         row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)
         parts = row_text.split()
 
-        if len(parts) < 5 or not parts[0].isalnum():
+        if len(parts) < 5:
             return None
         
         product_number = parts[0]
@@ -70,7 +70,7 @@ def parse_row(row_text):
 # Fungsi untuk OCR jika teks tidak terdeteksi
 def extract_text_with_ocr(pdf_path, page_number):
     try:
-        images = convert_from_path(pdf_path, first_page=page_number, last_page=page_number, dpi=300)
+        images = convert_from_path(pdf_path, first_page=page_number, last_page=page_number, dpi=200)
         if not images:
             print(f"Tidak ada halaman yang dapat diproses dari file {pdf_path}")
             return None
@@ -154,7 +154,3 @@ def process_row(rows):
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
-
-
-# Jalankan fungsi untuk file PDF
-extract_table_from_pdf("sample/australian_scan.pdf")
