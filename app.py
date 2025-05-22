@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify
-from function import process_file
+from function import process_file, ProductTable
 import os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'output'
+app.config['UPLOAD_FOLDER'] = 'sample'
 app.secret_key = 'supersecretkey'
 
 @app.route('/')
@@ -12,7 +12,12 @@ def home():
     folder = app.config['UPLOAD_FOLDER']
     if os.path.exists(folder):
         files = [f for f in os.listdir(folder) if f.endswith('.csv')]
-    return render_template('index.html', files=files)
+    return render_template('index.html', files=files, title='MwConvert')
+
+@app.route('/data')
+def data():
+    products = ProductTable.get_all()
+    return render_template('data.html', products=products ,title='MwConvert')
 
 @app.route('/submit', methods=['POST'])
 def submit_file():
@@ -48,4 +53,4 @@ def download(filename):
 if __name__ == "__main__":
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -23,6 +23,10 @@ class ProductTable(Base):
     unit_price = Column(Float)
     line_total = Column(Float)
 
+    @classmethod
+    def get_all(cls):
+        return session.query(cls).all()
+
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -31,9 +35,9 @@ session = Session()
 def parse_row(row_text):
     try:
         # Pembersihan teks
-        row_text = re.sub(r"[“![|/~=_—]", " ", row_text)
-        row_text = re.sub(r"\s{2,}", " ", row_text).strip()  # Hilangkan spasi berlebih
-        row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)  # Hilangkan persen jika ada
+        row_text = re.sub(r"[“![|/~=_—]", " ", row_text) #Menghilangkan karakter aneh
+        row_text = re.sub(r"\s{2,}", " ", row_text).strip()  # Menghilangkan spasi berlebih
+        row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)  # MEnghilangkan persen jika ada
         
         # Pisahkan teks berdasarkan spasi
         parts = row_text.split()
@@ -48,13 +52,13 @@ def parse_row(row_text):
         line_total = parts[-1]
         
         # Konversi ke tipe data yang sesuai
-        quantity = int(re.sub(r"[^\d]", "", quantity))  # Hilangkan karakter non-digit
-        unit_price = float(re.sub(r"[^\d.]", "", unit_price))  # Hilangkan non-digit kecuali titik
-        line_total = float(re.sub(r"[^\d.]", "", line_total))  # Hilangkan non-digit kecuali titik
+        quantity = int(re.sub(r"[^\d]", "", quantity))  # Menghilangkan karakter non-digit
+        unit_price = float(re.sub(r"[^\d.]", "", unit_price))  # Menghilangkan non-digit kecuali titik
+        line_total = float(re.sub(r"[^\d.]", "", line_total))  # Menghilangkan non-digit kecuali titik
         
         return product_number, description, quantity, unit_price, line_total
     except Exception as e:
-        print(f"Error parsing row: {e}")
+        # print(f"Error parsing row: {e}")
         return None
 
 # Fungsi untuk OCR jika teks tidak terdeteksi
@@ -77,7 +81,7 @@ def extract_text_with_ocr(file_path, page_number):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-def extract_image_with_ocr(image_path):
+def extract_image_with_ocr(image_path): 
     try:
         # Open image
         image = Image.open(image_path)
@@ -103,10 +107,17 @@ def extract_image_with_ocr(image_path):
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
+        replacements = {
+            'soot.': '4.00%',  # Fix p4 percentage
+        }
+
+
         # Use OCR with custom config
         custom_config = r'--oem 3 --psm 6'
         extracted_text = pytesseract.image_to_string(image, config=custom_config)
 
+        for wrong, correct in replacements.items():
+            extracted_text = extracted_text.replace(wrong, correct)
         extracted_text = re.sub(r"[^\w\s.%,-]", " ", extracted_text)
         extracted_text = re.sub(r"\s{3,}", " ", extracted_text).strip()
 
@@ -133,12 +144,12 @@ def process_file(file_path):
                 
                 if page.width and page.height:
                     text = extract_text_with_ocr(file_path, page_number)
-                    print(text)
+                    # print(text)
 
                 rows = text.split("\n")
                 for row in rows:
                     parsed = parse_row(row)
-                    print(parsed)
+                    # print(parsed)
                     if parsed:
                         all_rows.append(parsed)
 
@@ -161,16 +172,14 @@ def process_file(file_path):
     else:
         print(f"File {file_path} tidak didukung")
         return ""
-    
+
     if all_rows:
         process_row(all_rows)
-
         df = pd.DataFrame(all_rows, columns=["product_number", "description", "quantity", "unit_price", "line_total"])
         csv_filename = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
         csv_path = os.path.join(os.path.dirname(file_path), csv_filename)
-        df.to_csv(csv_path, index=False)
-        print(f"CSV berhasil disimpan di {csv_path}")
-        return csv_filename
+        df.to_csv(csv_path, index=False) 
+        return csv_filename 
     else:
         print("Tidak ada data yang diekstrak.")
         return ""
@@ -193,6 +202,7 @@ def process_row(rows):
                         
             session.add(product)
             session.commit()
+            print(parsed_row)
             print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
         except Exception as e:
             session.rollback()
