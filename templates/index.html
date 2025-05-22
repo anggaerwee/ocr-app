@@ -60,23 +60,12 @@
             >
               {{ message }}
             </p>
-            {% if category == 'success' and filecsv %}
             <div class="mt-3 space-x-2">
-              <a
-                href="{{ url_for('download', filename=filecsv) }}"
-                type="button"
-                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
-                >Download CSV</a
-              >
-              <a
-                href="/data"
-                type="button"
-                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
-              >
-                Database
-              </a>
+              {% if category == 'success' and filecsv %}
+              <a href="{{ url_for('download', filename=filecsv) }}" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">Download CSV</a>
+              <a href="/data" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">Database</a>
+              {% endif %}
             </div>
-            {% endif %}
           </div>
           {% endfor %}
         </div>

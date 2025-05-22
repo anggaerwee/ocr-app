@@ -3,7 +3,7 @@ from function import process_file, ProductTable
 import os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'sample'
+app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
 
 @app.route('/')

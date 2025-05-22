@@ -7,6 +7,7 @@ import os
 from sqlalchemy import create_engine, Column, Integer, Float, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
+import csv
 
 # Konfigurasi database
 DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/python"
@@ -174,16 +175,23 @@ def process_file(file_path):
         return ""
 
     if all_rows:
-        process_row(all_rows)
-        df = pd.DataFrame(all_rows, columns=["product_number", "description", "quantity", "unit_price", "line_total"])
-        csv_filename = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
-        csv_path = os.path.join(os.path.dirname(file_path), csv_filename)
-        df.to_csv(csv_path, index=False) 
-        return csv_filename 
+        process_row(all_rows) # Function untuk menyimpan ke database
+        folder = os.path.dirname(file_path)
+        csvname = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
+        csv_path = os.path.join(folder, csvname)
+        write_csv_with_delimiter(csv_path, all_rows, ";") # Function untuk menyimpan csv
+        return csvname
     else:
         print("Tidak ada data yang diekstrak.")
         return ""
-
+    
+def write_csv_with_delimiter(filename, allrows, delimiter):
+    with open(filename, mode="w", newline="", encoding="utf-8") as file:
+        df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Line Total"])
+        df.to_csv(file, index=False, sep=delimiter, header=True)
+        writer = csv.writer(file, delimiter=delimiter)
+        writer.writerows(allrows)  
+        
 def process_row(rows):
     for parsed_row in rows:
         if not parsed_row or len(parsed_row) != 5:
@@ -202,8 +210,10 @@ def process_row(rows):
                         
             session.add(product)
             session.commit()
-            print(parsed_row)
-            print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
+            # print(parsed_row)
+            # print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
+
+# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')
