@@ -9,27 +9,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
 
-DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/python"
-engine = create_engine(DATABASE_URL)
-Base = declarative_base()
-
-class ProductTable(Base):
-    __tablename__ = 'tb_product'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    product_number = Column(String(50))
-    description = Column(String(255))
-    quantity = Column(Integer)
-    unit_price = Column(Float)
-    line_total = Column(Float)
-    discount = Column(Float)
-
-    @classmethod
-    def get_all(cls):
-        return session.query(cls).all()
-
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-session = Session()
+from database.db_config import Session, ProductTable
 
 def parse_row(row_text):
     try:

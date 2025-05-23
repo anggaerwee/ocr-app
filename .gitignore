@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches
+*.log
+*.pot
+*.pyc
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# PDF/Images Results
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.csv
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# Logs
+*.log
+
+# Local SQLite or SQLAlchemy DBs
+*.sqlite3
+*.db
+
+# Other temporary files
+output/
+sample/
+database/
