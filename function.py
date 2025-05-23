@@ -9,18 +9,19 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
 
-DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
+DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/python"
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 
 class ProductTable(Base):
-    __tablename__ = 'invoice'
+    __tablename__ = 'tb_product'
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_number = Column(String(50))
     description = Column(String(255))
     quantity = Column(Integer)
     unit_price = Column(Float)
     line_total = Column(Float)
+    discount = Column(Float)
 
     @classmethod
     def get_all(cls):
@@ -34,25 +35,39 @@ def parse_row(row_text):
     try:
         row_text = re.sub(r"[“![|/~=_—]", " ", row_text)
         row_text = re.sub(r"\s{2,}", " ", row_text).strip()
-        row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)
-        
+
         parts = row_text.split()
         if len(parts) < 5:
             return None
-        
+
+        line_total_str = parts[-1]
+        possible_discount_str = parts[-2]
+
+        if "%" in possible_discount_str:
+            # Format parts 6: dengan diskon
+            description_parts = parts[1:-4]
+            quantity_str = parts[-4]
+            unit_price_str = parts[-3]
+            discount_str = possible_discount_str
+        else:
+            # Format parts 5: tanpa diskon
+            description_parts = parts[1:-3]
+            quantity_str = parts[-3]
+            unit_price_str = parts[-2]
+            discount_str = None
+
         product_number = parts[0]
-        description = " ".join(parts[1:-3]).strip()
-        quantity = parts[-3]
-        unit_price = parts[-2]
-        line_total = parts[-1]
-       
-        quantity = int(re.sub(r"[^\d]", "", quantity))
-        unit_price = float(re.sub(r"[^\d.]", "", unit_price))
-        line_total = float(re.sub(r"[^\d.]", "", line_total))
-        
-        return product_number, description, quantity, unit_price, line_total
+        description = " ".join(description_parts).strip()
+
+        quantity = int(re.sub(r"[^\d]", "", quantity_str))
+        unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
+        line_total = float(re.sub(r"[^\d.]", "", line_total_str))
+        discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else None
+
+        return product_number, description, quantity, unit_price, line_total, discount
+
     except Exception as e:
-       
+        print(f"Baris gagal di parsing: {e}")
         return None
 
 def extract_text_with_ocr(file_path, page_number):
@@ -96,7 +111,6 @@ def extract_image_with_ocr(image_path):
             'soot.': '4.00%',
         }
 
-
         custom_config = r'--oem 3 --psm 6'
         extracted_text = pytesseract.image_to_string(image, config=custom_config)
 
@@ -124,10 +138,11 @@ def process_file(file_path):
                 
                 if page.width and page.height:
                     text = extract_text_with_ocr(file_path, page_number)
-
+                    print(text)
                 rows = text.split("\n")
                 for row in rows:
                     parsed = parse_row(row)
+                    print(parsed)
                     if parsed:
                         all_rows.append(parsed)
 
@@ -167,22 +182,25 @@ def write_csv_with_delimiter(filename, allrows, delimiter):
         
 def process_row(rows):
     for parsed_row in rows:
-        if not parsed_row or len(parsed_row) != 5:
-            continue
 
         try:
-            product_number, description, quantity, unit_price, line_total = parsed_row
+            product_number, description, quantity, unit_price, line_total, discount = parsed_row
 
             product = ProductTable(
                 product_number=str(product_number).strip(),
                 description=str(description).strip(),
                 quantity=quantity,
                 unit_price=unit_price,
-                line_total=line_total
+                line_total=line_total,
+                discount=discount
             )
                         
             session.add(product)
             session.commit()
+            print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
+
+# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')
+# process_file('sample/wholesale-produce-distributor-invoice.pdf')

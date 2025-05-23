@@ -21,16 +21,17 @@
         <table class="min-w-full table-auto border-collapse">
           <thead class="bg-gray-200 text-gray-700">
             <tr>
-              <th class="px-4 py-2 border">#</th>
-              <th class="px-4 py-2 border">Product Number</th>
+              <th class="px-4 py-2 border">No</th>
+              <th class="px-4 py-2 border">Product #</th>
               <th class="px-4 py-2 border">Description</th>
               <th class="px-4 py-2 border">Quantity</th>
               <th class="px-4 py-2 border">Unit Price</th>
+              <th class="px-4 py-2 border">Discount %</th>
               <th class="px-4 py-2 border">Line Total</th>
             </tr>
           </thead>
           <tbody class="text-sm text-gray-800">
-            {% for item in products %}
+            {% for item in product %}
             <tr class="border-b hover:bg-gray-100">
               <td class="px-4 py-2 border">{{ loop.index }}</td>
               <td class="px-4 py-2 border">{{ item.product_number }}</td>
@@ -38,6 +39,13 @@
               <td class="px-4 py-2 border">{{ item.quantity }}</td>
               <td class="px-4 py-2 border">
                 Rp. {{ "%.2f"|format(item.unit_price) }}
+              </td>
+              <td class="px-4 py-2 border">
+                {% if item.discount is not none  %}
+                  {{ "%.2f"|format(item.discount) }} 
+                {% else  %}
+                
+                {% endif  %}
               </td>
               <td class="px-4 py-2 border">
                 Rp. {{ "%.2f"|format(item.line_total) }}
