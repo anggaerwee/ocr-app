@@ -1,45 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{title }} | Data</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-  <div class="container mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Data Produk dari CSV</h1>
-    <a href="/" type="button" class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Kembali</a>
-    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-      <table class="min-w-full table-auto border-collapse">
-        <thead class="bg-gray-200 text-gray-700">
-          <tr>
-            <th class="px-4 py-2 border">#</th>
-            <th class="px-4 py-2 border">Product Number</th>
-            <th class="px-4 py-2 border">Description</th>
-            <th class="px-4 py-2 border">Quantity</th>
-            <th class="px-4 py-2 border">Unit Price</th>
-            <th class="px-4 py-2 border">Line Total</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm text-gray-800">
-          {% for item in products %}
-          <tr class="border-b hover:bg-gray-100">
-            <td class="px-4 py-2 border">{{ loop.index }}</td>
-            <td class="px-4 py-2 border">{{ item.product_number }}</td>
-            <td class="px-4 py-2 border">{{ item.description }}</td>
-            <td class="px-4 py-2 border">{{ item.quantity }}</td>
-            <td class="px-4 py-2 border">Rp. {{ "%.2f"|format(item.unit_price) }}</td>
-            <td class="px-4 py-2 border">Rp. {{ "%.2f"|format(item.line_total) }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data ditemukan.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{title }} | Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-10">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">
+        Data Produk dari CSV
+      </h1>
+      <a
+        href="/"
+        type="button"
+        class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+        >Kembali</a
+      >
+      <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+        <table class="min-w-full table-auto border-collapse">
+          <thead class="bg-gray-200 text-gray-700">
+            <tr>
+              <th class="px-4 py-2 border">#</th>
+              <th class="px-4 py-2 border">Product Number</th>
+              <th class="px-4 py-2 border">Description</th>
+              <th class="px-4 py-2 border">Quantity</th>
+              <th class="px-4 py-2 border">Unit Price</th>
+              <th class="px-4 py-2 border">Line Total</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm text-gray-800">
+            {% for item in products %}
+            <tr class="border-b hover:bg-gray-100">
+              <td class="px-4 py-2 border">{{ loop.index }}</td>
+              <td class="px-4 py-2 border">{{ item.product_number }}</td>
+              <td class="px-4 py-2 border">{{ item.description }}</td>
+              <td class="px-4 py-2 border">{{ item.quantity }}</td>
+              <td class="px-4 py-2 border">
+                Rp. {{ "%.2f"|format(item.unit_price) }}
+              </td>
+              <td class="px-4 py-2 border">
+                Rp. {{ "%.2f"|format(item.line_total) }}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-gray-500 py-4">
+                Tidak ada data ditemukan.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

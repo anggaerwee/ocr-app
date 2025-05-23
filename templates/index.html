@@ -39,7 +39,6 @@
           dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.
         </p>
 
-        <!-- Flash Message -->
         {% with messages = get_flashed_messages(with_categories=True) %} {% if
         messages %}
         <div class="my-3" id="alert">
@@ -62,8 +61,18 @@
             </p>
             <div class="mt-3 space-x-2">
               {% if category == 'success' and filecsv %}
-              <a href="{{ url_for('download', filename=filecsv) }}" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">Download CSV</a>
-              <a href="/data" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">Database</a>
+              <a
+                href="{{ url_for('download', filename=filecsv) }}"
+                type="button"
+                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+                >Download CSV</a
+              >
+              <a
+                href="/data"
+                type="button"
+                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+                >Tampilkan Data</a
+              >
               {% endif %}
             </div>
           </div>
@@ -93,7 +102,8 @@
           </div>
         </form>
         <p class="text-xs text-gray-500 mt-3">
-          Masukan file pdf untuk mendownload data csv yang disimpan di PostgreSQL
+          Masukan file pdf untuk mendownload data csv yang disimpan di
+          PostgreSQL
         </p>
       </div>
     </div>
@@ -102,15 +112,14 @@
       Dropzone.autoDiscover = false;
       var myDropzone = new Dropzone("#fileDropzone", {
         url: "/submit",
-        paramName: "file", // harus sama dengan name input di Flask
+        paramName: "file",
         maxFiles: 10,
-        maxFilesize: 10, // MB
+        maxFilesize: 10,
         addRemoveLinks: true,
         acceptedFiles: ".pdf,.webp",
         dictDefaultMessage: "Drop files here or click to upload.",
         init: function () {
           this.on("sending", function (file, xhr, formData) {
-            // Optional: reload page or show flash message
             Swal.fire({
               title: "Processing...",
               text: "Please wait your file being converted",
@@ -122,9 +131,7 @@
           });
 
           this.on("success", function (file, response) {
-        
-              window.location.reload();
-
+            window.location.reload();
           });
 
           this.on("error", function (file, errorMessage) {

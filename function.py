@@ -9,14 +9,12 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
 
-# Konfigurasi database
-DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/python"
+DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 
-# Model database
 class ProductTable(Base):
-    __tablename__ = 'tb_product'
+    __tablename__ = 'invoice'
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_number = Column(String(50))
     description = Column(String(255))
@@ -32,37 +30,31 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Fungsi untuk parsing tabel secara fleksibel (hilangkan kolom diskon jika ada)
 def parse_row(row_text):
     try:
-        # Pembersihan teks
-        row_text = re.sub(r"[“![|/~=_—]", " ", row_text) #Menghilangkan karakter aneh
-        row_text = re.sub(r"\s{2,}", " ", row_text).strip()  # Menghilangkan spasi berlebih
-        row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)  # MEnghilangkan persen jika ada
+        row_text = re.sub(r"[“![|/~=_—]", " ", row_text)
+        row_text = re.sub(r"\s{2,}", " ", row_text).strip()
+        row_text = re.sub(r"\d+\.\d+%\s*", "", row_text)
         
-        # Pisahkan teks berdasarkan spasi
         parts = row_text.split()
         if len(parts) < 5:
-            return None  # Baris tidak valid jika elemen terlalu sedikit
+            return None
         
-        # Parsing elemen utama
         product_number = parts[0]
         description = " ".join(parts[1:-3]).strip()
         quantity = parts[-3]
         unit_price = parts[-2]
         line_total = parts[-1]
-        
-        # Konversi ke tipe data yang sesuai
-        quantity = int(re.sub(r"[^\d]", "", quantity))  # Menghilangkan karakter non-digit
-        unit_price = float(re.sub(r"[^\d.]", "", unit_price))  # Menghilangkan non-digit kecuali titik
-        line_total = float(re.sub(r"[^\d.]", "", line_total))  # Menghilangkan non-digit kecuali titik
+       
+        quantity = int(re.sub(r"[^\d]", "", quantity))
+        unit_price = float(re.sub(r"[^\d.]", "", unit_price))
+        line_total = float(re.sub(r"[^\d.]", "", line_total))
         
         return product_number, description, quantity, unit_price, line_total
     except Exception as e:
-        # print(f"Error parsing row: {e}")
+       
         return None
 
-# Fungsi untuk OCR jika teks tidak terdeteksi
 def extract_text_with_ocr(file_path, page_number):
     try:
         images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=200)
@@ -72,7 +64,6 @@ def extract_text_with_ocr(file_path, page_number):
         
         extracted_text = ""
         for image in images:
-            # Konfigurasi OCR untuk hasil yang lebih baik
             custom_config = r'--oem 3 --psm 6'
             page_text = pytesseract.image_to_string(image, config=custom_config)
             extracted_text += page_text + "\n"
@@ -84,36 +75,28 @@ def extract_text_with_ocr(file_path, page_number):
 
 def extract_image_with_ocr(image_path): 
     try:
-        # Open image
         image = Image.open(image_path)
 
-        # Convert to grayscale to improve contrast
         image = image.convert("L")
 
-        # Enhance contrast moderately
         enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.0)  # Adjusted from 4.0 to 2.0
+        image = enhancer.enhance(2.0)
 
-        # Resize image to improve OCR quality
         width, height = image.size
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
-        # Apply median filter to reduce noise
         image = image.filter(ImageFilter.MedianFilter(size=3))
 
-        # Apply sharpening filter to enhance edges
         image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=250, threshold=3))
 
-        # Binarize image (convert to pure black and white)
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
         replacements = {
-            'soot.': '4.00%',  # Fix p4 percentage
+            'soot.': '4.00%',
         }
 
 
-        # Use OCR with custom config
         custom_config = r'--oem 3 --psm 6'
         extracted_text = pytesseract.image_to_string(image, config=custom_config)
 
@@ -127,37 +110,29 @@ def extract_image_with_ocr(image_path):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-# Fungsi utama untuk ekstraksi tabel dari PDF
 def process_file(file_path):
 
-    # Validasi jika file tidak ditemukan 
     if not os.path.exists(file_path):
         print(f"File {file_path} tidak ditemukan")
         return
     
-    # Simpan nilai dalam array
     all_rows = []
 
-    # Jika file berformat PDF 
     if file_path.endswith('.pdf'):
         with pdfplumber.open(file_path) as pdf:
             for page_number, page in enumerate(pdf.pages, start=1):
                 
                 if page.width and page.height:
                     text = extract_text_with_ocr(file_path, page_number)
-                    # print(text)
 
                 rows = text.split("\n")
                 for row in rows:
                     parsed = parse_row(row)
-                    # print(parsed)
                     if parsed:
                         all_rows.append(parsed)
 
-    # Jika file berformat webp   
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
-        # print(text)
         rows = text.split("\n")
         for row in rows:
             row = row.strip()
@@ -165,21 +140,19 @@ def process_file(file_path):
                 continue
 
             parsed = parse_row(row)
-            # print(parsed)
             if parsed:
                 all_rows.append(parsed)
     
-    # Jika format file tidak di dukung
     else:
         print(f"File {file_path} tidak didukung")
         return ""
 
     if all_rows:
-        process_row(all_rows) # Function untuk menyimpan ke database
+        process_row(all_rows)
         folder = os.path.dirname(file_path)
         csvname = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
         csv_path = os.path.join(folder, csvname)
-        write_csv_with_delimiter(csv_path, all_rows, ";") # Function untuk menyimpan csv
+        write_csv_with_delimiter(csv_path, all_rows, ";")
         return csvname
     else:
         print("Tidak ada data yang diekstrak.")
@@ -210,10 +183,6 @@ def process_row(rows):
                         
             session.add(product)
             session.commit()
-            # print(parsed_row)
-            # print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
-
-# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')

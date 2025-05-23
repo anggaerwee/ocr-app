@@ -12,12 +12,12 @@ def home():
     folder = app.config['UPLOAD_FOLDER']
     if os.path.exists(folder):
         files = [f for f in os.listdir(folder) if f.endswith('.csv')]
-    return render_template('index.html', files=files, title='MwConvert')
+    return render_template('index.html', files=files, title='OcrConvert')
 
 @app.route('/data')
 def data():
     products = ProductTable.get_all()
-    return render_template('data.html', products=products ,title='MwConvert')
+    return render_template('data.html', products=products ,title='OcrConvert')
 
 @app.route('/submit', methods=['POST'])
 def submit_file():
@@ -40,7 +40,7 @@ def submit_file():
                 flash((f"{file.filename} Berhasil disimpan di database", csv_filename), 'success')
             else:
                 flash((f"File {file.filename} gagal disimpan di database", ''), 'error')
-        return '', 204  # Untuk Dropzone, tidak perlu redirect
+        return '', 204
     except Exception as e:
         flash((f"terjadi kesalahan : {e}", ''), 'error')
         return '', 500
