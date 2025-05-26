@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{title }} | Data</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DataTables Bootstrap 5 integration -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+    />
+    <!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap 5 JS (Popper + Bootstrap) -->
+
   </head>
   <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-10">
@@ -12,17 +22,17 @@
         Data Produk dari CSV
       </h1>
       <a
-        href="/"
-        type="button"
-        class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg"
-        >Kembali</a
-      >
-      <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-        <table class="min-w-full table-auto border-collapse">
-          <thead class="bg-gray-200 text-gray-700">
-            <tr>
-              <th class="px-4 py-2 border">No</th>
-              <th class="px-4 py-2 border">Product #</th>
+      href="/"
+      class="inline-block mb-4 text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200">
+      Kembali
+    </a>
+    
+    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+      <table id="productTable" class="min-w-full table-auto border-collapse">
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="px-4 py-2 border">No</th>
+            <th class="px-4 py-2 border">Product #</th>
               <th class="px-4 py-2 border">Description</th>
               <th class="px-4 py-2 border">Quantity</th>
               <th class="px-4 py-2 border">Unit Price</th>
@@ -30,37 +40,52 @@
               <th class="px-4 py-2 border">Line Total</th>
             </tr>
           </thead>
-          <tbody class="text-sm text-gray-800">
-            {% for item in products %}
-            <tr class="border-b hover:bg-gray-100">
-              <td class="px-4 py-2 border">{{ loop.index }}</td>
-              <td class="px-4 py-2 border">{{ item.product_number }}</td>
-              <td class="px-4 py-2 border">{{ item.description }}</td>
-              <td class="px-4 py-2 border">{{ item.quantity }}</td>
-              <td class="px-4 py-2 border">
-                Rp. {{ "%.2f"|format(item.unit_price) }}
-              </td>
-              <td class="px-4 py-2 border">
-                {% if item.discount is not none  %}
-                  {{ "%.2f"|format(item.discount) }} 
-                {% else  %}
-                
-                {% endif  %}
-              </td>
-              <td class="px-4 py-2 border">
-                Rp. {{ "%.2f"|format(item.line_total) }}
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="6" class="text-center text-gray-500 py-4">
-                Tidak ada data ditemukan.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+      $('#productTable').DataTable({
+  ajax: '/api/products',
+  columns: [
+    {
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      },
+    },
+    { data: 'product_number' },
+    { data: 'description' },
+    { data: 'quantity' },
+    {
+      data: 'unit_price',
+      render: function (data) {
+        return 'Rp. ' + parseFloat(data).toFixed(2);
+      },
+    },
+    {
+      data: 'discount',
+      render: function (data) {
+        return data !== null ? parseFloat(data).toFixed(2) : '';
+      },
+    },
+    {
+      data: 'line_total',
+      render: function (data) {
+        return 'Rp. ' + parseFloat(data).toFixed(2);
+      },
+    },
+  ],
+  pagingType: 'simple_numbers',
+  dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+       "<'row'<'col-sm-12'tr>>" +
+       "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+});
+    </script>
   </body>
 </html>

@@ -16,8 +16,24 @@ def home():
 
 @app.route('/data')
 def data():
+    return render_template('data.html', title='OcrConvert')
+
+@app.route('/api/products')
+def api_products():
     products = ProductTable.get_all()
-    return render_template('data.html', products=products ,title='OcrConvert')
+    data = [
+        {
+            'product_number': p.product_number,
+            'description': p.description,
+            'quantity': p.quantity,
+            'unit_price': p.unit_price,
+            'discount': p.discount,
+            'line_total': p.line_total
+        }
+        for p in products
+    ]
+    return jsonify({'data': data})
+
 
 @app.route('/submit', methods=['POST'])
 def submit_file():

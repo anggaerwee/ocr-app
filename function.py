@@ -8,9 +8,7 @@ from sqlalchemy import create_engine, Column, Integer, Float, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
-
 from database.db_config import Session, ProductTable
-
 def parse_row(row_text):
     try:
         row_text = re.sub(r"[“![|/~=_—]", " ", row_text)
@@ -161,6 +159,7 @@ def write_csv_with_delimiter(filename, allrows, delimiter):
         writer.writerows(allrows)  
         
 def process_row(rows):
+    session = Session()
     for parsed_row in rows:
 
         try:
