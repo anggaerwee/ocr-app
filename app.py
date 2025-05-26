@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify
-from function import process_file, ProductTable
+from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
+from function import process_file, ProductTable, Session
 # from database.db_config import engine, Base, Session, ProductTable
 import os
 app = Flask(__name__)
@@ -28,7 +28,8 @@ def api_products():
             'quantity': p.quantity,
             'unit_price': p.unit_price,
             'discount': p.discount,
-            'line_total': p.line_total
+            'line_total': p.line_total,
+            'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
         }
         for p in products
     ]
@@ -65,6 +66,17 @@ def submit_file():
 def download(filename):
     folder = app.config['UPLOAD_FOLDER']
     return send_from_directory(folder, filename, as_attachment=True)
+
+@app.route('/deleteall')
+def delete_all():
+    try:
+        session = Session()
+        session.query(ProductTable).delete()
+        session.commit()
+        session.close()
+        return redirect(url_for('data'))
+    except Exception as e:
+        return f"Error: {e}"
 
 if __name__ == "__main__":
     if not os.path.exists(app.config['UPLOAD_FOLDER']):

@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, Float, String
+from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
+from datetime import datetime
 
 DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
 engine = create_engine(DATABASE_URL)
@@ -14,6 +15,7 @@ class ProductTable(Base):
     unit_price = Column(Float)
     line_total = Column(Float)
     discount = Column(Float)
+    createddate = Column(DateTime, default=datetime.utcnow) 
 
     @classmethod
     def get_all(cls):
@@ -21,4 +23,4 @@ class ProductTable(Base):
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
-session = Session() 
+session = Session()

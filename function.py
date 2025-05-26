@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, Column, Integer, Float, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
+
 from database.db_config import Session, ProductTable
 def parse_row(row_text):
     try:
@@ -69,7 +70,6 @@ def extract_text_with_ocr(file_path, page_number):
 def extract_image_with_ocr(image_path): 
     try:
         image = Image.open(image_path)
-
         image = image.convert("L")
 
         enhancer = ImageEnhance.Contrast(image)
@@ -79,7 +79,6 @@ def extract_image_with_ocr(image_path):
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
         image = image.filter(ImageFilter.MedianFilter(size=3))
-
         image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=250, threshold=3))
 
         threshold = 128
@@ -94,13 +93,23 @@ def extract_image_with_ocr(image_path):
 
         for wrong, correct in replacements.items():
             extracted_text = extracted_text.replace(wrong, correct)
-        extracted_text = re.sub(r"[^\w\s.%,-]", " ", extracted_text)
-        extracted_text = re.sub(r"\s{3,}", " ", extracted_text).strip()
 
-        return extracted_text
+        extracted_text = re.sub(r"[^\w\s./%,-]", " ", extracted_text)
+
+        # Bersihkan per baris
+        lines = extracted_text.splitlines()
+        cleaned_lines = []
+        for line in lines:
+            line = re.sub(r"^[a-zA-Z](?=\d)", "", line)  # buang huruf di depan angka
+            line = line.replace("(", "").replace(")", "")  # buang tanda kurung
+            cleaned_lines.append(line)
+
+        return "\n".join(cleaned_lines)
+
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None
+
 
 def process_file(file_path):
 
