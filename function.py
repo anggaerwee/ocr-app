@@ -43,7 +43,7 @@ def parse_row(row_text):
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
         discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else None
 
-        return product_number, description, quantity, unit_price, line_total, discount
+        return product_number, description, quantity, unit_price,discount, line_total, 
 
     except Exception as e:
         print(f"Baris gagal di parsing: {e}")
@@ -162,9 +162,9 @@ def process_file(file_path):
     
 def write_csv_with_delimiter(filename, allrows, delimiter):
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Line Total"])
+        df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"]) 
         df.to_csv(file, index=False, sep=delimiter, header=True)
-        writer = csv.writer(file, delimiter=delimiter)
+        writer = csv.writer(file, delimiter=delimiter,)
         writer.writerows(allrows)  
         
 def process_row(rows):
@@ -172,7 +172,7 @@ def process_row(rows):
     for parsed_row in rows:
 
         try:
-            product_number, description, quantity, unit_price, line_total, discount = parsed_row
+            product_number, description, quantity, unit_price, discount, line_total,  = parsed_row
 
             product = ProductTable(
                 product_number=str(product_number).strip(),
