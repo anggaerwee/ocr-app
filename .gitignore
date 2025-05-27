@@ -44,6 +44,9 @@ build/
 *.sqlite3
 *.db
 
+#  PostgreSQL Dbs
+*.pgpass
+pg_dump.log
 # Other temporary files
 output/
 sample/

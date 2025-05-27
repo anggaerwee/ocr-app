@@ -10,11 +10,11 @@ import pandas as pd
 import csv
 
 from database.db_config import Session, ProductTable
+
 def parse_row(row_text):
     try:
-        row_text = re.sub(r"[“![|/~=_—]", " ", row_text)
+        row_text = re.sub(r"[“![|~=_—j(]", "", row_text)
         row_text = re.sub(r"\s{2,}", " ", row_text).strip()
-
         parts = row_text.split()
         if len(parts) < 5:
             return None
@@ -36,8 +36,10 @@ def parse_row(row_text):
             discount_str = None
 
         product_number = parts[0]
-        description = " ".join(description_parts).strip()
-
+        description = " ".join(description_parts).strip().lstrip('/')
+        product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("pd", "p5")
+        description = description.replace("IGRASS", "GRASS")
+        # line_total_str = line_total_str.replace("7250.00", "772.20")
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
@@ -85,7 +87,10 @@ def extract_image_with_ocr(image_path):
         image = image.point(lambda p: 255 if p > threshold else 0)
 
         replacements = {
-            'soot.': '4.00%',
+            # 'soot.': '4.00%',
+            # 'l' : '1',
+            # 's' : '3',
+            # 'd' : '5',
         }
 
         custom_config = r'--oem 3 --psm 6'
@@ -94,14 +99,13 @@ def extract_image_with_ocr(image_path):
         for wrong, correct in replacements.items():
             extracted_text = extracted_text.replace(wrong, correct)
 
-        extracted_text = re.sub(r"[^\w\s./%,-]", " ", extracted_text)
-
-        # Bersihkan per baris
+        # extracted_text = re.sub(r"[^\w\s./%,-]", " ", extracted_text)
+        # extracted_text
         lines = extracted_text.splitlines()
         cleaned_lines = []
         for line in lines:
-            line = re.sub(r"^[a-zA-Z](?=\d)", "", line)  # buang huruf di depan angka
-            line = line.replace("(", "").replace(")", "")  # buang tanda kurung
+            line = re.sub(r"^[a-zA-Z](?=\d)", "", line)
+            line = line.replace("(", "").replace(")", "")
             cleaned_lines.append(line)
 
         return "\n".join(cleaned_lines)
@@ -189,6 +193,3 @@ def process_row(rows):
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
-
-# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')
-# process_file('sample/wholesale-produce-distributor-invoice.pdf')

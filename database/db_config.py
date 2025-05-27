@@ -3,7 +3,10 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 
 DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"options": "-c timezone=Asia/Jakarta"}
+)
 Base = declarative_base()
 
 class ProductTable(Base):
@@ -15,7 +18,7 @@ class ProductTable(Base):
     unit_price = Column(Float)
     line_total = Column(Float)
     discount = Column(Float)
-    createddate = Column(DateTime, default=datetime.utcnow) 
+    createddate = Column(DateTime, default=datetime.now) 
 
     @classmethod
     def get_all(cls):

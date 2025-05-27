@@ -77,8 +77,11 @@ def delete_all():
         return redirect(url_for('data'))
     except Exception as e:
         return f"Error: {e}"
-
+@app.route("/api/invoice_count")
+def invoice_count():
+    count = len(ProductTable.get_all())
+    return jsonify({"count": count})
 if __name__ == "__main__":
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
-    app.run(host='10.21.1.126', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
