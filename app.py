@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
 from function import process_file, ProductTable, Session
-# from database.db_config import engine, Base, Session, ProductTable
 import os
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
