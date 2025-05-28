@@ -12,7 +12,7 @@ from database.db_config import Session, ProductTable
 
 def parse_row(row_text):
     try:
-        row_text = re.sub(r"[“![|~=_—j]", "", row_text)
+        row_text = re.sub(r"[“![|~=j__—]", "", row_text)
         row_text = re.sub(r"\s{2,}", " ", row_text).strip()
         parts = row_text.split()
         if len(parts) < 5:
@@ -53,6 +53,7 @@ def parse_row(row_text):
         line_total_str = line_total_str.replace("3863.17", "363.17").replace("363.27", "363.17")
         description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large")
         line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05")
+
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
@@ -212,7 +213,7 @@ def process_row(rows):
                         
             session.add(product)
             session.commit()
-            print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {line_total}")
+            print(f"Data berhasil disimpan: {product_number}, {description}, {quantity}, {unit_price}, {discount} ,{line_total}")
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
