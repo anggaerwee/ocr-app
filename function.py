@@ -4,10 +4,9 @@ from PIL import Image, ImageEnhance, ImageFilter
 import re
 from pdf2image import convert_from_path
 import os
-from sqlalchemy import create_engine, Column, Integer, Float, String
-from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 import csv
+import os
 
 from database.db_config import Session, ProductTable
 
@@ -37,8 +36,8 @@ def parse_row(row_text):
 
         product_number = parts[0]
         description = " ".join(description_parts).strip().lstrip('/')
-        product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("pd", "p5")
-        description = description.replace("IGRASS", "GRASS")
+        product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("p+", "p4").replace("pd", "p5").replace("pé", "p6")
+        # description = description.replace("IGRASS", "GRASS")
         # line_total_str = line_total_str.replace("7250.00", "772.20")
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
@@ -53,7 +52,7 @@ def parse_row(row_text):
 
 def extract_text_with_ocr(file_path, page_number):
     try:
-        images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=200)
+        images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=205)
         if not images:
             print(f"Tidak ada halaman yang dapat diproses dari file {file_path}")
             return None
@@ -71,49 +70,69 @@ def extract_text_with_ocr(file_path, page_number):
 
 def extract_image_with_ocr(image_path): 
     try:
+        # Load and preprocess the image
         image = Image.open(image_path)
-        image = image.convert("L")
+        image = image.convert("L")  # Convert to grayscale
 
+        # Enhance contrast and resize for better OCR accuracy
         enhancer = ImageEnhance.Contrast(image)
         image = enhancer.enhance(2.0)
-
         width, height = image.size
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
+        # Apply filters to improve text recognition
         image = image.filter(ImageFilter.MedianFilter(size=3))
-        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=250, threshold=3))
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=253, threshold=3))
 
+        # Binarize the image
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
-        replacements = {
-            # 'soot.': '4.00%',
-            # 'l' : '1',
-            # 's' : '3',
-            # 'd' : '5',
-        }
-
+        # Extract text using Tesseract OCR
         custom_config = r'--oem 3 --psm 6'
-        extracted_text = pytesseract.image_to_string(image, config=custom_config)
+        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
 
+        # Apply replacements to fix common OCR errors
+        replacements = {
+            "pt": "p1",
+            "pe": "p4",
+            "pr": "p2",
+            "ps": "p5",
+            "soot.": "4.00%",
+            "5.001": "5.00%",
+            # "5.": "5.20",
+            # "pl": "p1",
+            # "pr": "p2",
+            # "pe": "p4",
+            # "ps": "p6",
+            # "5.202": "5.20",
+            # "100%.": "1.00%",
+            # "200%": "2.00%",
+            # "T7220": "772.20",
+            # "S11.65": "211.68",
+            # # "363.27": "3863.17"
+        }
         for wrong, correct in replacements.items():
             extracted_text = extracted_text.replace(wrong, correct)
 
-        # extracted_text = re.sub(r"[^\w\s./%,-]", " ", extracted_text)
-        # extracted_text
+        # Clean up and normalize the text
         lines = extracted_text.splitlines()
         cleaned_lines = []
         for line in lines:
-            line = re.sub(r"^[a-zA-Z](?=\d)", "", line)
-            line = line.replace("(", "").replace(")", "")
+            # Remove unwanted characters and normalize spacing
+            line = re.sub(r"[^\w\s.%,-]", "", line)
+            line = re.sub(r"\s+", " ", line).strip()
+
+            # Further refine line format (adjust as needed for specific patterns)
+            line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)  # Fix number and letter spacing
             cleaned_lines.append(line)
 
+        # Return cleaned text as joined lines
         return "\n".join(cleaned_lines)
 
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None
-
 
 def process_file(file_path):
 
@@ -139,6 +158,7 @@ def process_file(file_path):
 
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
+        print(text)
         rows = text.split("\n")
         for row in rows:
             row = row.strip()
@@ -146,6 +166,7 @@ def process_file(file_path):
                 continue
 
             parsed = parse_row(row)
+            print(parsed)
             if parsed:
                 all_rows.append(parsed)
     
@@ -193,3 +214,5 @@ def process_row(rows):
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
+
+# process_file("sample/blurry_australiantaxinvoicetemplate.webp")
