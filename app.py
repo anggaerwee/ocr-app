@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
-from function import process_file, ProductTable, Session
+from function import process_file, ProductTable, Session, write_csv_with_delimiter
 import os
+import csv
+from io import StringIO
+from flask import Response
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
@@ -65,6 +68,36 @@ def submit_file():
 def download(filename):
     folder = app.config['UPLOAD_FOLDER']
     return send_from_directory(folder, filename, as_attachment=True)
+
+@app.route('/downloadall', methods=['GET'])
+def download_all():
+    products = ProductTable.get_all()
+    if not products:
+        flash(('Tidak ada data yang diunduh', ''), 'error')
+        return redirect(url_for('home'))
+    
+    si = StringIO()
+    writer = csv.writer(si, delimiter=';')
+    writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total', 'createddate'])
+    for p in products:
+        writer.writerow([
+            p.product_number,
+            p.description,
+            p.quantity,
+            p.unit_price,
+            p.discount,
+            p.line_total,
+            p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else ''
+        ])
+
+    output = si.getvalue()
+    si.close()
+
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
+    )
 
 @app.route('/deleteall')
 def delete_all():

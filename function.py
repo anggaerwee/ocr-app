@@ -165,7 +165,7 @@ def process_file(file_path):
             row = row.strip()
             if not row:
                 continue
-
+            
             parsed = parse_row(row)
             print(parsed)
             if parsed:
