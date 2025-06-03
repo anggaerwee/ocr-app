@@ -59,8 +59,14 @@ def parse_row(row_text):
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
         discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else None
 
-        return product_number, description, quantity, unit_price,discount, line_total, 
-
+        return (
+            product_number,
+            description,
+            quantity,
+            "{:.2f}".format(unit_price),
+            "{:.2f}".format(discount) if discount is not None else None,
+            "{:.2f}".format(line_total)
+        )
     except Exception as e:
         print(f"Baris gagal di parsing: {e}")
         return None
@@ -217,3 +223,5 @@ def process_row(rows):
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
+
+# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')

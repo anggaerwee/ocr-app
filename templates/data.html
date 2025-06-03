@@ -323,6 +323,7 @@
                 }).then(function () {
                   $("#productTable").DataTable().ajax.reload();
                   $("#delete-all-btn").hide();
+                  $("#download-all").hide();
                   })
                 },
               error: function (xhr, status, error) {
@@ -358,6 +359,7 @@
                 }).then(function () {
                   $("#productTable").DataTable().ajax.reload();
                   $("#delete-all-btn").hide();
+                  $("#download-all").hide();
                   })
                 },
               error: function (xhr, status, error) {
@@ -401,14 +403,15 @@
               .addClass("left-full opacity-0");
           }
         );
-         $.get("/api/invoice_count", function (data) {
-      if (data.count > 0) {
-        $("#delete-all-btn").show();
-        $("#invoice-count-badge").text(data.count > 99 ? "99+" : data.count);
-      } else {
-        $("#delete-all-btn").hide();
-      }
-    });
+
+        $.get("/api/invoice_count", function (data) {
+          if (data.count > 0) {
+            $("#delete-all-btn").show();
+            $("#invoice-count-badge").text(data.count > 99 ? "99+" : data.count);
+          } else {
+            $("#delete-all-btn").hide();
+          }
+        });
       });
     </script>
   </body>
