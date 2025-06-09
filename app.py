@@ -2,10 +2,6 @@ from flask import Flask, render_template, request, redirect, flash, send_from_di
 from function import process_file, ProductTable, Session, write_csv_with_delimiter
 import os
 import csv
-<<<<<<< HEAD
-=======
-from flask import session as flask_session
->>>>>>> c509d5c (Update NAFNet and related files)
 from io import StringIO
 from flask import Response
 app = Flask(__name__)
@@ -77,7 +73,6 @@ def download(filename):
     folder = app.config['UPLOAD_FOLDER']
     return send_from_directory(folder, filename, as_attachment=True)
 
-<<<<<<< HEAD
 @app.route('/downloadall', methods=['GET'])
 def download_all():
     products = ProductTable.get_all()
@@ -108,50 +103,6 @@ def download_all():
         headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
     )
 
-=======
-@app.route('/delete/<int:id>', methods=['DELETE'])
-def delete_product(id):
-    session = Session()
-    product = session.query(ProductTable).get(id)
-    
-    if product:
-        session.delete(product)
-        session.commit()
-        session.close()
-        return jsonify({'message': 'Deleted successfully'}), 200
-    else:
-        session.close()
-        return jsonify({'error': 'Data not found'}), 404
-# @app.route('/download/<path:filename>', methods=['GET'])
-# def download(filename):
-#     products = ProductTable.get_all()
-#     if not products:
-#         flash(('Tidak ada data yang diunduh', ''), 'error')
-#         return redirect(url_for('home'))
-    
-#     si = StringIO()
-#     writer = csv.writer(si, delimiter=';')
-#     writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total', 'createddate'])
-#     for p in products:
-#         writer.writerow([
-#             p.product_number,
-#             p.description,
-#             p.quantity,
-#             p.unit_price,
-#             p.discount,
-#             p.line_total,
-#             p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else ''
-#         ])
-
-#     output = si.getvalue()
-#     si.close()
-
-#     return Response(
-#         output,
-#         mimetype='text/csv',
-#         headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
-#     )
->>>>>>> c509d5c (Update NAFNet and related files)
 @app.route('/deleteall')
 def delete_all():
     try:
