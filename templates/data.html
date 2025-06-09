@@ -81,6 +81,7 @@
       .badge {
         margin-left: 8px;
       }
+<<<<<<< HEAD
 
       .judul{
         border-left-width: 4px;
@@ -127,11 +128,15 @@
     }
   }
   </style>
+=======
+    </style>
+>>>>>>> c509d5c (Update NAFNet and related files)
   </head>
   <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-10">
       <div class="row bg-white" style="border-radius: 5px">
         <div class="col bg-white p-4 shadow-md rounded-lg">
+<<<<<<< HEAD
           <!-- ...existing code... -->
           <div class="element-top flex flex-wrap justify-between items-center mb-4 gap-2">
             <div class="flex flex-row gap-2 items-center">
@@ -172,6 +177,45 @@
                   </button>
                 </li>
               </ul>
+=======
+          <div class="flex justify-between items-center mb-4">
+            <a
+              href="/"
+              class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
+              id="back-button"
+            >
+              <span
+                class="transition-all duration-200 flex justify-center"
+                id="back-text"
+                >Kembali</span
+              >
+              <i
+                class="fas fa-arrow-left absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0"
+                id="back-icon"
+              ></i>
+            </a>
+            <div class="flex items-center">
+              <button
+                id="delete-all-btn"
+                type="button"
+                class="relative text-red-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 hover:bg-red-300 mr-4"
+                style="display: none"
+              >
+                <i class="bi bi-trash"></i> Delete <span class="ml-1">All</span>
+                <span
+                  id="invoice-count-badge"
+                  class="absolute -top-3 -right-3 badge rounded-pill bg-warning text-white text-xs px-2"
+                >
+                  0
+                </span>
+              </button>
+
+              <h1
+                class="text-2xl font-bold text-gray-800 border-l-4 border-indigo-600 pl-4"
+              >
+                Data Produk dari CSV
+              </h1>
+>>>>>>> c509d5c (Update NAFNet and related files)
             </div>
           </div>
           <!-- ...existing code... -->
@@ -187,11 +231,19 @@
                   <th class="px-4 py-2 border border-gray-300">Discount %</th>
                   <th class="px-4 py-2 border border-gray-300">Line Total</th>
                   <th class="px-4 py-2 border border-gray-300">Created</th>
+                  <th class="px-4 py-2 border border-gray-300">Action</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-300"></tbody>
             </table>
           </div>
+          <footer class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2"
+          >
+            <div class="container mx-auto text-center text-gray-600">
+              <i class="fa fa-copyright"></i> 2025 -
+              <strong class="font-bold">ConvertData</strong>
+            </div>
+          </footer>
         </div>
       </div>
     </div>
@@ -234,6 +286,12 @@
             },
           },
           { data: "createddate" },
+          {
+            data: "id",
+            render: function (data) {
+              return `<button class="btn btn-danger btn-sm delete-btn" data-id="${data}"><i class="bi bi-trash"></i></button>`;
+            },
+          },
         ],
         pagingType: "simple_numbers",
         language: {
@@ -275,6 +333,7 @@
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
+<<<<<<< HEAD
           confirmButtonText: "Ya, Download",
           allowOutsideClick: false,
         }).then((result) => {
@@ -310,7 +369,13 @@
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
           confirmButtonText: "Ya, Hapus",
+=======
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+>>>>>>> c509d5c (Update NAFNet and related files)
           allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false,
         }).then((result) => {
           if (result.isConfirmed) {
             $.ajax({
@@ -319,13 +384,18 @@
               success: function (response) {
                 Toast.fire({
                   icon: "success",
-                  title: "Signed in successfully",
+                  title: "successfully deleted all data",
                 }).then(function () {
                   $("#productTable").DataTable().ajax.reload();
                   $("#delete-all-btn").hide();
+<<<<<<< HEAD
                   $("#download-all").hide();
                   })
                 },
+=======
+                });
+              },
+>>>>>>> c509d5c (Update NAFNet and related files)
               error: function (xhr, status, error) {
                 Toast.fire({
                   icon: "error",
@@ -336,6 +406,7 @@
           }
         });
       });
+<<<<<<< HEAD
     
       $("#dropdown-delete-all-btn").on("click", function () {
         Swal.fire({
@@ -412,6 +483,77 @@
             $("#delete-all-btn").hide();
           }
         });
+=======
+      $(document).on("click", ".delete-btn", function () {
+        const id = $(this).data("id");
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Data will be permanently deleted!",
+          icon: "warning",
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: `/delete/${id}`,
+              type: "DELETE",
+              success: function (response) {
+                Toast.fire({
+                  icon: "success",
+                  title: "successfully deleted data",
+                }).then(function () {
+                  $("#productTable").DataTable().ajax.reload();
+                  $.get("/api/invoice_count", function (data) {
+                    if (data.count > 0) {
+                      $("#delete-all-btn").show();
+                      $("#invoice-count-badge").text(
+                        data.count > 99 ? "99+" : data.count
+                      );
+                    } else {
+                      $("#delete-all-btn").hide();
+                      $("#invoice-count-badge").text("0").hide();
+                    }
+                  });
+                });
+              },
+              error: function () {
+                Toast.fire({
+                  icon: "error",
+                  title: "error deleted data",
+                });
+              },
+            });
+          }
+        });
+      });
+      $("#back-button").hover(
+        function () {
+          $("#back-text").addClass("translate-x-[-100%] opacity-0");
+          $("#back-icon")
+            .removeClass("left-full opacity-0")
+            .addClass("left-1/2 -translate-x-1/2 opacity-100");
+        },
+        function () {
+          $("#back-text").removeClass("translate-x-[-100%] opacity-0");
+          $("#back-icon")
+            .removeClass("left-1/2 -translate-x-1/2 opacity-100")
+            .addClass("left-full opacity-0");
+        }
+      );
+      $.get("/api/invoice_count", function (data) {
+        if (data.count > 0) {
+          $("#delete-all-btn").show();
+          $("#invoice-count-badge").text(data.count > 99 ? "99+" : data.count);
+        } else {
+          $("#delete-all-btn").hide();
+        }
+>>>>>>> c509d5c (Update NAFNet and related files)
       });
     </script>
   </body>

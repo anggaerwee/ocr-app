@@ -28,6 +28,8 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
     <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
     <link
       href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css"
@@ -35,8 +37,88 @@
       type="text/css"
     />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+  .dropzone {
+    transition: all 0.3s ease-in-out;
+    border: 2px dashed #94a3b8;
+    background-color: #f8fafc;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+
+  .dropzone:hover {
+    background-color: #f1f5f9;
+    border-color: #60a5fa;
+  }
+
+  .dropzone.dz-started {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .dz-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1f2937;
+  }
+
+  .btn-animated {
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+  }
+
+  .btn-animated:hover {
+    background-color: #bbf7d0;
+    transform: scale(1.05);
+  }
+  @keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+#upload-hover {
+  cursor: pointer;
+  width: 320px;
+  position: relative;
+  overflow: hidden;
+}
+
+#upload-text-container {
+  width: 100%;
+}
+
+#upload-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+}
+
+</style>
   </head>
   <body>
+<<<<<<< HEAD
 
     <div class="flex items-center justify-center min-h-screen bg-gray-100">
       <div
@@ -92,34 +174,123 @@
           action="/submit"
           method="post"
           enctype="multipart/form-data"
+=======
+    <div class="flex items-center justify-center min-h-[100vh] bg-gray-100">
+      <div class="max-w-md w-full border border-gray-300 rounded-lg p-4 shadow-sm bg-gray-50 relative overflow-visible animate-fade-in">
+
+        <h2
+          class="text-4xl font-bold text-gray-300 absolute top-6 left-6 z-0 opacity-30 select-none"
+>>>>>>> c509d5c (Update NAFNet and related files)
         >
-          <div class="dz-message needsclick">
-            <i class="ki-duotone ki-file-up fs-3x text-primary"
-              ><span class="path1"></span><span class="path2"></span
-            ></i>
-            <div class="ms-4">
-              <h3 class="fs-5 fw-bold text-gray-900 mb-1">
-                Drop files here or click to upload.
-              </h3>
-              <span class="fs-7 fw-semibold text-gray-500"
-                >File anda akan otomatis di convert</span
+          ocrconvert
+        </h2>
+        <img
+          src="{{ url_for('static', filename='images.jpg') }}"
+          class="absolute bottom-0 left-0 w-40 opacity-20 z-0 select-none -translate-x-1/2 translate-y-1/2"
+          alt="Background Image"
+        />
+
+        <h3 class="text-xl font-bold text-gray-800 mb-4 relative z-10">
+          {{ title }}
+        </h3>
+
+        <div
+          class="bg-white border border-gray-300 rounded-lg p-6 flex flex-col relative z-10 shadow-md"
+        >
+          <h2 class="text-gray-900 text-lg mb-2 font-medium title-font">
+            PDF to SQL Data Extraction Tool
+          </h2>
+          <p class="leading-relaxed mb-5 text-gray-600">
+            Projek ini bertujuan untuk membuat alat yang bisa mengambil data
+            dari dokumen PDF dan mengubahnya ke format yang bisa digunakan di
+            SQL.
+          </p>
+
+          {% with messages = get_flashed_messages(with_categories=True) %} {% if
+          messages %}
+          <div class="my-3" id="alert">
+            {% for category, data in messages %} {% set message = data[0] if
+            data is iterable and data|length > 1 else data %} {% set filecsv =
+            data[1] if data is iterable and data|length > 1 else None %}
+            <div
+              class="p-4 mb-2 text-white rounded {{ 'bg-green-200' if category == 'success' else 'bg-red-200' }}"
+            >
+              <h1
+                class="text-base font-semibold {{ 'text-green-800' if category == 'success' else 'text-red-800' }}"
               >
+                {{ 'Convert Completed' if category == 'success' else 'Error
+                Occurred' }}
+              </h1>
+              <p
+                class="mt-2 {{ 'text-green-800' if category == 'success' else 'text-red-800' }}"
+              >
+                {{ message }}
+              </p>
+              <div class="mt-3 space-x-2">
+                {% if category == 'success' and filecsv %}
+                <a
+                  href="{{ url_for('download', filename=filecsv) }}"
+                  type="button"
+                  target="_blank"
+                  class="btn-animated text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+                  >Download CSV</a
+                >
+                <a
+                  href="/data"
+                  target="_blank"
+                  type="button"
+                  class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+                  >Tampilkan Data</a
+                >
+                {% endif %}
+              </div>
             </div>
+            {% endfor %}
           </div>
-        </form>
-        <p class="text-xs text-gray-500 mt-3">
-          Masukan file pdf untuk mendownload data csv yang disimpan di
-          PostgreSQL
-        </p>
+          {% endif %} {% endwith %}
+
+          <form
+            class="dropzone"
+            id="fileDropzone"
+            action="/submit"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <div class="dz-message needsclick">
+              <i class="ki-duotone ki-file-up fs-3x text-primary"
+                ><span class="path1"></span><span class="path2"></span
+              ></i>
+              <div id="upload-hover" class="position-relative d-inline-block overflow-hidden cursor-pointer" style="width: 320px;">
+  <div id="upload-text-container" class="d-flex justify-content-between align-items-center" style="transition: transform 0.4s ease, opacity 0.4s ease;">
+    <div id="upload-text-left" class="fs-5 fw-bold text-gray-900" style="white-space: nowrap; transition: transform 0.4s ease, opacity 0.4s ease;">
+      Drop files here or click to upload.
+    </div>
+    <div id="upload-text-right" class="fs-7 fw-semibold text-gray-500" style="white-space: nowrap; transition: transform 0.4s ease, opacity 0.4s ease;">
+      File anda akan otomatis di convert
+    </div>
+  </div>
+  <i
+    id="upload-icon"
+    class="bi bi-cloud-arrow-up-fill text-primary position-absolute top-50 start-50"
+    style="font-size: 0; opacity: 0; transform: translate(-50%, -50%) scale(0); transition: font-size 0.4s ease, opacity 0.4s ease, transform 0.4s ease;"
+  ></i>
+</div>
+              </div>
+            </div>
+          </form>
+          <p class="text-xs text-gray-500 mt-3">
+            Masukan file pdf untuk mendownload data csv yang disimpan di
+            PostgreSQL
+          </p>
+        </div>
       </div>
     </div>
-
     <script>
       Dropzone.autoDiscover = false;
       var myDropzone = new Dropzone("#fileDropzone", {
         // url: "/submit",
         paramName: "file",
-        maxFiles: 10,
+        maxFiles: 1,
         maxFilesize: 2 * 1024,
         addRemoveLinks: true,
         acceptedFiles: ".pdf,.webp",
@@ -130,6 +301,8 @@
               title: "Processing...",
               text: "Please wait your file being converted",
               allowOutsideClick: false,
+              allowEscapeKey: false,
+              allowEnterKey: false,
               didOpen: () => {
                 Swal.showLoading();
               },
@@ -153,6 +326,38 @@
       $("#close").on("click", function () {
         $("#alert").hide();
       });
+      $("#upload-hover").hover(
+  function () {
+    $("#upload-text-left").css({
+      transform: "translateX(-120%)",
+      opacity: "0"
+    });
+    $("#upload-text-right").css({
+      transform: "translateX(120%)",
+      opacity: "0"
+    });
+    $("#upload-icon").css({
+      fontSize: "40px",
+      opacity: "1",
+      transform: "translate(-50%, -50%) scale(1)"
+    });
+  },
+  function () {
+    $("#upload-text-left").css({
+      transform: "translateX(0)",
+      opacity: "1"
+    });
+    $("#upload-text-right").css({
+      transform: "translateX(0)",
+      opacity: "1"
+    });
+    $("#upload-icon").css({
+      fontSize: "0",
+      opacity: "0",
+      transform: "translate(-50%, -50%) scale(0)"
+    });
+  }
+);
     </script>
   </body>
 </html>

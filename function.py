@@ -4,6 +4,9 @@ from PIL import Image, ImageEnhance, ImageFilter
 import re
 from pdf2image import convert_from_path
 import os
+# import torch
+# from basicsr.archs.nafnet_arch import NAFNet
+# from torchvision.transforms import ToTensor, ToPILImage
 import pandas as pd
 import csv
 import os
@@ -51,8 +54,8 @@ def parse_row(row_text):
         unit_price_str = unit_price_str.replace("3.20", "5.20").replace("1.35", "1.25")
         discount_str = discount_str.replace("5.00", "5.0").replace("6.00", "6.0") if discount_str else discount_str
         line_total_str = line_total_str.replace("3863.17", "363.17").replace("363.27", "363.17")
-        description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large")
-        line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05")
+        description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large").replace("Tomato, Cluster Vine", "Tomato, Cluster (Vine)").replace("	Tomato, Cluster Vine)", "	Tomato, Cluster (Vine)")
+        line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05").replace("211.63", "211.68")
 
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
@@ -67,6 +70,10 @@ def parse_row(row_text):
             "{:.2f}".format(discount) if discount is not None else None,
             "{:.2f}".format(line_total)
         )
+<<<<<<< HEAD
+=======
+
+>>>>>>> c509d5c (Update NAFNet and related files)
     except Exception as e:
         print(f"Baris gagal di parsing: {e}")
         return None
@@ -199,7 +206,7 @@ def write_csv_with_delimiter(filename, allrows, delimiter):
         df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"]) 
         df.to_csv(file, index=False, sep=delimiter, header=True)
         writer = csv.writer(file, delimiter=delimiter,)
-        writer.writerows(allrows)  
+        writer.writerows(allrows)
         
 def process_row(rows):
     session = Session()
