@@ -70,10 +70,7 @@ def parse_row(row_text):
             "{:.2f}".format(discount) if discount is not None else None,
             "{:.2f}".format(line_total)
         )
-<<<<<<< HEAD
-=======
-
->>>>>>> c509d5c (Update NAFNet and related files)
+    
     except Exception as e:
         print(f"Baris gagal di parsing: {e}")
         return None
