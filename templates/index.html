@@ -158,6 +158,7 @@
               <a
                 href="/data"
                 type="button"
+                target="_blank"
                 class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
                 >Tampilkan Data</a
               >
@@ -228,20 +229,23 @@
         addRemoveLinks: true,
         acceptedFiles: ".pdf,.webp",
         dictDefaultMessage: "Drop files here or click to upload.",
-        init: function () {
-          this.on("sending", function (file, xhr, formData) {
-            Swal.fire({
-              title: "Processing...",
-              text: "Please wait your file being converted",
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-              allowEnterKey: false,
-              didOpen: () => {
-                Swal.showLoading();
-              },
-            });
-          });
-
+       init: function () {
+  this.on("sending", function (file, xhr, formData) {
+    Swal.fire({
+      title: "Processing...",
+      html: `
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <img src="static/Animation.gif" alt="Loading..." style="width: 100px; height: 100px; margin-bottom: 10px;">
+          <p>Please wait, your file is being converted...</p>
+        </div>
+      `,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      showConfirmButton: false,
+      showCancelButton: false
+    });
+  });
           this.on("success", function (file, response) {
             window.location.reload();
           });

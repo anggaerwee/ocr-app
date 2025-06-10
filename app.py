@@ -45,7 +45,6 @@ def api_products():
 @app.route('/submit', methods=['POST'])
 def submit_file():
     try:
-        # Untuk multi-file
         files = request.files.getlist('file')
         for file in files:
             if file.filename == '':
@@ -82,18 +81,16 @@ def download_all():
     
     si = StringIO()
     writer = csv.writer(si, delimiter=';')
-    writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total', 'createddate'])
+    writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total'])
     for p in products:
         writer.writerow([
             p.product_number,
             p.description,
-            p.quantity,
-            p.unit_price,
-            p.discount,
-            p.line_total,
-            p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else ''
+            f"{p.quantity:.2f}" if isinstance(p.quantity, (int, float)) else p.quantity,
+            f"{p.unit_price:.2f}" if isinstance(p.unit_price, (int, float)) else p.unit_price,
+            f"{p.discount:.2f}%" if isinstance(p.discount, (int, float)) else p.discount,
+            f"{p.line_total:.2f}" if isinstance(p.line_total, (int, float)) else p.line_total
         ])
-
     output = si.getvalue()
     si.close()
 
@@ -102,6 +99,13 @@ def download_all():
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
     )
+@app.route('/api/products/<int:id>', methods=['DELETE'])
+def delete_product(id):
+    result = ProductTable.delete(id)
+    if result:
+        return jsonify({"message": "Deleted"}), 200
+    else:
+        return jsonify({"error": "Not found"}), 404
 
 @app.route('/deleteall')
 def delete_all():

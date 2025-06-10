@@ -227,5 +227,3 @@ def process_row(rows):
         except Exception as e:
             session.rollback()
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
-
-# process_file('sample/nonblurry_australiantaxinvoicetemplate.pdf')

@@ -23,6 +23,14 @@ class ProductTable(Base):
     @classmethod
     def get_all(cls):
         return session.query(cls).all()
+    @classmethod
+    def delete(cls, id):
+        product = session.query(cls).get(id)
+        if product:
+            session.delete(product)
+            session.commit()
+            return True
+        return False
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)

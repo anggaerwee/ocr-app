@@ -43,7 +43,8 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
     <style>
-      #back-icon, #download-icon {
+      #back-icon,
+      #download-icon {
         font-size: 16px;
       }
       .dataTables_wrapper .dataTables_paginate .paginate_button {
@@ -82,76 +83,122 @@
         margin-left: 8px;
       }
 
-      .judul{
+      .judul {
         border-left-width: 4px;
         border-left-color: #4f46e5;
       }
 
-  @media (max-width: 640px) {
-    #delete-all-btn,
-    #download-all,
-    #back-button {
-      display: none !important;
-    }
-    #responsive-dropdown {
-      display: block !important;
-    }
-  }
-  @media (min-width: 640px) {
-    #responsive-dropdown {
-      display: none !important;
-    }
-  }
+      @media (max-width: 640px) {
+        #delete-all-btn,
+        #download-all,
+        #back-button {
+          display: none !important;
+        }
+        #responsive-dropdown {
+          display: block !important;
+        }
+      }
+      @media (min-width: 640px) {
+        #responsive-dropdown {
+          display: none !important;
+        }
+      }
 
-  @media (max-width: 425px){
-    .judul {
-      display: none;
-    }
-  }
-  @media (max-width: 640px) {
-    .judul {
-      display: block;
-      order: -1;
-      width: 100%;
-      margin-bottom: 1rem;
-      text-align: center;
-      border: none;
-    }
-    .element-top {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .flex.items-center {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  }
-  </style>
+      @media (max-width: 425px) {
+        .judul {
+          display: none;
+        }
+      }
+      @media (max-width: 640px) {
+        .judul {
+          display: block;
+          order: -1;
+          width: 100%;
+          margin-bottom: 1rem;
+          text-align: center;
+          border: none;
+        }
+        .element-top {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .flex.items-center {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
   </head>
   <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-10">
       <div class="row bg-white" style="border-radius: 5px">
         <div class="col bg-white p-4 shadow-md rounded-lg">
-          <!-- ...existing code... -->
-          <div class="element-top flex flex-wrap justify-between items-center mb-4 gap-2">
+          <div
+            class="element-top flex flex-wrap justify-between items-center mb-4 gap-2"
+          >
             <div class="flex flex-row gap-2 items-center">
-              <a href="/" class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24" id="back-button">
-                <span class="transition-all duration-200 flex justify-center" id="back-text">Kembali</span>
-                <i class="fas fa-arrow-left absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0" id="back-icon"></i>
+              <a
+                href="/"
+                class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
+                id="back-button"
+              >
+                <span
+                  class="transition-all duration-200 flex justify-center"
+                  id="back-text"
+                  >Kembali</span
+                >
+                <i
+                  class="fas fa-arrow-left absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0"
+                  id="back-icon"
+                ></i>
               </a>
-              <button id="download-all" class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-33">
-                <span class="transition-all duration-200 flex justify-center" id="download-text">Download All</span>
-                <i class="fas fa-download absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0" id="download-icon"></i>
-              </button>
-              <button id="delete-all-btn" type="button" class="relative text-red-50 bg-red-600 font-semibold py-2 px-6 rounded focus:outline-none focus:ring-2 hover:bg-red-700" style="display: none">
-                Delete All
-                <span id="invoice-count-badge" class="absolute -top-3 -right-3 badge rounded-pill bg-warning text-white text-xs px-2">0</span>
+              <button
+                id="download-all"
+                class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-33"
+              >
+                <span
+                  class="transition-all duration-200 flex justify-center"
+                  id="download-text"
+                  >Download All</span
+                >
+                <i
+                  class="fas fa-download absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0"
+                  id="download-icon"
+                ></i>
               </button>
             </div>
-            <h1 class="judul text-2xl font-bold text-gray-800 pl-4">Data Produk dari CSV</h1>
-            <!-- Responsive Dropdown for mobile -->
-            <div class="dropdown" id="responsive-dropdown" style="display:none;">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="d-flex items-center gap-4 mb-4">
+              <button
+                id="delete-all-btn"
+                type="button"
+                class="relative text-red-600 font-semibold py-2 px-6 rounded border border-dashed border-red-600 hover:bg-red-100 hover:shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-2"
+                style="background-color: transparent; display: none"
+              >
+                Delete All
+                <span
+                  id="invoice-count-badge"
+                  class="absolute -top-3 -right-3 badge rounded-pill bg-warning text-white text-xs px-2"
+                  >0</span
+                >
+              </button>
+
+              <h1 class="judul text-2xl font-bold text-gray-800">
+                Data Produk dari CSV
+              </h1>
+            </div>
+
+            <div
+              class="dropdown"
+              id="responsive-dropdown"
+              style="display: none"
+            >
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Menu
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -161,22 +208,40 @@
                   </a>
                 </li>
                 <li>
-                  <button id="dropdown-delete-all-btn" type="button" class="dropdown-item text-danger d-flex align-items-center" style="display: none">
+                  <button
+                    id="dropdown-delete-all-btn"
+                    type="button"
+                    class="dropdown-item text-danger d-flex align-items-center"
+                    style="display: none"
+                  >
                     <i class="bi bi-trash me-2"></i>Delete All
-                    <span id="dropdown-invoice-count-badge" class="badge rounded-pill bg-warning text-white text-xs ms-2">0</span>
+                    <span
+                      id="dropdown-invoice-count-badge"
+                      class="badge rounded-pill bg-warning text-white text-xs ms-2"
+                      >0</span
+                    >
                   </button>
                 </li>
                 <li>
-                  <button id="dropdown-download-all-btn" type="button" class="dropdown-item text-danger d-flex align-items-center" style="display: none">
+                  <button
+                    id="dropdown-download-all-btn"
+                    type="button"
+                    class="dropdown-item text-danger d-flex align-items-center"
+                    style="display: none"
+                  >
                     <i class="fas fa-download me-2"></i>Download All
                   </button>
                 </li>
               </ul>
             </div>
           </div>
-          <!-- ...existing code... -->
-          <div class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-300 p-4">
-            <table id="productTable" class="min-w-full table-auto border-collapse border border-gray-300">
+          <div
+            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-300 p-4"
+          >
+            <table
+              id="productTable"
+              class="min-w-full table-auto border-collapse border border-gray-300"
+            >
               <thead class="bg-gray-200 text-gray-700 border-b border-gray-300">
                 <tr>
                   <th class="px-4 py-2 border border-gray-300">No</th>
@@ -193,7 +258,8 @@
               <tbody class="divide-y divide-gray-300"></tbody>
             </table>
           </div>
-          <footer class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2"
+          <footer
+            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2"
           >
             <div class="container mx-auto text-center text-gray-600">
               <i class="fa fa-copyright"></i> 2025 -
@@ -209,7 +275,6 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
-
       $("#productTable").DataTable({
         ajax: "/api/products",
         pageLength: 50,
@@ -264,8 +329,10 @@
         initComplete: function (settings, json) {
           if (json.data.length > 0) {
             $("#delete-all-btn").show();
+            $("#download-all").show();
           } else {
             $("#delete-all-btn").hide();
+            $("#download-all").hide();
           }
         },
       });
@@ -280,8 +347,86 @@
           toast.onmouseleave = Swal.resumeTimer;
         },
       });
+      $(document).on("click", ".delete-btn", function () {
+        const id = $(this).data("id");
+        Swal.fire({
+          title: "Yakin ingin menghapus produk ini?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: `/api/products/${id}`,
+              type: "DELETE",
+              success: function (response) {
+                Toast.fire({
+                  icon: "success",
+                  title: "successfully deleted all data",
+                }).then(function () {
+                  $("#productTable").DataTable().ajax.reload();
+                  $.get("/api/invoice_count", function (data) {
+                    if (data.count > 0) {
+                      $("#delete-all-btn").show();
+                      $("#download-all").show();
+                      $("#invoice-count-badge").text(
+                        data.count > 99 ? "99+" : data.count
+                      );
+                    } else {
+                      $("#delete-all-btn").hide();
+                      $("#download-all").hide();
+                      $("#invoice-count-badge").text("");
+                    }
+                  });
+                });
+              },
+              error: function (xhr, status, error) {
+                Swal.fire("Gagal!", "Gagal menghapus data.", "error");
+                console.error(error);
+              },
+            });
+          }
+        });
+      });
 
       $("#download-all").on("click", function () {
+        Swal.fire({
+          title: "Konfirmasi!",
+          text: "Apakah anda yakin akan mendownload semua data?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Ya, Download",
+          allowOutsideClick: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: "Preparing Downloading...",
+              html: `<div style="display: flex; flex-direction: column; align-items: center;">
+            <img src="static/rocket-io.gif" alt="Downloading..." style="width: 120px; height: 120px; margin-bottom: 10px;">
+            <p>Mohon tunggu, file sedang disiapkan...</p>
+          </div>`,
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              allowEnterKey: false,
+              showConfirmButton: false,
+              showCancelButton: false,
+            didOpen: () => {
+              setTimeout(() => {
+                window.location.href = "/downloadall";
+                Swal.close();
+              }, 1500);
+            },
+          })
+          }
+        });
+      });
+
+      $("#dropdown-download-all-btn").on("click", function () {
         Swal.fire({
           title: "Konfirmasi!",
           text: "Apakah anda yakin akan mendownload semua data?",
@@ -298,23 +443,6 @@
         });
       });
 
-      $("#dropdown-download-all-btn").on("click", function() {
-        Swal.fire({
-          title: "Konfirmasi!",
-          text: "Apakah anda yakin akan mendownload semua data?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ya, Download",
-          allowOutsideClick: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/downloadall";
-          }
-        });
-      })
-
       $("#delete-all-btn").on("click", function () {
         Swal.fire({
           title: "Konfirmasi!",
@@ -323,7 +451,8 @@
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Ya, Hapus",
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
           allowOutsideClick: false,
           allowEscapeKey: false,
           allowEnterKey: false,
@@ -340,8 +469,8 @@
                   $("#productTable").DataTable().ajax.reload();
                   $("#delete-all-btn").hide();
                   $("#download-all").hide();
-                  })
-                },
+                });
+              },
               error: function (xhr, status, error) {
                 Toast.fire({
                   icon: "error",
@@ -352,7 +481,7 @@
           }
         });
       });
-    
+
       $("#dropdown-delete-all-btn").on("click", function () {
         Swal.fire({
           title: "Konfirmasi!",
@@ -376,8 +505,8 @@
                   $("#productTable").DataTable().ajax.reload();
                   $("#delete-all-btn").hide();
                   $("#download-all").hide();
-                  })
-                },
+                });
+              },
               error: function (xhr, status, error) {
                 Toast.fire({
                   icon: "error",
@@ -423,9 +552,14 @@
         $.get("/api/invoice_count", function (data) {
           if (data.count > 0) {
             $("#delete-all-btn").show();
-            $("#invoice-count-badge").text(data.count > 99 ? "99+" : data.count);
+            $("#download-all").show();
+            $("#invoice-count-badge").text(
+              data.count > 99 ? "99+" : data.count
+            );
           } else {
             $("#delete-all-btn").hide();
+            $("#download-all").hide();
+            $("#invoice-count-badge").text("");
           }
         });
       });
