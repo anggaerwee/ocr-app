@@ -4,12 +4,10 @@ from PIL import Image, ImageEnhance, ImageFilter
 import re
 from pdf2image import convert_from_path
 import os
-# import torch
-# from basicsr.archs.nafnet_arch import NAFNet
-# from torchvision.transforms import ToTensor, ToPILImage
 import pandas as pd
 import csv
-import os
+import cv2
+import numpy as np
 
 from database.db_config import Session, ProductTable
 
@@ -37,25 +35,6 @@ def parse_row(row_text):
 
         product_number = parts[0]
         description = " ".join(description_parts).strip().lstrip('/')
-        if product_number == "p5":
-            description = re.sub(r"^61", "", description)
-        if quantity_str.strip() == "2":
-            if product_number == "p3":
-                quantity_str = "72"
-            elif "65.00" in unit_price_str:
-                quantity_str = "12"
-            elif "5.2" in unit_price_str:
-                quantity_str = "72"
-        line_total_str = line_total_str.replace("90.00", "50.00") if "13010" in product_number else line_total_str
-        description = description.replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET") if product_number == "p6" else description
-        description = description.replace("(Green Pepper EX-Large", "Green Pepper EX-Large") if product_number == "30040" else description
-        product_number = product_number.replace("p5", "p6") if "250M" in description else product_number
-        product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("p+", "p4").replace("pe", "p4").replace("pd", "p5").replace("pé", "p6")
-        unit_price_str = unit_price_str.replace("3.20", "5.20").replace("1.35", "1.25")
-        discount_str = discount_str.replace("5.00", "5.0").replace("6.00", "6.0") if discount_str else discount_str
-        line_total_str = line_total_str.replace("3863.17", "363.17").replace("363.27", "363.17")
-        description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large").replace("Tomato, Cluster Vine", "Tomato, Cluster (Vine)").replace("	Tomato, Cluster Vine)", "	Tomato, Cluster (Vine)")
-        line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05").replace("211.63", "211.68")
 
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
@@ -77,16 +56,18 @@ def parse_row(row_text):
 
 def extract_text_with_ocr(file_path, page_number):
     try:
-        images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=205)
+        images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=500)
+
         if not images:
             print(f"Tidak ada halaman yang dapat diproses dari file {file_path}")
             return None
         
         extracted_text = ""
         for image in images:
+            
             custom_config = r'--oem 3 --psm 6'
-            page_text = pytesseract.image_to_string(image, config=custom_config)
-            extracted_text += page_text + "\n"
+            page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind')
+            extracted_text += page_text 
         
         return extracted_text.strip()
     except Exception as e:
@@ -104,45 +85,15 @@ def extract_image_with_ocr(image_path):
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
         image = image.filter(ImageFilter.MedianFilter(size=3))
-        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=253, threshold=3))
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=320, threshold=3))
 
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
-        output_folder = "output"
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        filename, file_extension = os.path.splitext(os.path.basename(image_path))
-        output_path = os.path.join(output_folder, f"{filename}_enhanced{file_extension}")
-        image.save(output_path)
-
         custom_config = r'--oem 3 --psm 6'
         extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
 
-        replacements = {
-            "pt": "p1",
-            "pe": "p4",
-            "pr": "p2",
-            "ps": "p5",
-            "soot.": "4.00%",
-            "5.001": "5.00%",
-        }
-        for wrong, correct in replacements.items():
-            extracted_text = extracted_text.replace(wrong, correct)
-
-        extracted_text = re.sub(r"[^\w\s.%,-/#]", " ", extracted_text)
-        extracted_text = re.sub(r'([a-zA-Z])4([a-zA-Z]*)', r'\1e\2', extracted_text)
-        lines = extracted_text.splitlines()
-        cleaned_lines = []
-        for line in lines:
-            line = re.sub(r"[^\w\s.%,-/]", "", line)
-            line = re.sub(r"\s+", " ", line).strip()
-
-            line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)
-            cleaned_lines.append(line)
-
-        return "\n".join(cleaned_lines)
-
+        return extracted_text
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None
@@ -165,7 +116,7 @@ def process_file(file_path):
                 rows = text.split("\n")
                 for row in rows:
                     parsed = parse_row(row)
-                    print(parsed)
+                    # print(parsed)
                     if parsed:
                         all_rows.append(parsed)
 
