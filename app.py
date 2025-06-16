@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
-from function import process_file, ProductTable, Session, write_csv_with_delimiter
+from function import process_file, ProductTable, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
 import os
 import csv
 from sqlalchemy.sql import text
@@ -28,7 +28,7 @@ def api_filenames():
         search = request.args.get('q', '').strip()
         base_query = """
             SELECT DISTINCT filename, text
-            FROM tb_product
+            FROM invoice
             WHERE filename IS NOT NULL AND filename != ''
         """
         if search:
@@ -75,6 +75,7 @@ def api_products():
 def submit_file():
     try:
         files = request.files.getlist('file')
+        text = ""
         for file in files:
             if file.filename == '':
                 flash(('Form tidak boleh kosong', ''), 'error')
@@ -86,28 +87,35 @@ def submit_file():
 
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filepath)
+
+            if file.filename.endswith('.pdf'):
+                text = extract_text_with_ocr(filepath, 1)
+            elif file.filename.endswith('.webp'):
+                text = extract_image_with_ocr(filepath)
+            else:
+                text = ""
+
             flash((f"{file.filename} berhasil diupload. Klik Save untuk proses ke database.", file.filename), 'success')
-        return '', 204
+        return jsonify({'text': text})
     except Exception as e:
         flash((f"terjadi kesalahan : {e}", ''), 'error')
         return '', 500
     
-@app.route('/save/<path:filepath>')
+@app.route('/save/<path:filepath>', methods=['POST'])
 def save(filepath):
     try:
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
         if not os.path.exists(full_path):
-            flash((f"File {filepath} tidak ditemukan.", ''), 'error')
-            return redirect('/')
+            return jsonify({'status': 'error', 'message': f"File {filepath} tidak ditemukan."}), 404
+
         csv_filename = process_file(full_path)
         if csv_filename:
-            flash((f"{filepath} berhasil diproses dan disimpan ke database.", csv_filename), 'success')
+            return jsonify({'status': 'success', 'message': f"{filepath} berhasil diproses dan disimpan ke database.", 'csv': csv_filename})
         else:
-            flash((f"File {filepath} gagal diproses.", ''), 'error')
-        return redirect('/')
+            return jsonify({'status': 'error', 'message': f"File {filepath} gagal diproses."}), 500
     except Exception as e:
-        flash((f"Terjadi kesalahan saat proses: {e}", ''), 'error')
-        return redirect('/')
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):
