@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, flash, send_from_di
 from function import process_file, ProductTable, Session, write_csv_with_delimiter
 import os
 import csv
+from sqlalchemy.sql import text
 from io import StringIO
 from flask import Response
 app = Flask(__name__)
@@ -20,6 +21,32 @@ def home():
 def data():
     return render_template('data.html', title='OcrConvert')
 
+@app.route('/api/filenames')
+def api_filenames():
+    session = Session()
+    try:
+        search = request.args.get('q', '').strip()
+        base_query = """
+            SELECT DISTINCT filename, text
+            FROM tb_product
+            WHERE filename IS NOT NULL AND filename != ''
+        """
+        if search:
+            base_query += " AND filename LIKE :search"
+            results = session.execute(
+                text(base_query),
+                {"search": f"%{search}%"}
+            ).fetchall()
+        else:
+            results = session.execute(text(base_query)).fetchall()
+        data = [{'id': row[0], 'text': row[0], 'fulltext': row[1]} for row in results]
+        return jsonify({'results': data})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    finally:
+        session.close()
+
+        
 @app.route('/api/products')
 def api_products():
     products = ProductTable.get_all()
@@ -32,6 +59,8 @@ def api_products():
             'unit_price': p.unit_price,
             'discount': p.discount,
             'line_total': p.line_total,
+            'text': p.text,
+            'filename': p.filename,
             'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
         }
         for p in products
@@ -57,15 +86,28 @@ def submit_file():
 
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filepath)
-            csv_filename = process_file(filepath)
-            if csv_filename:
-                flash((f"{file.filename} Berhasil disimpan di database", csv_filename), 'success')
-            else:
-                flash((f"File {file.filename} gagal disimpan di database", ''), 'error')
+            flash((f"{file.filename} berhasil diupload. Klik Save untuk proses ke database.", file.filename), 'success')
         return '', 204
     except Exception as e:
         flash((f"terjadi kesalahan : {e}", ''), 'error')
         return '', 500
+    
+@app.route('/save/<path:filepath>')
+def save(filepath):
+    try:
+        full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
+        if not os.path.exists(full_path):
+            flash((f"File {filepath} tidak ditemukan.", ''), 'error')
+            return redirect('/')
+        csv_filename = process_file(full_path)
+        if csv_filename:
+            flash((f"{filepath} berhasil diproses dan disimpan ke database.", csv_filename), 'success')
+        else:
+            flash((f"File {filepath} gagal diproses.", ''), 'error')
+        return redirect('/')
+    except Exception as e:
+        flash((f"Terjadi kesalahan saat proses: {e}", ''), 'error')
+        return redirect('/')
 
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):

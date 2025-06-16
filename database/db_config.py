@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 
-DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
+DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/python"
 engine = create_engine(
     DATABASE_URL,
     connect_args={"options": "-c timezone=Asia/Jakarta"}
@@ -10,7 +10,7 @@ engine = create_engine(
 Base = declarative_base()
 
 class ProductTable(Base):
-    __tablename__ = 'invoice'
+    __tablename__ = 'tb_product'
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_number = Column(String(50))
     description = Column(String(255))
@@ -18,6 +18,8 @@ class ProductTable(Base):
     unit_price = Column(Float)
     line_total = Column(Float)
     discount = Column(Float)
+    text = Column(String(255))
+    filename = Column(String(255))
     createddate = Column(DateTime, default=datetime.now) 
 
     @classmethod

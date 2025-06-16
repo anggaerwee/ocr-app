@@ -36,7 +36,10 @@
       href="{{ url_for('static', filename='unnamed.png') }}"
       media="(prefers-color-scheme: dark)"
     />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
 
     <link
       rel="stylesheet"
@@ -136,7 +139,7 @@
           <div
             class="element-top flex flex-wrap justify-between items-center mb-4 gap-2"
           >
-            <div class="flex flex-row gap-2 items-center">
+            <div class="flex flex-row gap-2 items-center w-50">
               <a
                 href="/"
                 class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
@@ -154,7 +157,7 @@
               </a>
               <button
                 id="download-all"
-                class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-33"
+                class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-21"
               >
                 <span
                   class="transition-all duration-200 flex justify-center"
@@ -166,6 +169,10 @@
                   id="download-icon"
                 ></i>
               </button>
+              <select
+                class="js-example-responsive flex-1"
+                style="width: 50%"
+              ></select>
             </div>
             <div class="d-flex items-center gap-4 mb-4">
               <button
@@ -269,13 +276,92 @@
         </div>
       </div>
     </div>
+    <div
+      class="modal fade"
+      id="dataModal"
+      tabindex="-1"
+      aria-labelledby="dataModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="dataModalLabel">
+              Detail Produk - filename
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="modalContent"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
-      $("#productTable").DataTable({
+      $(".js-example-responsive").select2({
+        placeholder: "Pilih Produk",
+        allowClear: true,
+        ajax: {
+          url: "/api/filenames",
+          dataType: "json",
+          delay: 250,
+          data: function (params) {
+            return {
+              q: params.term || "",
+            };
+          },
+          processResults: function (data) {
+            return {
+              results: data.results,
+            };
+          },
+          cache: true,
+        },
+        minimumInputLength: 0,
+        language: {
+          noResults: function () {
+            return "No result found";
+          },
+        },
+      });
+
+      $(".js-example-responsive").on("select2:select", function (e) {
+        var selectedData = e.params.data;
+        $("#dataModalLabel").text("Detail Produk - " + selectedData.text);
+        var modalContent = `
+      <p><strong>Nama File:</strong> ${selectedData.text}</p>
+      <p><strong>Text:</strong><br><pre style="white-space:pre-wrap;">${
+        selectedData.fulltext || ""
+      }</pre></p>
+  `;
+        $("#modalContent").html(modalContent);
+        $("#dataModal").modal("show");
+        $(".js-example-responsive").val(null).trigger("change");
+      });
+
+      var table = $("#productTable").DataTable({
         ajax: "/api/products",
         pageLength: 50,
         columns: [
@@ -310,7 +396,9 @@
           {
             data: "id",
             render: function (data) {
-              return `<button class="btn btn-danger btn-sm delete-btn" data-id="${data}"><i class="bi bi-trash"></i></button>`;
+              return `
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${data}"><i class="bi bi-trash"></i></button>
+              `;
             },
           },
         ],
@@ -336,6 +424,7 @@
           }
         },
       });
+
       const Toast = Swal.mixin({
         toast: true,
         position: "top-end",
@@ -402,6 +491,8 @@
           cancelButtonColor: "#d33",
           confirmButtonText: "Ya, Download",
           allowOutsideClick: false,
+          allowEnterKey: false,
+          allowEscapeKey: false,
         }).then((result) => {
           if (result.isConfirmed) {
             Swal.fire({
@@ -415,13 +506,13 @@
               allowEnterKey: false,
               showConfirmButton: false,
               showCancelButton: false,
-            didOpen: () => {
-              setTimeout(() => {
-                window.location.href = "/downloadall";
-                Swal.close();
-              }, 1500);
-            },
-          })
+              didOpen: () => {
+                setTimeout(() => {
+                  window.location.href = "/downloadall";
+                  Swal.close();
+                }, 1500);
+              },
+            });
           }
         });
       });

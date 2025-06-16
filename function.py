@@ -11,10 +11,10 @@ import numpy as np
 
 from database.db_config import Session, ProductTable
 
-def parse_row(row_text):
+def parse_row(row_text, full_text, filename):
     try:
         row_text = re.sub(r"[“![|~=j__—]", "", row_text)
-        row_text = re.sub(r"\s{2,}", " ", row_text).strip()
+        row_text = re.sub(r"\s{2,}", " ", row_text).strip() 
         parts = row_text.split()
         if len(parts) < 5:
             return None
@@ -23,19 +23,24 @@ def parse_row(row_text):
         possible_discount_str = parts[-2]
 
         if "%" in possible_discount_str:
-            description_parts = parts[1:-4]
+            description_end_index = -4
             quantity_str = parts[-4]
             unit_price_str = parts[-3]
             discount_str = possible_discount_str
         else:
-            description_parts = parts[1:-3]
+            description_end_index = -3
             quantity_str = parts[-3]
             unit_price_str = parts[-2]
             discount_str = None
 
-        product_number = parts[0]
-        description = " ".join(description_parts).strip().lstrip('/')
+        if re.match(r"^p\S*$", parts[0], re.IGNORECASE) or re.match(r"^\d{4,6}$", parts[0]):
+            product_number = parts[0]
+            description_parts = parts[1:description_end_index]
+        else:
+            product_number = ""
+            description_parts = parts[0:description_end_index]
 
+        description = " ".join(description_parts).strip().lstrip('/')
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
@@ -47,8 +52,14 @@ def parse_row(row_text):
             quantity,
             "{:.2f}".format(unit_price),
             "{:.2f}".format(discount) if discount is not None else None,
-            "{:.2f}".format(line_total)
+            "{:.2f}".format(line_total),
+            full_text,
+            filename,
         )
+    
+    except Exception as e:
+        print(f"Baris gagal di parsing: {e}")
+        return None
     
     except Exception as e:
         print(f"Baris gagal di parsing: {e}")
@@ -74,7 +85,7 @@ def extract_text_with_ocr(file_path, page_number):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-def extract_image_with_ocr(image_path): 
+def extract_image_with_ocr(image_path):
     try:
         image = Image.open(image_path)
         image = image.convert("L")
@@ -85,13 +96,13 @@ def extract_image_with_ocr(image_path):
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
         image = image.filter(ImageFilter.MedianFilter(size=3))
-        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=320, threshold=3))
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=330, threshold=3))
 
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
         custom_config = r'--oem 3 --psm 6'
-        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
+        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind') 
 
         return extracted_text
     except Exception as e:
@@ -112,24 +123,25 @@ def process_file(file_path):
                 
                 if page.width and page.height:
                     text = extract_text_with_ocr(file_path, page_number)
-                    print(text)
                 rows = text.split("\n")
+                print(rows)
+                filename = os.path.basename(file_path)
                 for row in rows:
-                    parsed = parse_row(row)
-                    # print(parsed)
+                    parsed = parse_row(row, text, filename)
                     if parsed:
                         all_rows.append(parsed)
 
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
         print(text)
+        filename = os.path.basename(file_path)
         rows = text.split("\n")
         for row in rows:
             row = row.strip()
             if not row:
                 continue
             
-            parsed = parse_row(row)
+            parsed = parse_row(row, text, filename)
             print(parsed)
             if parsed:
                 all_rows.append(parsed)
@@ -161,7 +173,7 @@ def process_row(rows):
     for parsed_row in rows:
 
         try:
-            product_number, description, quantity, unit_price, discount, line_total,  = parsed_row
+            product_number, description, quantity, unit_price, discount, line_total, text, filename  = parsed_row
 
             product = ProductTable(
                 product_number=str(product_number).strip(),
@@ -169,7 +181,9 @@ def process_row(rows):
                 quantity=quantity,
                 unit_price=unit_price,
                 line_total=line_total,
-                discount=discount
+                discount=discount,
+                text=text,
+                filename=filename,
             )
                         
             session.add(product)
