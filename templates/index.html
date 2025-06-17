@@ -153,7 +153,7 @@
             </p>
             <div class="mt-3 space-x-2">
               {% if category == 'success' and filecsv %}
-              <a href="{{ url_for('download', filename=filecsv) }}" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">Download CSV</a>
+              <a href="{{ url_for('download', filename=filecsv) }}" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300 hidden" id="downloadButton" >Download CSV</a>
               <a
               href="/data"
               type="button" 
@@ -342,50 +342,57 @@
     e.preventDefault();
     const filepath = $(this).data('filecsv');
     const $saveBtn = $(this);
+    const $downloadBtn = $('#downloadButton'); // Tambahkan referensi tombol download
 
     Swal.fire({
-      title: 'Menyimpan...',
-      html: `
-        <div style="display: flex; flex-direction: column; align-items: center;">
-          <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
-          <p>Please wait, is saving to the database...</p>
-        </div>
-      `,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false
+        title: 'Menyimpan...',
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
+            <p>Please wait, is saving to the database...</p>
+          </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
     });
 
     $.ajax({
-      url: `/save/${filepath}`,
-      type: 'POST',
-      success: function (response) {
-        Swal.close();
-        if (response.status === 'success') {
-          Toast.fire({
-            icon: 'success',
-            text: response.message
-          });
-          localStorage.removeItem("textData");
-          $saveBtn.hide();
-        } else {
-          Toast.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: response.message
-          });
+        url: `/save/${filepath}`,
+        type: 'POST',
+        success: function (response) {
+            Swal.close();
+            if (response.status === 'success') {
+                Toast.fire({
+                    icon: 'success',
+                    text: response.message
+                });
+
+                // Sembunyikan tombol save dan tampilkan tombol download
+                $saveBtn.hide();
+                $downloadBtn.attr('href', `/download/${response.csv}`); // Update URL tombol download
+                $downloadBtn.removeClass('hidden');
+
+                localStorage.removeItem("textData");
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: response.message
+                });
+            }
+        },
+        error: function (xhr) {
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message || 'Terjadi kesalahan.'
+            });
         }
-      },
-      error: function (xhr) {
-        Swal.close();
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: xhr.responseJSON?.message || 'Terjadi kesalahan.'
-        });
-      }
     });
-  });
+});
+
 </script>
   </body>
 </html>

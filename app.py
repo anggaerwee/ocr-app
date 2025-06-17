@@ -28,7 +28,7 @@ def api_filenames():
         search = request.args.get('q', '').strip()
         base_query = """
             SELECT DISTINCT filename, text
-            FROM invoice
+            FROM tb_product
             WHERE filename IS NOT NULL AND filename != ''
         """
         if search:
@@ -120,7 +120,13 @@ def save(filepath):
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):
     folder = app.config['UPLOAD_FOLDER']
-    return send_from_directory(folder, filename, as_attachment=True)
+    if not filename.lower().endswith('.csv'):
+        filename = os.path.splitext(filename)[0] + '.csv'
+    file_path = os.path.join(folder, filename)  
+    if not os.path.exists(file_path):
+        flash(('error', f'File {filename} tidak ditemukan.'))
+        return redirect('/')
+    return send_from_directory(folder, filename, as_attachment=True, mimetype='text/csv')
 
 @app.route('/downloadall', methods=['GET'])
 def download_all():
