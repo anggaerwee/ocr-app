@@ -130,6 +130,32 @@
           align-items: stretch;
         }
       }
+      @media (max-width: 768px) {
+        .js-example-responsive {
+          display: none !important;
+        }
+
+        #responsive-dropdown {
+          display: block !important;
+        }
+
+        #dropdown-select-container {
+          display: flex !important;
+        }
+      }
+      @media (max-width: 768px) {
+        .js-example-responsive {
+          display: none !important;
+        }
+
+        #responsive-dropdown {
+          display: flex !important;
+        }
+
+        #dropdown-select {
+          display: block !important;
+        }
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -170,7 +196,7 @@
                 ></i>
               </button>
               <select
-                class="js-example-responsive flex-1"
+                class="js-example-responsive flex-1 overflow-hidden"
                 style="width: 50%"
               ></select>
             </div>
@@ -195,7 +221,7 @@
             </div>
 
             <div
-              class="dropdown"
+              class="d-flex gap-2 align-items-center dropdown"
               id="responsive-dropdown"
               style="display: none"
             >
@@ -208,6 +234,12 @@
               >
                 Menu
               </button>
+              <select
+                class="form-select flex-gros-1 js-example-responsive flex-1"
+                id="dropdown-select"
+                style="width: 50%"
+              ></select>
+
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li>
                   <a href="/" class="dropdown-item" id="dropdown-back-button">
@@ -266,13 +298,27 @@
             </table>
           </div>
           <footer
-            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2"
-          >
-            <div class="container mx-auto text-center text-gray-600">
-              <i class="fa fa-copyright"></i> 2025 -
-              <strong class="font-bold">ConvertData</strong>
-            </div>
-          </footer>
+  class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2 group"
+>
+  <div
+    class="container mx-auto text-center text-gray-600 inline-block bounce-target"
+  >
+    <i class="fa fa-copyright mr-1"></i> 2025 -
+    <strong class="font-bold">ConvertData</strong>
+  </div>
+</footer>
+
+<style>
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%     { transform: translateY(-8px); }
+  }
+
+  .group:hover .bounce-target {
+    animation: bounce 0.6s ease-in-out infinite;
+  }
+</style>
+
         </div>
       </div>
     </div>
@@ -299,11 +345,17 @@
           <div class="modal-body" id="modalContent"></div>
           <div class="modal-footer">
             <button
+              class="btn btn-outline-success d-flex align-items-center gap-2 dwcsv"
+              type="button"
+            >
+              <i class="bi bi-download"></i> Download CSV
+            </button>
+            <button
               type="button"
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Close
+              Cancel
             </button>
           </div>
         </div>
@@ -349,6 +401,7 @@
 
       $(".js-example-responsive").on("select2:select", function (e) {
         var selectedData = e.params.data;
+        const selectedId = selectedData.id;
         $("#dataModalLabel").text("Detail Produk - " + selectedData.text);
         var modalContent = `
       <p><strong>Nama File:</strong> ${selectedData.text}</p>
@@ -357,6 +410,8 @@
       }</pre></p>
   `;
         $("#modalContent").html(modalContent);
+        $("#dataModal .dwcsv").data("id", selectedId);
+        $("#dataModal .savefile").data("id", selectedId);
         $("#dataModal").modal("show");
         $(".js-example-responsive").val(null).trigger("change");
       });
@@ -653,6 +708,30 @@
             $("#invoice-count-badge").text("");
           }
         });
+      });
+      $("#dataModal").on("click", ".dwcsv", function () {
+        const id = $(this).data("id");
+
+        if (!id) {
+          return Toast.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Id tidak tersedia",
+          });
+        }
+        const link = document.createElement("a");
+        link.href = `/download/${id}`;
+        link.setAttribute("download", id);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Toast.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "File has been saved successfully.",
+        });
+        $("#dataModal").modal("hide");
       });
     </script>
   </body>

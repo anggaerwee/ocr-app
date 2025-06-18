@@ -42,26 +42,26 @@ def parse_row(row_text, full_text, filename):
 
         description = " ".join(description_parts).strip().lstrip('/')
 
-        if product_number == "p5":
-            description = re.sub(r"^61", "", description)
-        if quantity_str.strip() == "2":
-            if product_number == "p3":
-                quantity_str = "72"
-            elif "65.00" in unit_price_str:
-                quantity_str = "12"
-            elif "5.2" in unit_price_str:
-                quantity_str = "72"
-        line_total_str = line_total_str.replace("90.00", "50.00") if "13010" in product_number else line_total_str
-        description = description.replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET") if product_number == "p6" else description
-        description = description.replace("(Green Pepper EX-Large", "Green Pepper EX-Large") if product_number == "30040" else description
-        product_number = product_number.replace("p5", "p6") if "250M" in description else product_number
-        product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("p+", "p4").replace("pe", "p4").replace("pd", "p5").replace("pé", "p6")
-        unit_price_str = unit_price_str.replace("3.20", "5.20").replace("1.35", "1.25")
-        if discount_str:
-            discount_str = discount_str.replace("5.00", "5.0").replace("6.00", "6.0")
-        line_total_str = line_total_str.replace("3863.17", "363.17").replace("363.27", "363.17")
-        description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large").replace("Tomato, Cluster Vine", "Tomato, Cluster (Vine)").replace("	Tomato, Cluster Vine)", "	Tomato, Cluster (Vine)")
-        line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05").replace("211.63", "211.68")
+        # if product_number == "p5":
+        #     description = re.sub(r"^61", "", description)
+        # if quantity_str.strip() == "2":
+        #     if product_number == "p3":
+        #         quantity_str = "72"
+        #     elif "65.00" in unit_price_str:
+        #         quantity_str = "12"
+        #     elif "5.2" in unit_price_str:
+        #         quantity_str = "72"
+        # line_total_str = line_total_str.replace("90.00", "50.00") if "13010" in product_number else line_total_str
+        # description = description.replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET") if product_number == "p6" else description
+        # description = description.replace("(Green Pepper EX-Large", "Green Pepper EX-Large") if product_number == "30040" else description
+        # product_number = product_number.replace("p5", "p6") if "250M" in description else product_number
+        # product_number = product_number.replace("pl", "p1").replace("ps", "p3").replace("p+", "p4").replace("pe", "p4").replace("pd", "p5").replace("pé", "p6")
+        # unit_price_str = unit_price_str.replace("3.20", "5.20").replace("1.35", "1.25")
+        # if discount_str:
+        #     discount_str = discount_str.replace("5.00", "5.0").replace("6.00", "6.0")
+        # line_total_str = line_total_str.replace("3863.17", "363.17").replace("363.27", "363.17")
+        # description = description.replace("IGRASS", "GRASS").replace("sMIDE", "615MM").replace("S0", "90").replace("LYS", "LVS").replace("404", "40#").replace("4xe", "4x4").replace("Cooking Onion 16/3", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40#", "Yam Louisiana / Mississippi 40#").replace("Cooking Onion 16 / 3# #", "Cooking Onion 16 / 3#").replace("Yam Louisiana/ Mississippi 40 #", "Yam Louisiana / Mississippi 40#").replace("250M PLASTIC FLOWER BUCKET", "250MM PLASTIC FLOWER BUCKET").replace("GRASS LONG MONDO GW X 192 LVS", "GRASS LONG MONDO G/W X 192 LVS").replace("sCWvLettuce", "Lettuce").replace("Cooking Onion 16 / 3##", "Cooking Onion 16 / 3#").replace("(Green Pepper EX-Large", "Green Pepper EX-Large").replace("Tomato, Cluster Vine", "Tomato, Cluster (Vine)").replace("	Tomato, Cluster Vine)", "	Tomato, Cluster (Vine)")
+        # line_total_str = line_total_str.replace("7250", "772.20").replace("155.25", "185.25").replace("185.0", "185.20").replace("7.03", "7.05").replace("211.63", "211.68")
 
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
@@ -103,7 +103,7 @@ def extract_text_with_ocr(file_path, page_number):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-def extract_image_with_ocr(image_path):
+def extract_image_with_ocr(image_path): 
     try:
         image = Image.open(image_path)
         image = image.convert("L")
@@ -114,15 +114,45 @@ def extract_image_with_ocr(image_path):
         image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
 
         image = image.filter(ImageFilter.MedianFilter(size=3))
-        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=330, threshold=3))
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=253, threshold=3))
 
         threshold = 128
         image = image.point(lambda p: 255 if p > threshold else 0)
 
-        custom_config = r'--oem 3 --psm 6'
-        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind') 
+        output_folder = "output"
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        filename, file_extension = os.path.splitext(os.path.basename(image_path))
+        output_path = os.path.join(output_folder, f"{filename}_enhanced{file_extension}")
+        image.save(output_path)
 
-        return extracted_text
+        custom_config = r'--oem 3 --psm 6'
+        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
+
+        replacements = {
+            "pt": "p1",
+            "pe": "p4",
+            "pr": "p2",
+            "ps": "p5",
+            "soot.": "4.00%",
+            "5.001": "5.00%",
+        }
+        for wrong, correct in replacements.items():
+            extracted_text = extracted_text.replace(wrong, correct)
+
+        extracted_text = re.sub(r"[^\w\s.%,-/#]", " ", extracted_text)
+        extracted_text = re.sub(r'([a-zA-Z])4([a-zA-Z]*)', r'\1e\2', extracted_text)
+        lines = extracted_text.splitlines()
+        cleaned_lines = []
+        for line in lines:
+            line = re.sub(r"[^\w\s.%,-/]", "", line)
+            line = re.sub(r"\s+", " ", line).strip()
+
+            line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)
+            cleaned_lines.append(line)
+
+        return "\n".join(cleaned_lines)
+
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None
@@ -167,18 +197,18 @@ def process_file(file_path):
     else:
         print(f"File {file_path} tidak didukung")
         return ""
-
+    
     if all_rows:
         process_row(all_rows)
+        csv_rows = [row[:6] for row in all_rows]
         folder = os.path.dirname(file_path)
         csvname = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
         csv_path = os.path.join(folder, csvname)
-        write_csv_with_delimiter(csv_path, all_rows, ";")
+        write_csv_with_delimiter(csv_path, csv_rows, ";")
         return csvname
     else:
         print("Tidak ada data yang diekstrak.")
         return ""
-    
 def write_csv_with_delimiter(filename, allrows, delimiter):
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"]) 

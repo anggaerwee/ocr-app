@@ -28,7 +28,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
 
     <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
     <link
@@ -38,88 +41,88 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-  .dropzone {
-    transition: all 0.3s ease-in-out;
-    border: 2px dashed #94a3b8;
-    background-color: #f8fafc;
-    padding: 2rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-  }
+      .dropzone {
+        transition: all 0.3s ease-in-out;
+        border: 2px dashed #94a3b8;
+        background-color: #f8fafc;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
 
-  .dropzone:hover {
-    background-color: #f1f5f9;
-    border-color: #60a5fa;
-  }
+      .dropzone:hover {
+        background-color: #f1f5f9;
+        border-color: #60a5fa;
+      }
 
-  .dropzone.dz-started {
-    animation: fadeIn 0.5s ease-in-out;
-  }
+      .dropzone.dz-started {
+        animation: fadeIn 0.5s ease-in-out;
+      }
 
-  @keyframes fadeIn {
-    from {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
+      @keyframes fadeIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
 
-  .dz-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: #1f2937;
-  }
+      .dz-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: #1f2937;
+      }
 
-  .btn-animated {
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
-  }
+      .btn-animated {
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+      }
 
-  .btn-animated:hover {
-    background-color: #bbf7d0;
-    transform: scale(1.05);
-  }
-  @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+      .btn-animated:hover {
+        background-color: #bbf7d0;
+        transform: scale(1.05);
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out forwards;
-}
-#upload-hover {
-  cursor: pointer;
-  width: 320px;
-  position: relative;
-  overflow: hidden;
-}
+      .animate-fade-in {
+        animation: fade-in 0.6s ease-out forwards;
+      }
+      #upload-hover {
+        cursor: pointer;
+        width: 320px;
+        position: relative;
+        overflow: hidden;
+      }
 
-#upload-text-container {
-  width: 100%;
-}
+      #upload-text-container {
+        width: 100%;
+      }
 
-#upload-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform-origin: center center;
-}
-</style>
+      #upload-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center center;
+      }
+    </style>
   </head>
   <body>
-
-
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div
+      class="flex flex-col items-center justify-center min-h-screen bg-gray-100"
+    >
       <div
         class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
       >
@@ -153,20 +156,29 @@
             </p>
             <div class="mt-3 space-x-2">
               {% if category == 'success' and filecsv %}
-              <a href="{{ url_for('download', filename=filecsv) }}" type="button" class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300 hidden" id="downloadButton" >Download CSV</a>
               <a
-              href="/data"
-              type="button" 
-              target="_blank"
-              class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
-              >Tampilkan Data</a
+                href="{{ url_for('download', filename=filecsv) }}"
+                type="button"
+                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300 hidden"
+                id="downloadButton"
+                >Download CSV</a
               >
-              <a href="javascript:void(0);" 
-   data-filecsv="{{ filecsv }}"
-   id="saveButton"
-   class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300">
-   Save
-</a>
+              <a
+                href="/data"
+                type="button"
+                target="_blank"
+                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+                id="showdatabtn"
+                >Tampilkan Data</a
+              >
+              <a
+                href="javascript:void(0);"
+                data-filecsv="{{ filecsv }}"
+                id="saveButton"
+                class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
+              >
+                Save
+              </a>
 
               {% endif %}
             </div>
@@ -180,219 +192,279 @@
           alt="Background Image"
         />
 
-        
         <div
-        class="bg-white border border-gray-300 rounded-lg p-6 flex flex-col relative z-10 shadow-md"
+          class="bg-white border border-gray-300 rounded-lg p-6 flex flex-col relative z-10 shadow-md"
         >
-        <h3 class="text-xl font-bold text-gray-800 mb-4 relative z-10">
-          {{ title }}
-        </h3>
-         
+          <h3 class="text-xl font-bold text-gray-800 mb-4 relative z-10">
+            {{ title }}
+          </h3>
+
           <div class="my-3" id="alert">
-          <form
-            class="dropzone"
-            id="fileDropzone"
-            action="/submit"
-            method="post"
-            enctype="multipart/form-data"
-          >
-            <div class="dz-message needsclick">
-              <i class="ki-duotone ki-file-up fs-3x text-primary"
-                ><span class="path1"></span><span class="path2"></span
-              ></i>
-              <div id="upload-hover" class="position-relative d-inline-block overflow-hidden cursor-pointer" style="width: 320px;">
-  <div id="upload-text-container" class="d-flex justify-content-between align-items-center" style="transition: transform 0.4s ease, opacity 0.4s ease;">
-    <div id="upload-text-left" class="fs-5 fw-bold text-gray-900" style="white-space: nowrap; transition: transform 0.4s ease, opacity 0.4s ease;">
-      Drop files here or click to upload.
-    </div>
-    <div id="upload-text-right" class="fs-7 fw-semibold text-gray-500" style="white-space: nowrap; transition: transform 0.4s ease, opacity 0.4s ease;">
-      File anda akan otomatis di convert
-    </div>
-  </div>
-  <i
-    id="upload-icon"
-    class="bi bi-cloud-arrow-up-fill text-primary position-absolute top-50 start-50"
-    style="font-size: 0; opacity: 0; transform: translate(-50%, -50%) scale(0); transition: font-size 0.4s ease, opacity 0.4s ease, transform 0.4s ease;"
-  ></i>
-</div>
+            <form
+              class="dropzone"
+              id="fileDropzone"
+              action="/submit"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <div class="dz-message needsclick">
+                <i class="ki-duotone ki-file-up fs-3x text-primary"
+                  ><span class="path1"></span><span class="path2"></span
+                ></i>
+                <div
+                  id="upload-hover"
+                  class="position-relative d-inline-block overflow-hidden cursor-pointer"
+                  style="width: 320px"
+                >
+                  <div
+                    id="upload-text-container"
+                    class="d-flex justify-content-between align-items-center"
+                    style="transition: transform 0.4s ease, opacity 0.4s ease"
+                  >
+                    <div
+                      id="upload-text-left"
+                      class="fs-5 fw-bold text-gray-900"
+                      style="
+                        white-space: nowrap;
+                        transition: transform 0.4s ease, opacity 0.4s ease;
+                      "
+                    >
+                      Drop files here or click to upload.
+                    </div>
+                    <div
+                      id="upload-text-right"
+                      class="fs-7 fw-semibold text-gray-500"
+                      style="
+                        white-space: nowrap;
+                        transition: transform 0.4s ease, opacity 0.4s ease;
+                      "
+                    >
+                      File anda akan otomatis di convert
+                    </div>
+                  </div>
+                  <i
+                    id="upload-icon"
+                    class="bi bi-cloud-arrow-up-fill text-primary position-absolute top-50 start-50"
+                    style="
+                      font-size: 0;
+                      opacity: 0;
+                      transform: translate(-50%, -50%) scale(0);
+                      transition: font-size 0.4s ease, opacity 0.4s ease,
+                        transform 0.4s ease;
+                    "
+                  ></i>
+                </div>
               </div>
-            </div>
+            </form>
+          </div>
           <p class="text-xs text-gray-500 mt-3">
             Masukan file pdf untuk mendownload data csv yang disimpan di
             PostgreSQL
           </p>
         </div>
       </div>
-       <hr class="my-8 border-gray-300" />
-      <textarea class="hidden mt-8 border boder-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" name="" id="text-area" style="min-width: 750px; min-height: 250px;" readonly></textarea>
+      <hr class="my-8 border-gray-300" />
+      <textarea
+        class="hidden mt-8 border boder-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        name=""
+        id="text-area"
+        style="min-width: 750px; min-height: 250px"
+        readonly
+      ></textarea>
     </div>
-   <script>
-  Dropzone.autoDiscover = false;
-  var myDropzone = new Dropzone("#fileDropzone", {
-    paramName: "file",
-    maxFiles: 1,
-    maxFilesize: 2 * 1024,
-    addRemoveLinks: true,
-    acceptedFiles: ".pdf,.webp",
-    dictDefaultMessage: "Drop files here or click to upload.",
-    init: function () {
-      this.on("sending", function (file, xhr, formData) {
-        Swal.fire({
-          title: "Processing...",
-          html: `
+    <script>
+      Dropzone.autoDiscover = false;
+      var myDropzone = new Dropzone("#fileDropzone", {
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 2 * 1024,
+        addRemoveLinks: true,
+        acceptedFiles: ".pdf,.webp",
+        dictDefaultMessage: "Drop files here or click to upload.",
+        init: function () {
+          this.on("sending", function (file, xhr, formData) {
+            Swal.fire({
+              title: "Processing...",
+              html: `
             <div style="display: flex; flex-direction: column; align-items: center;">
               <img src="static/Animation.gif" alt="Loading..." style="width: 100px; height: 100px; margin-bottom: 10px;">
               <p>Please wait, your file is being converted...</p>
             </div>
           `,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          allowEnterKey: false,
-          showConfirmButton: false
-        });
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              allowEnterKey: false,
+              showConfirmButton: false,
+            });
+          });
+
+          this.on("success", function (file, response) {
+            Swal.close();
+            if (response.text && response.text.trim() !== "") {
+              localStorage.setItem("textData", response.text);
+              localStorage.setItem("reloadedOnce", "true");
+              window.location.reload();
+            } else {
+              $("#text-area").val("Tidak ada data yang diekstrak.");
+            }
+          });
+
+          this.on("error", function (file, errorMessage) {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: "Terjadi kesalahan saat upload",
+            });
+            this.removeFile(file);
+          });
+        },
       });
 
-      this.on("success", function (file, response) {
-        Swal.close();
-        if (response.text && response.text.trim() !== "") {
-          localStorage.setItem("textData", response.text);
-          localStorage.setItem("reloadedOnce", "true");
-          window.location.reload();
-        } else {
-          $("#text-area").val("Tidak ada data yang diekstrak.");
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
+
+      $(document).ready(function () {
+        const wasReloaded = localStorage.getItem("reloadedOnce");
+        const savedText = localStorage.getItem("textData");
+
+        if (wasReloaded && savedText) {
+          $("#text-area").removeClass("hidden");
+          $("#text-area").val(savedText);
+          localStorage.removeItem("textData");
+          localStorage.removeItem("reloadedOnce");
         }
-      });
 
-      this.on("error", function (file, errorMessage) {
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "Terjadi kesalahan saat upload",
+        $("#text-area").on("input", function () {
+          localStorage.setItem("textData", $(this).val());
         });
-        this.removeFile(file);
+
+        $("#close").on("click", function () {
+          $("#alert").hide();
+        });
+        $("#upload-hover").hover(
+          function () {
+            $("#upload-text-left").css({
+              transform: "translateX(-120%)",
+              opacity: "0",
+            });
+            $("#upload-text-right").css({
+              transform: "translateX(120%)",
+              opacity: "0",
+            });
+            $("#upload-icon").css({
+              fontSize: "40px",
+              opacity: "1",
+              transform: "translate(-50%, -50%) scale(1)",
+            });
+          },
+          function () {
+            $("#upload-text-left").css({
+              transform: "translateX(0)",
+              opacity: "1",
+            });
+            $("#upload-text-right").css({
+              transform: "translateX(0)",
+              opacity: "1",
+            });
+            $("#upload-icon").css({
+              fontSize: "0",
+              opacity: "0",
+              transform: "translate(-50%, -50%) scale(0)",
+            });
+          }
+        );
       });
-    }
-  });
 
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    showConfirmButton: false,
-    timer: 1500,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
-    },
-  });
+      $(document).on("click", "#saveButton", function (e) {
+        e.preventDefault();
+        const filepath = $(this).data("filecsv");
+        const $saveBtn = $(this);
+        const $downloadBtn = $("#downloadButton");
 
-  $(document).ready(function () {
-    const wasReloaded = localStorage.getItem("reloadedOnce");
-    const savedText = localStorage.getItem("textData");
-
-    if (wasReloaded && savedText) {
-      $("#text-area").removeClass("hidden");
-      $("#text-area").val(savedText);
-      localStorage.removeItem("textData");
-      localStorage.removeItem("reloadedOnce");
-    }
-
-    $("#text-area").on("input", function () {
-      localStorage.setItem("textData", $(this).val());
-    });
-
-    $("#close").on("click", function () {
-      $("#alert").hide();
-    });
-    $("#upload-hover").hover(
-  function () {
-    $("#upload-text-left").css({
-      transform: "translateX(-120%)",
-      opacity: "0"
-    });
-    $("#upload-text-right").css({
-      transform: "translateX(120%)",
-      opacity: "0"
-    });
-    $("#upload-icon").css({
-      fontSize: "40px",
-      opacity: "1",
-      transform: "translate(-50%, -50%) scale(1)"
-    });
-  },
-  function () {
-    $("#upload-text-left").css({
-      transform: "translateX(0)",
-      opacity: "1"
-    });
-    $("#upload-text-right").css({
-      transform: "translateX(0)",
-      opacity: "1"
-    });
-    $("#upload-icon").css({
-      fontSize: "0",
-      opacity: "0",
-      transform: "translate(-50%, -50%) scale(0)"
-    });
-  }
-);
-  });
-
-  $(document).on('click', '#saveButton', function (e) {
-    e.preventDefault();
-    const filepath = $(this).data('filecsv');
-    const $saveBtn = $(this);
-    const $downloadBtn = $('#downloadButton'); // Tambahkan referensi tombol download
-
-    Swal.fire({
-        title: 'Menyimpan...',
-        html: `
+        Swal.fire({
+          title: "Menyimpan...",
+          html: `
           <div style="display: flex; flex-direction: column; align-items: center;">
             <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
             <p>Please wait, is saving to the database...</p>
           </div>
         `,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false
-    });
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
 
-    $.ajax({
-        url: `/save/${filepath}`,
-        type: 'POST',
-        success: function (response) {
+        $.ajax({
+          url: `/save/${filepath}`,
+          type: "POST",
+          success: function (response) {
             Swal.close();
-            if (response.status === 'success') {
-                Toast.fire({
-                    icon: 'success',
-                    text: response.message
-                });
+            if (response.status === "success") {
+              Toast.fire({
+                icon: "success",
+                text: response.message,
+              });
 
-                // Sembunyikan tombol save dan tampilkan tombol download
-                $saveBtn.hide();
-                $downloadBtn.attr('href', `/download/${response.csv}`); // Update URL tombol download
-                $downloadBtn.removeClass('hidden');
+              $saveBtn.hide();
+              $downloadBtn.attr("href", `/download/${response.csv}`);
+              $downloadBtn.removeClass("hidden");
 
-                localStorage.removeItem("textData");
+              localStorage.removeItem("textData");
             } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: response.message
-                });
+              Toast.fire({
+                icon: "error",
+                title: "Gagal",
+                text: response.message,
+              });
             }
-        },
-        error: function (xhr) {
+          },
+          error: function (xhr) {
             Swal.close();
             Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: xhr.responseJSON?.message || 'Terjadi kesalahan.'
+              icon: "error",
+              title: "Error",
+              text: xhr.responseJSON?.message || "Terjadi kesalahan.",
             });
-        }
-    });
-});
+          },
+        });
+      });
+      $(document).on("click", "#showdatabtn", function (e) {
+        const $saveBtn = $("#saveButton");
 
-</script>
+        if ($saveBtn.is(":visible")) {
+          e.preventDefault();
+
+          Swal.fire({
+            title: "Data belum disimpan",
+            text: "Apakah Anda ingin menyimpan terlebih dahulu sebelum melihat data?",
+            icon: "warning",
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: "Save & Continue",
+            denyButtonText: "Continue Without Saving",
+            cancelButtonText: "Batal",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $saveBtn.trigger("click");
+              $(document).one("ajaxSuccess", function () {
+                window.open("/data", "_blank");
+              });
+            } else if (result.isDenied) {
+              window.open("/data", "_blank");
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+            }
+          });
+        }
+      });
+    </script>
   </body>
 </html>
