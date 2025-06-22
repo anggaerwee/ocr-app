@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
-from function import process_file, ProductTable, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
+from function import process_file, ProductTable, InvoiceBlur, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
 import os
 import csv
 from sqlalchemy.sql import text
@@ -26,9 +26,12 @@ def api_filenames():
     session = Session()
     try:
         search = request.args.get('q', '').strip()
-        base_query = """
+        source = request.args.get('source', 'product')
+
+        table_name ='invooiceblur' if source == 'blur' else 'invoice'
+        base_query = f"""
             SELECT DISTINCT filename, text
-            FROM tb_product
+            FROM {table_name}
             WHERE filename IS NOT NULL AND filename != ''
         """
         if search:
@@ -49,7 +52,11 @@ def api_filenames():
         
 @app.route('/api/products')
 def api_products():
-    products = ProductTable.get_all()
+    source = request.args.get('source', 'product')
+    if source == 'blur':
+        products = InvoiceBlur.get_all(Session())
+    else:
+        products = ProductTable.get_all(Session())
     data = [
         {
             'id' : p.id,
@@ -130,34 +137,48 @@ def download(filename):
 
 @app.route('/downloadall', methods=['GET'])
 def download_all():
-    products = ProductTable.get_all()
-    if not products:
-        flash(('Tidak ada data yang diunduh', ''), 'error')
-        return redirect(url_for('home'))
-    
-    si = StringIO()
-    writer = csv.writer(si, delimiter=';')
-    writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total'])
-    for p in products:
-        writer.writerow([
-            p.product_number,
-            p.description,
-            f"{p.quantity:.2f}" if isinstance(p.quantity, (int, float)) else p.quantity,
-            f"{p.unit_price:.2f}" if isinstance(p.unit_price, (int, float)) else p.unit_price,
-            f"{p.discount:.2f}%" if isinstance(p.discount, (int, float)) else p.discount,
-            f"{p.line_total:.2f}" if isinstance(p.line_total, (int, float)) else p.line_total
-        ])
-    output = si.getvalue()
-    si.close()
+    session = Session()  # <--- tambahkan ini
+    source = request.args.get('source', 'product')
 
-    return Response(
-        output,
-        mimetype='text/csv',
-        headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
-    )
+    try:
+        if source == 'blur':
+            products = InvoiceBlur.get_all(session)
+        else:
+            products = ProductTable.get_all(session)
+
+        if not products:
+            return "Tidak Ada Data Untuk Diunduh", 404
+
+        si = StringIO()
+        writer = csv.writer(si, delimiter=';')
+        writer.writerow(['product_number', 'description', 'quantity', 'unit_price', 'discount', 'line_total'])
+        for p in products:
+            writer.writerow([
+                p.product_number,
+                p.description,
+                f"{p.quantity:.2f}" if isinstance(p.quantity, (int, float)) else p.quantity,
+                f"{p.unit_price:.2f}" if isinstance(p.unit_price, (int, float)) else p.unit_price,
+                f"{p.discount:.2f}%" if isinstance(p.discount, (int, float)) else p.discount,
+                f"{p.line_total:.2f}" if isinstance(p.line_total, (int, float)) else p.line_total
+            ])
+        output = si.getvalue()
+        si.close()
+
+        return Response(
+            output,
+            mimetype='text/csv',
+            headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
+        )
+    finally:
+        session.close()
+
 @app.route('/api/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
-    result = ProductTable.delete(id)
+    source = request.args.get('source', 'product')
+    if source == 'blur':
+        result = InvoiceBlur.delete(id)
+    else:
+        result = ProductTable.delete(id)
     if result:
         return jsonify({"message": "Deleted"}), 200
     else:
@@ -165,9 +186,13 @@ def delete_product(id):
 
 @app.route('/deleteall')
 def delete_all():
+    source = request.args.get('source', 'product')
     try:
         session = Session()
-        session.query(ProductTable).delete()
+        if source == 'blur':
+            session.query(InvoiceBlur).delete()
+        else:
+            session.query(ProductTable).delete()
         session.commit()
         session.close()
         return redirect(url_for('data'))
@@ -176,7 +201,11 @@ def delete_all():
     
 @app.route("/api/invoice_count")
 def invoice_count():
-    count = len(ProductTable.get_all())
+    source = request.args.get('source', 'product')
+    if source == 'blur':
+        count = len(InvoiceBlur.get_all(Session()))
+    else:
+        count = len(ProductTable.get_all(Session()))
     return jsonify({"count": count})
 
 

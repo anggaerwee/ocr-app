@@ -117,6 +117,51 @@
         left: 50%;
         transform-origin: center center;
       }
+
+.swal-popup {
+    background: #f0f0f0;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+}
+
+.swal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.swal-content {
+    font-size: 18px;
+    color: #666;
+}
+
+.swal-confirm-btn {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.swal-deny-btn {
+    background: #FF9800;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.swal-cancel-btn {
+    background: #E74C3C;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
     </style>
   </head>
   <body>
@@ -263,14 +308,15 @@
           </p>
         </div>
       </div>
-      <hr class="my-8 border-gray-300" />
-      <textarea
-        class="hidden mt-8 border boder-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        name=""
-        id="text-area"
-        style="min-width: 750px; min-height: 250px"
-        readonly
-      ></textarea>
+     <hr class="my-8 border-gray-300" />
+<textarea 
+  class="hidden mt-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
+  name="" 
+  id="text-area" 
+  style="width: 100%; min-height: 250px; max-width: 80%; padding: 10px; box-sizing: border-box;" 
+  readonly
+></textarea>
+
     </div>
     <script>
       Dropzone.autoDiscover = false;
@@ -438,12 +484,10 @@
         });
       });
       $(document).on("click", "#showdatabtn", function (e) {
-        const $saveBtn = $("#saveButton");
-
-        if ($saveBtn.is(":visible")) {
-          e.preventDefault();
-
-          Swal.fire({
+    const $saveBtn = $("#saveButton");
+    if ($saveBtn.is(":visible")) {
+        e.preventDefault();
+        Swal.fire({
             title: "Data belum disimpan",
             text: "Apakah Anda ingin menyimpan terlebih dahulu sebelum melihat data?",
             icon: "warning",
@@ -452,19 +496,66 @@
             confirmButtonText: "Save & Continue",
             denyButtonText: "Continue Without Saving",
             cancelButtonText: "Batal",
-          }).then((result) => {
+            customClass: {
+                popup: 'swal-popup',
+                title: 'swal-title',
+                content: 'swal-content',
+                confirmButton: 'swal-confirm-btn',
+                denyButton: 'swal-deny-btn',
+                cancelButton: 'swal-cancel-btn'
+            },
+            didOpen: () => {
+                const swalPopup = document.querySelector('.swal-popup');
+                swalPopup.style.background = '#f0f0f0';
+                swalPopup.style.borderRadius = '10px';
+                swalPopup.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.2)';
+                
+                const swalTitle = document.querySelector('.swal-title');
+                swalTitle.style.fontSize = '24px';
+                swalTitle.style.fontWeight = 'bold';
+                swalTitle.style.color = '#333';
+                
+                const swalContent = document.querySelector('.swal-content');
+                swalContent.style.fontSize = '18px';
+                swalContent.style.color = '#666';
+                
+                const swalConfirmBtn = document.querySelector('.swal-confirm-btn');
+                swalConfirmBtn.style.background = '#4CAF50';
+                swalConfirmBtn.style.color = '#fff';
+                swalConfirmBtn.style.border = 'none';
+                swalConfirmBtn.style.padding = '10px 20px';
+                swalConfirmBtn.style.borderRadius = '5px';
+                swalConfirmBtn.style.cursor = 'pointer';
+                
+                const swalDenyBtn = document.querySelector('.swal-deny-btn');
+                swalDenyBtn.style.background = '#FF9800';
+                swalDenyBtn.style.color = '#fff';
+                swalDenyBtn.style.border = 'none';
+                swalDenyBtn.style.padding = '10px 20px';
+                swalDenyBtn.style.borderRadius = '5px';
+                swalDenyBtn.style.cursor = 'pointer';
+                
+                const swalCancelBtn = document.querySelector('.swal-cancel-btn');
+                swalCancelBtn.style.background = '#E74C3C';
+                swalCancelBtn.style.color = '#fff';
+                swalCancelBtn.style.border = 'none';
+                swalCancelBtn.style.padding = '10px 20px';
+                swalCancelBtn.style.borderRadius = '5px';
+                swalCancelBtn.style.cursor = 'pointer';
+            }
+        }).then((result) => {
             if (result.isConfirmed) {
-              $saveBtn.trigger("click");
-              $(document).one("ajaxSuccess", function () {
-                window.open("/data", "_blank");
-              });
+                $saveBtn.trigger("click");
+                $(document).one("ajaxSuccess", function () {
+                    window.open("/data", "_blank");
+                });
             } else if (result.isDenied) {
-              window.open("/data", "_blank");
+                window.open("/data", "_blank");
             } else if (result.dismiss === Swal.DismissReason.cancel) {
             }
-          });
-        }
-      });
+        });
+    }
+});
     </script>
   </body>
 </html>

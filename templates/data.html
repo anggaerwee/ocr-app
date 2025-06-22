@@ -156,6 +156,14 @@
           display: block !important;
         }
       }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%     { transform: translateY(-8px); }
+  }
+
+  .group:hover .bounce-target {
+    animation: bounce 0.6s ease-in-out infinite;
+  }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -170,6 +178,7 @@
                 href="/"
                 class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
                 id="back-button"
+                accesskey="←"
               >
                 <span
                   class="transition-all duration-200 flex justify-center"
@@ -218,6 +227,15 @@
               <h1 class="judul text-2xl font-bold text-gray-800">
                 Data Produk dari CSV
               </h1>
+            </div>
+            <div class="w-full mt-2">
+               <label for="" style="font-weight: bold; font-size: 16px;">Show Data:</label>
+              <select
+              class="select-data flex-1"
+              id="sourceSelect"
+              style="width: 150px"
+              ><option value="product">product</option>
+              <option value="blur">blur</option></select>
             </div>
 
             <div
@@ -307,18 +325,6 @@
     <strong class="font-bold">ConvertData</strong>
   </div>
 </footer>
-
-<style>
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50%     { transform: translateY(-8px); }
-  }
-
-  .group:hover .bounce-target {
-    animation: bounce 0.6s ease-in-out infinite;
-  }
-</style>
-
         </div>
       </div>
     </div>
@@ -372,6 +378,11 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+      document.addEventListener("keydown", function(event) {
+  if (event.altKey && event.key === "ArrowLeft") {
+    document.getElementById("back-button").click();
+  }
+});
       $(".js-example-responsive").select2({
         placeholder: "Pilih Produk",
         allowClear: true,
@@ -382,6 +393,7 @@
           data: function (params) {
             return {
               q: params.term || "",
+              source: $("#sourceSelect").val() || "product",
             };
           },
           processResults: function (data) {
@@ -416,8 +428,17 @@
         $(".js-example-responsive").val(null).trigger("change");
       });
 
+      $(document).ready(function (){
+        $(".select-data").select2({
+          placeholder: "Pilih Sumber Data",
+          minimumInputLength: -1,
+          width: "resolve",
+      })
+
+      let currentSource = "product";
+
       var table = $("#productTable").DataTable({
-        ajax: "/api/products",
+        ajax: `/api/products?source=${currentSource}`,
         pageLength: 50,
         columns: [
           {
@@ -480,6 +501,12 @@
         },
       });
 
+      $("#sourceSelect").on("change", function () {
+        currentSource = $(this).val();
+        table.ajax.url("/api/products?source=" + currentSource).load();
+      })
+      })
+
       const Toast = Swal.mixin({
         toast: true,
         position: "top-end",
@@ -493,6 +520,7 @@
       });
       $(document).on("click", ".delete-btn", function () {
         const id = $(this).data("id");
+        const source = $("#sourceSelect").val() || "product";
         Swal.fire({
           title: "Yakin ingin menghapus produk ini?",
           icon: "warning",
@@ -504,7 +532,7 @@
         }).then((result) => {
           if (result.isConfirmed) {
             $.ajax({
-              url: `/api/products/${id}`,
+              url: `/api/products/${id}?source=${source}`,
               type: "DELETE",
               success: function (response) {
                 Toast.fire({
@@ -512,7 +540,8 @@
                   title: "successfully deleted all data",
                 }).then(function () {
                   $("#productTable").DataTable().ajax.reload();
-                  $.get("/api/invoice_count", function (data) {
+                  const source = $("#sourceSelect").val() || "product";
+                  $.get(`/api/invoice_count?source=${source}`, function (data) {
                     if (data.count > 0) {
                       $("#delete-all-btn").show();
                       $("#download-all").show();
@@ -537,6 +566,7 @@
       });
 
       $("#download-all").on("click", function () {
+        const source = $("#sourceSelect").val() || "product";
         Swal.fire({
           title: "Konfirmasi!",
           text: "Apakah anda yakin akan mendownload semua data?",
@@ -563,7 +593,7 @@
               showCancelButton: false,
               didOpen: () => {
                 setTimeout(() => {
-                  window.location.href = "/downloadall";
+                  window.location.href = `/downloadall?source=${source}`;
                   Swal.close();
                 }, 1500);
               },
@@ -590,6 +620,7 @@
       });
 
       $("#delete-all-btn").on("click", function () {
+        const source = $("#sourceSelect").val() || "product";
         Swal.fire({
           title: "Konfirmasi!",
           text: "Apakah anda yakin akan menghapus semua data?",
@@ -605,7 +636,7 @@
         }).then((result) => {
           if (result.isConfirmed) {
             $.ajax({
-              url: "/deleteall",
+              url: `/deleteall?source=${source}`,
               type: "GET",
               success: function (response) {
                 Toast.fire({
@@ -695,7 +726,10 @@
           }
         );
 
-        $.get("/api/invoice_count", function (data) {
+      });
+      function updateInvoicecount(){
+        const source = $("#sourceSelect").val() || "product";
+        $.get(`/api/invoice_count?source=${source}`, function (data) {
           if (data.count > 0) {
             $("#delete-all-btn").show();
             $("#download-all").show();
@@ -708,7 +742,14 @@
             $("#invoice-count-badge").text("");
           }
         });
+      }
+      $(document).ready(function(){
+        updateInvoicecount();
       });
+      $("#sourceSelect").on("change", function(){
+        updateInvoicecount();
+        $("#productTable").DataTable().ajax.reload();
+      })
       $("#dataModal").on("click", ".dwcsv", function () {
         const id = $(this).data("id");
 
