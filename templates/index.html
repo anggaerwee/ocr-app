@@ -331,7 +331,7 @@
           this.on("sending", function (file, xhr, formData) {
             Swal.fire({
               title: "Processing...",
-              html: `
+              html: ` 
             <div style="display: flex; flex-direction: column; align-items: center;">
               <img src="static/Animation.gif" alt="Loading..." style="width: 100px; height: 100px; margin-bottom: 10px;">
               <p>Please wait, your file is being converted...</p>
@@ -436,6 +436,18 @@
         const $saveBtn = $(this);
         const $downloadBtn = $("#downloadButton");
 
+         Swal.fire({
+    title: "Simpan data ke mana?",
+    text: "Pilih apakah data akan disimpan sebagai data jelas atau data buram.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Product Table",
+    cancelButtonText: "Invoice Blur",
+    reverseButtons: true,
+         }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.cancel) {
+      const mode = result.isConfirmed ? "product" : "blur";
+  
         Swal.fire({
           title: "Menyimpan...",
           html: `
@@ -452,6 +464,7 @@
         $.ajax({
           url: `/save/${filepath}`,
           type: "POST",
+          data: { mode: mode},
           success: function (response) {
             Swal.close();
             if (response.status === "success") {
@@ -482,6 +495,8 @@
             });
           },
         });
+      }
+      });
       });
       $(document).on("click", "#showdatabtn", function (e) {
     const $saveBtn = $("#saveButton");

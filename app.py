@@ -114,8 +114,8 @@ def save(filepath):
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
         if not os.path.exists(full_path):
             return jsonify({'status': 'error', 'message': f"File {filepath} tidak ditemukan."}), 404
-
-        csv_filename = process_file(full_path)
+        mode = request.form.get('mode', 'product') 
+        csv_filename = process_file(full_path, mode=mode)
         if csv_filename:
             return jsonify({'status': 'success', 'message': f"{filepath} berhasil diproses dan disimpan ke database.", 'csv': csv_filename})
         else:
