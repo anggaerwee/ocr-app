@@ -81,31 +81,37 @@ def extract_text_with_ocr(file_path, page_number):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-def extract_image_with_ocr(image_path): 
+def extract_image_with_ocr(image_path):
     try:
-        image = Image.open(image_path)
-        image = image.convert("L")
+        image = cv2.imread(image_path)
 
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.0)
-        width, height = image.size
-        image = image.resize((width * 4, height * 4), Image.Resampling.LANCZOS)
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+        merged = cv2.merge((cl, a, b))
+        image = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
 
-        image = image.filter(ImageFilter.MedianFilter(size=3))
-        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=253, threshold=3))
+        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9.5, -1], [-1, -1, -1]])
+        image = cv2.filter2D(image, -1, sharpen_kernel)
 
-        threshold = 128
-        image = image.point(lambda p: 255 if p > threshold else 0)
+        image = cv2.fastNlMeansDenoisingColored(image, None, 5, 5, 7, 21)
+
+        height, width = image.shape[:2]
+        image = cv2.resize(image, (width * 2, height * 2), interpolation=cv2.INTER_CUBIC)
 
         output_folder = "output"
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        filename, file_extension = os.path.splitext(os.path.basename(image_path))
-        output_path = os.path.join(output_folder, f"{filename}_enhanced{file_extension}")
-        image.save(output_path)
+        os.makedirs(output_folder, exist_ok=True)
+        filename = os.path.basename(image_path)
+        filename_no_ext, ext = os.path.splitext(filename)
+        enhanced_path = os.path.join(output_folder, f"{filename_no_ext}_enhanced.webp")
+        cv2.imwrite(enhanced_path, image)
+
+        pil_img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("L")
+        pil_img = pil_img.point(lambda p: 255 if p > 128 else 0)
 
         custom_config = r'--oem 3 --psm 6'
-        extracted_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
+        extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng+ind')
 
         extracted_text = re.sub(r"[^\w\s.%,-/#]", " ", extracted_text)
         extracted_text = re.sub(r'([a-zA-Z])4([a-zA-Z]*)', r'\1e\2', extracted_text)
@@ -114,9 +120,9 @@ def extract_image_with_ocr(image_path):
         for line in lines:
             line = re.sub(r"[^\w\s.%,-/]", "", line)
             line = re.sub(r"\s+", " ", line).strip()
-
             line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)
-            cleaned_lines.append(line)
+            if line:
+                cleaned_lines.append(line)
 
         return "\n".join(cleaned_lines)
 
@@ -124,7 +130,7 @@ def extract_image_with_ocr(image_path):
         print(f"Error extracting text with OCR: {e}")
         return None
 
-def process_file(file_path, mode="product"):
+def process_file(file_path, mode="product", text_override=None):
     if not os.path.exists(file_path):
         print(f"File {file_path} tidak ditemukan")
         return
@@ -132,7 +138,10 @@ def process_file(file_path, mode="product"):
     all_rows = []
     full_text = ""
 
-    if file_path.endswith('.pdf'):
+    if text_override:
+        full_text = text_override
+        rows = text_override.split("\n")
+    elif file_path.endswith('.pdf'):
         with pdfplumber.open(file_path) as pdf:
             for page_number, page in enumerate(pdf.pages, start=1):
                 try:
@@ -141,48 +150,73 @@ def process_file(file_path, mode="product"):
                         full_text += text + "\n"
                 except Exception as e:
                     print(f"Error reading page {page_number}: {e}")
-
         rows = full_text.split("\n")
-        filename = os.path.basename(file_path)
-        for row in rows:
-            row = row.strip()
-            if not row:
-                continue
-            parsed = parse_row(row, full_text, filename)
-            if parsed:
-                all_rows.append(parsed)
-
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
-        filename = os.path.basename(file_path)
+        full_text = text
         rows = text.split("\n")
-        for row in rows:
-            row = row.strip()
-            if not row:
-                continue
-            parsed = parse_row(row, text, filename)
-            if parsed:
-                all_rows.append(parsed)
-
     else:
         print(f"File {file_path} tidak didukung")
         return ""
 
-    if all_rows:
+    filename = os.path.basename(file_path)
+    for row in rows:
+        row = row.strip()
+        if not row:
+            continue
+        parsed = parse_row(row, full_text, filename)
+        if parsed:
+            all_rows.append(parsed)
+        else:
+            print(f"[PARSE FAIL] Gagal parsing baris: {row}")
+
+    if not all_rows:
+        if text_override and mode == "blur":
+            print("[INFO] Tidak ada parsing valid, simpan seluruh text ke invoiceblur.")
+            try:
+                session = Session()
+                dummy = InvoiceBlur(
+                    product_number="-",
+                    description="no row data available",
+                    quantity=0,
+                    unit_price=0.0,
+                    discount=0.0,
+                    line_total=0.0,
+                    text=full_text,
+                    filename=filename
+                )
+                session.add(dummy)
+                session.commit()
+                print("[SAVED] Raw text berhasil disimpan ke invoiceblur.")
+                return os.path.splitext(filename)[0] + '.csv'
+            except Exception as e:
+                session.rollback()
+                print(f"[ERROR] Gagal simpan raw text ke invoiceblur: {e}")
+                return "error_blur"
+        else:
+            print("[ERROR] Parsing gagal total, tanpa override.")
+            return "error_blur"
+
+    try:
         if mode == "blur":
             process_row_blur(all_rows)
         else:
             process_row(all_rows)
+    except Exception as e:
+        print(f"[ERROR] Gagal menyimpan hasil parsing ke database: {e}")
+        return "error_blur"
 
+    try:
         csv_rows = [row[:6] for row in all_rows]
         folder = os.path.dirname(file_path)
-        csvname = os.path.splitext(os.path.basename(file_path))[0] + '.csv'
+        csvname = os.path.splitext(filename)[0] + '.csv'
         csv_path = os.path.join(folder, csvname)
         write_csv_with_delimiter(csv_path, csv_rows, ";")
+        print(f"[CSV] Disimpan ke: {csv_path}")
         return csvname
-    else:
-        print("Tidak ada data yang diekstrak.")
-        return ""
+    except Exception as e:
+        print(f"[ERROR] Gagal menyimpan CSV: {e}")
+        return "error_blur"
 
 def write_csv_with_delimiter(filename, allrows, delimiter):
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
@@ -219,6 +253,7 @@ def process_row(rows):
             print(f"Kesalahan pada baris: {parsed_row}. Error: {e}")
 
 def process_row_blur(rows):
+    print(f"[DEBUG] total rows untuk blur: { len(rows)}")
     session = Session()
     for parsed_row in rows:
         if not parsed_row:

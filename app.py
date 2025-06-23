@@ -115,21 +115,39 @@ def submit_file():
         flash((f"Terjadi kesalahan : {e}", ''), 'error')
         return '', 500
 
-    
 @app.route('/save/<path:filepath>', methods=['POST'])
 def save(filepath):
     try:
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
         if not os.path.exists(full_path):
             return jsonify({'status': 'error', 'message': f"File {filepath} tidak ditemukan."}), 404
-        mode = request.form.get('mode', 'product') 
-        csv_filename = process_file(full_path, mode=mode)
-        if csv_filename:
-            return jsonify({'status': 'success', 'message': f"{filepath} berhasil diproses dan disimpan ke database.", 'csv': csv_filename})
+        
+        mode = request.form.get('mode', 'product').lower()
+        text_override = request.form.get('text') if mode == "blur" else None
+
+        csv_filename = process_file(full_path, mode=mode, text_override=text_override)
+
+        if csv_filename == "error_blur":
+            return jsonify({
+                'status': 'error_blur',
+                'message': "Data terlalu buram atau gagal diproses. Simpan ke tabel blur?"
+            })
+        elif csv_filename:
+            return jsonify({
+                'status': 'success',
+                'message': f"File {filepath} berhasil diproses.",
+                'csv': csv_filename
+            })
         else:
-            return jsonify({'status': 'error', 'message': f"File {filepath} gagal diproses."}), 500
+            return jsonify({
+                'status': 'error',
+                'message': f"File {filepath} gagal diproses."
+            }), 500
+
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):

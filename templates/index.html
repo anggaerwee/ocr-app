@@ -118,50 +118,49 @@
         transform-origin: center center;
       }
 
-.swal-popup {
-    background: #f0f0f0;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-}
+      .swal-popup {
+        background: #f0f0f0;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      }
 
-.swal-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-}
+      .swal-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+      }
 
-.swal-content {
-    font-size: 18px;
-    color: #666;
-}
+      .swal-content {
+        font-size: 18px;
+        color: #666;
+      }
 
-.swal-confirm-btn {
-    background: #4CAF50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+      .swal-confirm-btn {
+        background: #4caf50;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
 
-.swal-deny-btn {
-    background: #FF9800;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+      .swal-deny-btn {
+        background: #ff9800;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
 
-.swal-cancel-btn {
-    background: #E74C3C;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
+      .swal-cancel-btn {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -176,7 +175,8 @@
         </h2>
         <p class="leading-relaxed mb-5 text-gray-600">
           Projek ini bertujuan untuk membuat alat yang bisa mengambil data dari
-          dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.
+          dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.Mohon
+          toleransi kalo ada typo
         </p>
 
         {% with messages = get_flashed_messages(with_categories=True) %} {% if
@@ -308,15 +308,20 @@
           </p>
         </div>
       </div>
-     <hr class="my-8 border-gray-300" />
-<textarea 
-  class="hidden mt-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
-  name="" 
-  id="text-area" 
-  style="width: 100%; min-height: 250px; max-width: 80%; padding: 10px; box-sizing: border-box;" 
-  readonly
-></textarea>
-
+      <hr class="my-8 border-gray-300" />
+      <textarea
+        class="hidden mt-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        name=""
+        id="text-area"
+        style="
+          width: 100%;
+          min-height: 250px;
+          max-width: 80%;
+          padding: 10px;
+          box-sizing: border-box;
+        "
+        readonly
+      ></textarea>
     </div>
     <script>
       Dropzone.autoDiscover = false;
@@ -370,7 +375,7 @@
         toast: true,
         position: "top-end",
         showConfirmButton: false,
-        timer: 1500,
+        timer: 2000,
         timerProgressBar: true,
         didOpen: (toast) => {
           toast.onmouseenter = Swal.stopTimer;
@@ -386,7 +391,7 @@
           $("#text-area").removeClass("hidden");
           $("#text-area").val(savedText);
           localStorage.removeItem("textData");
-          localStorage.removeItem("reloadedOnce");
+          localStorage.removeItem("reloadedOnce", true);
         }
 
         $("#text-area").on("input", function () {
@@ -430,87 +435,81 @@
         );
       });
 
-      $(document).on("click", "#saveButton", function (e) {
-        e.preventDefault();
-        const filepath = $(this).data("filecsv");
-        const $saveBtn = $(this);
-        const $downloadBtn = $("#downloadButton");
+     $(document).on("click", "#saveButton", function (e) {
+  e.preventDefault();
+  const filepath = $(this).data("filecsv");
+  const $saveBtn = $(this);
+  const $downloadBtn = $("#downloadButton");
 
-         Swal.fire({
-    title: "Simpan data ke mana?",
-    text: "Pilih apakah data akan disimpan sebagai data jelas atau data buram.",
-    icon: "question",
-    showCancelButton: true,
-    showCloseButton: true,
-    confirmButtonText: "Product NoBLur",
-    cancelButtonText: "Blur",
-    reverseButtons: true,
-      allowOutsideClick: false,
-  allowEscapeKey: false,
-  allowEnterKey: false,
-         }).then((result) => {
-          if (result.isConfirmed || result.dismiss === Swal.DismissReason.cancel) {
-      const mode = result.isConfirmed ? "product" : "blur";
-  
-        Swal.fire({
-          title: "Menyimpan...",
-          html: `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
-            <p>Please wait, is saving to the database...</p>
-          </div>
-        `,
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
+  Swal.fire({
+    title: "Menyimpan...",
+    html: `
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
+        <p>Please wait, is saving to the database...</p>
+      </div>
+    `,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  });
+
+  $.ajax({
+    url: `/save/${filepath}`,
+    type: "POST",
+    data: {},
+    success: function (response) {
+      if (response.status === "success") {
+        Swal.close();
+        Toast.fire({ icon: "success", text: response.message });
+        $saveBtn.hide();
+        $downloadBtn.attr("href", `/download/${response.csv}`).removeClass("hidden");
+        localStorage.removeItem("textData");
+      } else if (response.status === "error_blur") {
+        const extractedText = $("#text-area").val();
+        $.post(`/save/${filepath}`, { mode: "blur", text: extractedText }, function (res) {
+          Swal.close();
+          if (res.status === "success") {
+            Toast.fire({ icon: "success", text: "Data Telah Disimpan ke Table blur" });
+            $saveBtn.hide();
+            $downloadBtn.attr("href", `/download/${res.csv}`).removeClass("hidden");
+            localStorage.removeItem("textData");
+          } else {
+            Toast.fire({ icon: "error", text: res.message });
+          }
+        }).fail(function (xhr) {
+          Swal.close();
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
+          });
         });
-
-        $.ajax({
-          url: `/save/${filepath}`,
-          type: "POST",
-          data: { mode: mode},
-          success: function (response) {
-            Swal.close();
-            if (response.status === "success") {
-              Toast.fire({
-                icon: "success",
-                text: response.message,
-              });
-
-              $saveBtn.hide();
-              $downloadBtn.attr("href", `/download/${response.csv}`);
-              $downloadBtn.removeClass("hidden");
-
-              localStorage.removeItem("textData");
-            } else {
-              Toast.fire({
-                icon: "error",
-                title: "Gagal",
-                text: response.message,
-              });
-            }
-          },
-          error: function (xhr) {
-            Swal.close();
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: xhr.responseJSON?.message || "Terjadi kesalahan.",
-            });
-          },
-        });
+      } else {
+        Swal.close();
+        Toast.fire({ icon: "error", text: response.message });
       }
+    },
+    error: function (xhr) {
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: xhr.responseJSON?.message || "Terjadi kesalahan.",
       });
-      });
+    },
+  });
+});
+
       $(document).on("click", "#showdatabtn", function (e) {
-    const $saveBtn = $("#saveButton");
-    if ($saveBtn.is(":visible")) {
-        e.preventDefault();
-        Swal.fire({
+        const $saveBtn = $("#saveButton");
+        if ($saveBtn.is(":visible")) {
+          e.preventDefault();
+          Swal.fire({
             title: "Data belum disimpan",
             text: "Apakah Anda ingin menyimpan terlebih dahulu sebelum melihat data?",
             icon: "warning",
-            showCancelButton: true,
+            showCancelButton: false,
             showDenyButton: true,
             confirmButtonText: "Save & Continue",
             denyButtonText: "Continue Without Saving",
@@ -519,65 +518,58 @@
             allowEscapeKey: false,
             allowEnterKey: false,
             customClass: {
-                popup: 'swal-popup',
-                title: 'swal-title',
-                content: 'swal-content',
-                confirmButton: 'swal-confirm-btn',
-                denyButton: 'swal-deny-btn',
-                cancelButton: 'swal-cancel-btn'
+              popup: "swal-popup",
+              title: "swal-title",
+              content: "swal-content",
+              confirmButton: "swal-confirm-btn",
+              denyButton: "swal-deny-btn",
+              // cancelButton: "swal-cancel-btn",
             },
             didOpen: () => {
-                const swalPopup = document.querySelector('.swal-popup');
-                swalPopup.style.background = '#f0f0f0';
-                swalPopup.style.borderRadius = '10px';
-                swalPopup.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.2)';
-                
-                const swalTitle = document.querySelector('.swal-title');
-                swalTitle.style.fontSize = '24px';
-                swalTitle.style.fontWeight = 'bold';
-                swalTitle.style.color = '#333';
-                
-                const swalContent = document.querySelector('.swal-content');
-                swalContent.style.fontSize = '18px';
-                swalContent.style.color = '#666';
-                
-                const swalConfirmBtn = document.querySelector('.swal-confirm-btn');
-                swalConfirmBtn.style.background = '#4CAF50';
-                swalConfirmBtn.style.color = '#fff';
-                swalConfirmBtn.style.border = 'none';
-                swalConfirmBtn.style.padding = '10px 20px';
-                swalConfirmBtn.style.borderRadius = '5px';
-                swalConfirmBtn.style.cursor = 'pointer';
-                
-                const swalDenyBtn = document.querySelector('.swal-deny-btn');
-                swalDenyBtn.style.background = '#FF9800';
-                swalDenyBtn.style.color = '#fff';
-                swalDenyBtn.style.border = 'none';
-                swalDenyBtn.style.padding = '10px 20px';
-                swalDenyBtn.style.borderRadius = '5px';
-                swalDenyBtn.style.cursor = 'pointer';
-                
-                const swalCancelBtn = document.querySelector('.swal-cancel-btn');
-                swalCancelBtn.style.background = '#E74C3C';
-                swalCancelBtn.style.color = '#fff';
-                swalCancelBtn.style.border = 'none';
-                swalCancelBtn.style.padding = '10px 20px';
-                swalCancelBtn.style.borderRadius = '5px';
-                swalCancelBtn.style.cursor = 'pointer';
-            }
-        }).then((result) => {
+              const swalPopup = document.querySelector(".swal-popup");
+              swalPopup.style.background = "#f0f0f0";
+              swalPopup.style.borderRadius = "10px";
+              swalPopup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.2)";
+
+              const swalTitle = document.querySelector(".swal-title");
+              swalTitle.style.fontSize = "24px";
+              swalTitle.style.fontWeight = "bold";
+              swalTitle.style.color = "#333";
+
+              const swalContent = document.querySelector(".swal-content");
+              swalContent.style.fontSize = "18px";
+              swalContent.style.color = "#666";
+
+              const swalConfirmBtn =
+                document.querySelector(".swal-confirm-btn");
+              swalConfirmBtn.style.background = "#4CAF50";
+              swalConfirmBtn.style.color = "#fff";
+              swalConfirmBtn.style.border = "none";
+              swalConfirmBtn.style.padding = "10px 20px";
+              swalConfirmBtn.style.borderRadius = "5px";
+              swalConfirmBtn.style.cursor = "pointer";
+
+              const swalDenyBtn = document.querySelector(".swal-deny-btn");
+              swalDenyBtn.style.background = "#FF9800";
+              swalDenyBtn.style.color = "#fff";
+              swalDenyBtn.style.border = "none";
+              swalDenyBtn.style.padding = "10px 20px";
+              swalDenyBtn.style.borderRadius = "5px";
+              swalDenyBtn.style.cursor = "pointer";
+            },
+          }).then((result) => {
             if (result.isConfirmed) {
-                $saveBtn.trigger("click");
-                $(document).one("ajaxSuccess", function () {
-                    window.open("/data", "_blank");
-                });
-            } else if (result.isDenied) {
+              $saveBtn.trigger("click");
+              $(document).one("ajaxSuccess", function () {
                 window.open("/data", "_blank");
+              });
+            } else if (result.isDenied) {
+              window.open("/data", "_blank");
             } else if (result.dismiss === Swal.DismissReason.cancel) {
             }
-        });
-    }
-});
+          });
+        }
+      });
     </script>
   </body>
 </html>
