@@ -98,7 +98,7 @@ def extract_image_with_ocr(image_path):
         image = cv2.fastNlMeansDenoisingColored(image, None, 5, 5, 7, 21)
 
         height, width = image.shape[:2]
-        image = cv2.resize(image, (width * 2, height * 2), interpolation=cv2.INTER_CUBIC)
+        image = cv2.resize(image, (int(width * 2.5), int(height * 2.5)), interpolation=cv2.INTER_CUBIC)
 
         output_folder = "output"
         os.makedirs(output_folder, exist_ok=True)

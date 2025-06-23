@@ -99,7 +99,7 @@ def submit_file():
 
             if file.filename.endswith('.pdf'):
                 from pdf2image import convert_from_path
-                images = convert_from_path(filepath, dpi=500)
+                images = convert_from_path(filepath, dpi=205)
                 for page_num, image in enumerate(images, start=1):
                     custom_config = r'--oem 3 --psm 6'
                     page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind')
