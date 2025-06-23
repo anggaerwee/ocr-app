@@ -441,9 +441,13 @@
     text: "Pilih apakah data akan disimpan sebagai data jelas atau data buram.",
     icon: "question",
     showCancelButton: true,
-    confirmButtonText: "Product Table",
-    cancelButtonText: "Invoice Blur",
+    showCloseButton: true,
+    confirmButtonText: "Product NoBLur",
+    cancelButtonText: "Blur",
     reverseButtons: true,
+      allowOutsideClick: false,
+  allowEscapeKey: false,
+  allowEnterKey: false,
          }).then((result) => {
           if (result.isConfirmed || result.dismiss === Swal.DismissReason.cancel) {
       const mode = result.isConfirmed ? "product" : "blur";
@@ -510,7 +514,10 @@
             showDenyButton: true,
             confirmButtonText: "Save & Continue",
             denyButtonText: "Continue Without Saving",
-            cancelButtonText: "Batal",
+            showCloseButton: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
             customClass: {
                 popup: 'swal-popup',
                 title: 'swal-title',

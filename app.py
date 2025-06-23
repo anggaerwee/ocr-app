@@ -5,6 +5,7 @@ import csv
 from sqlalchemy.sql import text
 from io import StringIO
 from flask import Response
+import pytesseract
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
@@ -28,7 +29,7 @@ def api_filenames():
         search = request.args.get('q', '').strip()
         source = request.args.get('source', 'product')
 
-        table_name ='invooiceblur' if source == 'blur' else 'invoice'
+        table_name ='invoiceblur' if source == 'blur' else 'invoice'
         base_query = f"""
             SELECT DISTINCT filename, text
             FROM {table_name}
@@ -82,7 +83,8 @@ def api_products():
 def submit_file():
     try:
         files = request.files.getlist('file')
-        text = ""
+        full_text = ""
+
         for file in files:
             if file.filename == '':
                 flash(('Form tidak boleh kosong', ''), 'error')
@@ -96,17 +98,23 @@ def submit_file():
             file.save(filepath)
 
             if file.filename.endswith('.pdf'):
-                text = extract_text_with_ocr(filepath, 1)
+                from pdf2image import convert_from_path
+                images = convert_from_path(filepath, dpi=500)
+                for page_num, image in enumerate(images, start=1):
+                    custom_config = r'--oem 3 --psm 6'
+                    page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind')
+                    full_text += f"\n\n--- Halaman {page_num} ---\n{page_text}"
             elif file.filename.endswith('.webp'):
                 text = extract_image_with_ocr(filepath)
-            else:
-                text = ""
+                full_text += text
 
             flash((f"{file.filename} berhasil diupload. Klik Save untuk proses ke database.", file.filename), 'success')
-        return jsonify({'text': text})
+
+        return jsonify({'text': full_text})
     except Exception as e:
-        flash((f"terjadi kesalahan : {e}", ''), 'error')
+        flash((f"Terjadi kesalahan : {e}", ''), 'error')
         return '', 500
+
     
 @app.route('/save/<path:filepath>', methods=['POST'])
 def save(filepath):
@@ -123,7 +131,6 @@ def save(filepath):
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):
     folder = app.config['UPLOAD_FOLDER']
@@ -137,7 +144,7 @@ def download(filename):
 
 @app.route('/downloadall', methods=['GET'])
 def download_all():
-    session = Session()  # <--- tambahkan ini
+    session = Session()
     source = request.args.get('source', 'product')
 
     try:

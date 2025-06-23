@@ -156,14 +156,19 @@
           display: block !important;
         }
       }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50%     { transform: translateY(-8px); }
-  }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
 
-  .group:hover .bounce-target {
-    animation: bounce 0.6s ease-in-out infinite;
-  }
+      .group:hover .bounce-target {
+        animation: bounce 0.6s ease-in-out infinite;
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -229,13 +234,17 @@
               </h1>
             </div>
             <div class="w-full mt-2">
-               <label for="" style="font-weight: bold; font-size: 16px;">Show Data:</label>
+              <label for="" style="font-weight: bold; font-size: 16px"
+                >Show Data:</label
+              >
               <select
-              class="select-data flex-1"
-              id="sourceSelect"
-              style="width: 150px"
-              ><option value="product">product</option>
-              <option value="blur">blur</option></select>
+                class="select-data flex-1"
+                id="sourceSelect"
+                style="width: 150px"
+              >
+                <option value="product">product</option>
+                <option value="blur">blur</option>
+              </select>
             </div>
 
             <div
@@ -316,15 +325,15 @@
             </table>
           </div>
           <footer
-  class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2 group"
->
-  <div
-    class="container mx-auto text-center text-gray-600 inline-block bounce-target"
-  >
-    <i class="fa fa-copyright mr-1"></i> 2025 -
-    <strong class="font-bold">ConvertData</strong>
-  </div>
-</footer>
+            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2 group"
+          >
+            <div
+              class="container mx-auto text-center text-gray-600 inline-block bounce-target"
+            >
+              <i class="fa fa-copyright mr-1"></i> 2025 -
+              <strong class="font-bold">ConvertData</strong>
+            </div>
+          </footer>
         </div>
       </div>
     </div>
@@ -378,11 +387,11 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-      document.addEventListener("keydown", function(event) {
-  if (event.altKey && event.key === "ArrowLeft") {
-    document.getElementById("back-button").click();
-  }
-});
+      document.addEventListener("keydown", function (event) {
+        if (event.altKey && event.key === "ArrowLeft") {
+          document.getElementById("back-button").click();
+        }
+      });
       $(".js-example-responsive").select2({
         placeholder: "Pilih Produk",
         allowClear: true,
@@ -428,84 +437,84 @@
         $(".js-example-responsive").val(null).trigger("change");
       });
 
-      $(document).ready(function (){
+      $(document).ready(function () {
         $(".select-data").select2({
           placeholder: "Pilih Sumber Data",
           minimumInputLength: -1,
           width: "resolve",
-      })
+        });
 
-      let currentSource = "product";
+        let currentSource = "product";
 
-      var table = $("#productTable").DataTable({
-        ajax: `/api/products?source=${currentSource}`,
-        pageLength: 50,
-        columns: [
-          {
-            data: null,
-            render: function (data, type, row, meta) {
-              return meta.row + 1;
+        var table = $("#productTable").DataTable({
+          ajax: `/api/products?source=${currentSource}`,
+          pageLength: 50,
+          columns: [
+            {
+              data: null,
+              render: function (data, type, row, meta) {
+                return meta.row + 1;
+              },
             },
-          },
-          { data: "product_number" },
-          { data: "description" },
-          { data: "quantity" },
-          {
-            data: "unit_price",
-            render: function (data) {
-              return parseFloat(data).toFixed(2);
+            { data: "product_number" },
+            { data: "description" },
+            { data: "quantity" },
+            {
+              data: "unit_price",
+              render: function (data) {
+                return parseFloat(data).toFixed(2);
+              },
             },
-          },
-          {
-            data: "discount",
-            render: function (data) {
-              return data !== null ? parseFloat(data).toFixed(2) + "%" : "";
+            {
+              data: "discount",
+              render: function (data) {
+                return data !== null ? parseFloat(data).toFixed(2) + "%" : "";
+              },
             },
-          },
-          {
-            data: "line_total",
-            render: function (data) {
-              return parseFloat(data).toFixed(2);
+            {
+              data: "line_total",
+              render: function (data) {
+                return parseFloat(data).toFixed(2);
+              },
             },
-          },
-          { data: "createddate" },
-          {
-            data: "id",
-            render: function (data) {
-              return `
+            { data: "createddate" },
+            {
+              data: "id",
+              render: function (data) {
+                return `
               <button class="btn btn-danger btn-sm delete-btn" data-id="${data}"><i class="bi bi-trash"></i></button>
               `;
+              },
+            },
+          ],
+          pagingType: "simple_numbers",
+          language: {
+            paginate: {
+              previous: "<i class='bi bi-chevron-left'></i>",
+              next: "<i class='bi bi-chevron-right'></i>",
             },
           },
-        ],
-        pagingType: "simple_numbers",
-        language: {
-          paginate: {
-            previous: "<i class='bi bi-chevron-left'></i>",
-            next: "<i class='bi bi-chevron-right'></i>",
+          emptyTable: "Tidak ada data yang tersedia",
+          dom:
+            "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          initComplete: function (settings, json) {
+            if (json.data.length > 0) {
+              $("#delete-all-btn").show();
+              $("#download-all").show();
+            } else {
+              $("#delete-all-btn").hide();
+              $("#download-all").hide();
+            }
           },
-        },
-        emptyTable: "Tidak ada data yang tersedia",
-        dom:
-          "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-          "<'row'<'col-sm-12'tr>>" +
-          "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        initComplete: function (settings, json) {
-          if (json.data.length > 0) {
-            $("#delete-all-btn").show();
-            $("#download-all").show();
-          } else {
-            $("#delete-all-btn").hide();
-            $("#download-all").hide();
-          }
-        },
-      });
+        });
 
-      $("#sourceSelect").on("change", function () {
-        currentSource = $(this).val();
-        table.ajax.url("/api/products?source=" + currentSource).load();
-      })
-      })
+        $("#sourceSelect").on("change", function () {
+          currentSource = $(this).val();
+          table.ajax.url("/api/products?source=" + currentSource).load();
+        });
+      });
 
       const Toast = Swal.mixin({
         toast: true,
@@ -529,6 +538,9 @@
           cancelButtonColor: "#d33",
           confirmButtonText: "Yes",
           cancelButtonText: "No",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false,
         }).then((result) => {
           if (result.isConfirmed) {
             $.ajax({
@@ -725,9 +737,8 @@
               .addClass("left-full opacity-0");
           }
         );
-
       });
-      function updateInvoicecount(){
+      function updateInvoicecount() {
         const source = $("#sourceSelect").val() || "product";
         $.get(`/api/invoice_count?source=${source}`, function (data) {
           if (data.count > 0) {
@@ -743,13 +754,13 @@
           }
         });
       }
-      $(document).ready(function(){
+      $(document).ready(function () {
         updateInvoicecount();
       });
-      $("#sourceSelect").on("change", function(){
+      $("#sourceSelect").on("change", function () {
         updateInvoicecount();
         $("#productTable").DataTable().ajax.reload();
-      })
+      });
       $("#dataModal").on("click", ".dwcsv", function () {
         const id = $(this).data("id");
 
