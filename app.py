@@ -52,9 +52,6 @@ def api_filenames():
     finally:
         session.close()
 
-        
-from datetime import datetime
-
 @app.route('/api/products')
 def api_products():
     session = Session()
@@ -70,7 +67,6 @@ def api_products():
         if filename:
             query = query.filter(model.filename == filename)
 
-        # Gunakan filter tanggal jika tersedia
         if startdt:
             try:
                 start_date = datetime.strptime(startdt, '%Y-%m-%d').date()
