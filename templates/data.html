@@ -308,6 +308,15 @@
       },
     });
 
+      $(".js-example-responsive").on("select2:select", function (e) {
+        var selectedData = e.params.data;
+        const selectedId = selectedData.id;
+        $("#dataModalLabel").text("Detail Produk - " + selectedData.text);
+        var modalContent = `
+        <div class="flex gap-5">
+         <p><strong>Nama File:</strong> ${selectedData.text}</p>
+        <button id="btn-copy" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-animation="true" data-bs-delay='{"show":200,"hide":100}' title="Copy"><i class="fa-regular fa-copy"></i></button>
+      </div>
     $(".js-example-responsive").on("select2:select", function (e) {
       var selectedData = e.params.data;
       const selectedId = selectedData.id;
@@ -318,6 +327,43 @@
         selectedData.fulltext || ""
       }</pre></p>
   `;
+        $("#modalContent").html(modalContent);
+        $("#dataModal .dwcsv").data("id", selectedId);
+        $("#dataModal .savefile").data("id", selectedId);
+        $("#dataModal").modal("show");
+        $(".js-example-responsive").val(null).trigger("change");
+
+        var tooltipTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+
+      $(document).on("click", "#btn-copy", function () {
+        const textToCopy = $("#modalContent pre").text();
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(textToCopy).then(
+            function () {
+              Toast.fire({
+                icon: "success",
+                title: "Teks disalin ke clipboard",
+              });
+            },
+            function () {
+              Toast.fire({ icon: "error", title: "Teks gagal disalin" });
+            }
+          );
+        } else {
+          const tempInput = $("<textarea>");
+          $("body").append(tempInput);
+          tempInput.val(textToCopy).select();
+          document.execCommand("copy");
+          tempInput.remove();
+          Toast.fire({ icon: "success", title: "Teks disalin ke clipboard" });
+        }
+      });
       $("#modalContent").html(modalContent);
       $("#dataModal .dwcsv").data("id", selectedId);
       $("#dataModal .savefile").data("id", selectedId);
@@ -325,6 +371,14 @@
       $(".js-example-responsive").val(null).trigger("change");
     });
 
+      $(document).ready(function () {
+        // Inisialisasi tooltip Bootstrap
+
+        $(".select-data").select2({
+          placeholder: "Pilih Sumber Data",
+          minimumInputLength: -1,
+          width: "resolve",
+        });
     $(document).ready(function () {
       $(".select-data").select2({
         placeholder: "Pilih Sumber Data",

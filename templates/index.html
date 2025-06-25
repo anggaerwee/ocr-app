@@ -1,15 +1,183 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-  <div
-    class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
-  >
-    <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">
-      PDF to SQL Data Extraction Tool
-    </h2>
-    <p class="leading-relaxed mb-5 text-gray-600">
-      Projek ini bertujuan untuk membuat alat yang bisa mengambil data dari
-      dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.<br />Mohon
-      toleransi kalo ada typo
-    </p>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} | Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='unnamed.png') }}"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='unnamed.png') }}"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+
+    <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+    <link
+      href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      .dropzone {
+        transition: all 0.3s ease-in-out;
+        border: 2px dashed #94a3b8;
+        background-color: #f8fafc;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+
+      .dropzone:hover {
+        background-color: #f1f5f9;
+        border-color: #60a5fa;
+      }
+
+      .dropzone.dz-started {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .dz-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: #1f2937;
+      }
+
+      .btn-animated {
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+      }
+
+      .btn-animated:hover {
+        background-color: #bbf7d0;
+        transform: scale(1.05);
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fade-in 0.6s ease-out forwards;
+      }
+      #upload-hover {
+        cursor: pointer;
+        width: 320px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #upload-text-container {
+        width: 100%;
+      }
+
+      #upload-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center center;
+      }
+
+      .swal-popup {
+        background: #f0f0f0;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .swal-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .swal-content {
+        font-size: 18px;
+        color: #666;
+      }
+
+      .swal-confirm-btn {
+        background: #4caf50;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .swal-deny-btn {
+        background: #ff9800;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .swal-cancel-btn {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="flex flex-col items-center justify-center min-h-screen bg-gray-100"
+    >
+      <div
+        class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
+      >
+        <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">
+          PDF to SQL Data Extraction Tool
+        </h2>
+        <p class="leading-relaxed mb-5 text-gray-600">
+          Projek ini bertujuan untuk membuat alat yang bisa mengambil data dari
+          dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.<br>Mohon
+          toleransi kalo ada typo
+        </p>
 
     {% with messages = get_flashed_messages(with_categories=True) %} {% if
     messages %}
@@ -76,99 +244,99 @@
         {{ title }}
       </h3>
 
-      <div class="my-3" id="alert">
-        <form
-          class="dropzone"
-          id="fileDropzone"
-          action="/submit"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <div class="dz-message needsclick">
-            <i class="ki-duotone ki-file-up fs-3x text-primary"
-              ><span class="path1"></span><span class="path2"></span
-            ></i>
-            <div
-              id="upload-hover"
-              class="position-relative d-inline-block overflow-hidden cursor-pointer"
-              style="width: 320px"
+          <div class="my-3" id="alert">
+            <form
+              class="dropzone"
+              id="fileDropzone"
+              action="/submit"
+              method="post"
+              enctype="multipart/form-data"
             >
-              <div
-                id="upload-text-container"
-                class="d-flex justify-content-between align-items-center"
-                style="transition: transform 0.4s ease, opacity 0.4s ease"
-              >
+              <div class="dz-message needsclick">
+                <i class="ki-duotone ki-file-up fs-3x text-primary"
+                  ><span class="path1"></span><span class="path2"></span
+                ></i>
                 <div
-                  id="upload-text-left"
-                  class="fs-7 fw-semibold text-gray-900"
-                  style="
-                    white-space: nowrap;
-                    transition: transform 0.4s ease, opacity 0.4s ease;
-                  "
+                  id="upload-hover"
+                  class="position-relative d-inline-block overflow-hidden cursor-pointer"
+                  style="width: 320px"
                 >
-                  Drop files here or click to upload.
-                </div>
-                <div
-                  id="upload-text-right"
-                  class="fs-7 fw-semibold text-gray-500"
-                  style="
-                    white-space: nowrap;
-                    transition: transform 0.4s ease, opacity 0.4s ease;
-                  "
-                >
-                  File anda akan otomatis di convert
+                  <div
+                    id="upload-text-container"
+                    class="d-flex justify-content-between align-items-center"
+                    style="transition: transform 0.4s ease, opacity 0.4s ease"
+                  >
+                    <div
+                      id="upload-text-left"
+                      class="fs-5 fw-bold text-gray-900"
+                      style="
+                        white-space: nowrap;
+                        transition: transform 0.4s ease, opacity 0.4s ease;
+                      "
+                    >
+                      Drop files here or click to upload.
+                    </div>
+                    <div
+                      id="upload-text-right"
+                      class="fs-7 fw-semibold text-gray-500"
+                      style="
+                        white-space: nowrap;
+                        transition: transform 0.4s ease, opacity 0.4s ease;
+                      "
+                    >
+                      File anda akan otomatis di convert
+                    </div>
+                  </div>
+                  <i
+                    id="upload-icon"
+                    class="bi bi-cloud-arrow-up-fill text-primary position-absolute top-50 start-50"
+                    style="
+                      font-size: 0;
+                      opacity: 0;
+                      transform: translate(-50%, -50%) scale(0);
+                      transition: font-size 0.4s ease, opacity 0.4s ease,
+                        transform 0.4s ease;
+                    "
+                  ></i>
                 </div>
               </div>
-              <i
-                id="upload-icon"
-                class="bi bi-cloud-arrow-up-fill position-absolute top-50 start-50"
-                style="
-                  font-size: 0;
-                  opacity: 0;
-                  transform: translate(-50%, -50%) scale(0);
-                  transition: font-size 0.4s ease, opacity 0.4s ease,
-                    transform 0.4s ease;
-                "
-              ></i>
-            </div>
+            </form>
           </div>
-        </form>
+          <p class="text-xs text-gray-500 mt-3">
+            Masukan file pdf untuk mendownload data csv yang disimpan di
+            PostgreSQL
+          </p>
+        </div>
       </div>
-      <p class="text-xs text-gray-500 mt-3">
-        Masukan file pdf untuk mendownload data csv yang disimpan di PostgreSQL
-      </p>
+      <hr class="my-8 border-gray-300" />
+      <textarea
+        class="hidden mt-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        name=""
+        id="text-area"
+        style="
+          width: 100%;
+          min-height: 250px;
+          max-width: 80%;
+          padding: 10px;
+          box-sizing: border-box;
+        "
+        readonly
+      ></textarea>
     </div>
-  </div>
-  <hr class="my-8 border-gray-300" />
-  <textarea
-    class="hidden mt-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-    name=""
-    id="text-area"
-    style="
-      width: 100%;
-      min-height: 250px;
-      max-width: 80%;
-      padding: 10px;
-      box-sizing: border-box;
-    "
-    readonly
-  ></textarea>
-</div>
-<script>
-  $(document).ready(function () {
-    Dropzone.autoDiscover = false;
-    var myDropzone = new Dropzone("#fileDropzone", {
-      paramName: "file",
-      maxFiles: 1,
-      maxFilesize: 2 * 1024,
-      addRemoveLinks: true,
-      acceptedFiles: ".pdf,.webp",
-      dictDefaultMessage: "Drop files here or click to upload.",
-      init: function () {
-        this.on("sending", function (file, xhr, formData) {
-          Swal.fire({
-            title: "Processing...",
-            html: ` 
+    <script>
+      Dropzone.autoDiscover = false;
+      var myDropzone = new Dropzone("#fileDropzone", {
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 2 * 1024,
+        addRemoveLinks: true,
+        acceptedFiles: ".pdf,.webp",
+        dictDefaultMessage: "Drop files here or click to upload.",
+        init: function () {
+          this.on("sending", function (file, xhr, formData) {
+            Swal.fire({
+              title: "Processing...",
+              html: ` 
             <div style="display: flex; flex-direction: column; align-items: center;">
               <img src="static/Animation.gif" alt="Loading..." style="width: 100px; height: 100px; margin-bottom: 10px;">
               <p>Please wait, your file is being converted...</p>
@@ -192,39 +360,39 @@
           }
         });
 
-        this.on("error", function (file, errorMessage) {
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: "Terjadi kesalahan saat upload",
+          this.on("error", function (file, errorMessage) {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: "Terjadi kesalahan saat upload",
+            });
+            this.removeFile(file);
           });
-          this.removeFile(file);
-        });
-      },
-    });
+        },
+      });
 
-    const Toast = Swal.mixin({
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.onmouseenter = Swal.stopTimer;
-        toast.onmouseleave = Swal.resumeTimer;
-      },
-    });
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
 
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
       const savedText = localStorage.getItem("textData");
 
-      if (wasReloaded && savedText) {
-        $("#text-area").removeClass("hidden");
-        $("#text-area").val(savedText);
-        localStorage.removeItem("textData");
-        localStorage.removeItem("reloadedOnce", true);
-      }
+        if (wasReloaded && savedText) {
+          $("#text-area").removeClass("hidden");
+          $("#text-area").val(savedText);
+          localStorage.removeItem("textData");
+          localStorage.removeItem("reloadedOnce", true);
+        }
 
       $("#text-area").on("input", function () {
         localStorage.setItem("textData", $(this).val());
@@ -267,113 +435,101 @@
       );
     });
 
-    $(document).on("click", "#saveButton", function (e) {
-      e.preventDefault();
-      const filepath = $(this).data("filecsv");
-      const $saveBtn = $(this);
-      const $downloadBtn = $("#downloadButton");
+     $(document).on("click", "#saveButton", function (e) {
+  e.preventDefault();
+  const filepath = $(this).data("filecsv");
+  const $saveBtn = $(this);
+  const $downloadBtn = $("#downloadButton");
 
-      Swal.fire({
-        title: "Menyimpan...",
-        html: `
+  Swal.fire({
+    title: "Menyimpan...",
+    html: `
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
         <p>Please wait, is saving to the database...</p>
       </div>
     `,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  });
 
-      $.ajax({
-        url: `/save/${filepath}`,
-        type: "POST",
-        data: {},
-        success: function (response) {
-          if (response.status === "success") {
-            Swal.close();
-            Toast.fire({ icon: "success", text: response.message });
+  $.ajax({
+    url: `/save/${filepath}`,
+    type: "POST",
+    data: {},
+    success: function (response) {
+      if (response.status === "success") {
+        Swal.close();
+        Toast.fire({ icon: "success", text: response.message });
+        $saveBtn.hide();
+        $downloadBtn.attr("href", `/download/${response.csv}`).removeClass("hidden");
+        localStorage.removeItem("textData");
+      } else if (response.status === "error_blur") {
+        const extractedText = $("#text-area").val();
+        $.post(`/save/${filepath}`, { mode: "blur", text: extractedText }, function (res) {
+          Swal.close();
+          if (res.status === "success") {
+            Toast.fire({ icon: "success", text: "Data Telah Disimpan ke Table blur" });
             $saveBtn.hide();
-            $downloadBtn
-              .attr("href", `/download/${response.csv}`)
-              .removeClass("hidden");
+            $downloadBtn.attr("href", `/download/${res.csv}`).removeClass("hidden");
             localStorage.removeItem("textData");
-          } else if (response.status === "error_blur") {
-            const extractedText = $("#text-area").val();
-            $.post(
-              `/save/${filepath}`,
-              { mode: "blur", text: extractedText },
-              function (res) {
-                Swal.close();
-                if (res.status === "success") {
-                  Toast.fire({
-                    icon: "success",
-                    text: "Data Telah Disimpan ke Table blur",
-                  });
-                  $saveBtn.hide();
-                  $downloadBtn
-                    .attr("href", `/download/${res.csv}`)
-                    .removeClass("hidden");
-                  localStorage.removeItem("textData");
-                } else {
-                  Toast.fire({ icon: "error", text: res.message });
-                }
-              }
-            ).fail(function (xhr) {
-              Swal.close();
-              Swal.fire({
-                icon: "error",
-                title: "Error",
-                text:
-                  xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
-              });
-            });
           } else {
-            Swal.close();
-            Toast.fire({ icon: "error", text: response.message });
+            Toast.fire({ icon: "error", text: res.message });
           }
-        },
-        error: function (xhr) {
+        }).fail(function (xhr) {
           Swal.close();
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: xhr.responseJSON?.message || "Terjadi kesalahan.",
+            text: xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
           });
-        },
+        });
+      } else {
+        Swal.close();
+        Toast.fire({ icon: "error", text: response.message });
+      }
+    },
+    error: function (xhr) {
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: xhr.responseJSON?.message || "Terjadi kesalahan.",
       });
-    });
+    },
+  });
+});
 
-    $(document).on("click", "#showdatabtn", function (e) {
-      const $saveBtn = $("#saveButton");
-      if ($saveBtn.is(":visible")) {
-        e.preventDefault();
-        Swal.fire({
-          title: "Data belum disimpan",
-          text: "Apakah Anda ingin menyimpan terlebih dahulu sebelum melihat data?",
-          icon: "warning",
-          showCancelButton: false,
-          showDenyButton: true,
-          confirmButtonText: "Save & Continue",
-          denyButtonText: "Continue Without Saving",
-          showCloseButton: true,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          allowEnterKey: false,
-          customClass: {
-            popup: "swal-popup",
-            title: "swal-title",
-            content: "swal-content",
-            confirmButton: "swal-confirm-btn",
-            denyButton: "swal-deny-btn",
-            // cancelButton: "swal-cancel-btn",
-          },
-          didOpen: () => {
-            const swalPopup = document.querySelector(".swal-popup");
-            swalPopup.style.background = "#f0f0f0";
-            swalPopup.style.borderRadius = "10px";
-            swalPopup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.2)";
+      $(document).on("click", "#showdatabtn", function (e) {
+        const $saveBtn = $("#saveButton");
+        if ($saveBtn.is(":visible")) {
+          e.preventDefault();
+          Swal.fire({
+            title: "Data belum disimpan",
+            text: "Apakah Anda ingin menyimpan terlebih dahulu sebelum melihat data?",
+            icon: "warning",
+            showCancelButton: false,
+            showDenyButton: true,
+            confirmButtonText: "Save & Continue",
+            denyButtonText: "Continue Without Saving",
+            showCloseButton: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            customClass: {
+              popup: "swal-popup",
+              title: "swal-title",
+              content: "swal-content",
+              confirmButton: "swal-confirm-btn",
+              denyButton: "swal-deny-btn",
+              // cancelButton: "swal-cancel-btn",
+            },
+            didOpen: () => {
+              const swalPopup = document.querySelector(".swal-popup");
+              swalPopup.style.background = "#f0f0f0";
+              swalPopup.style.borderRadius = "10px";
+              swalPopup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.2)";
 
             const swalTitle = document.querySelector(".swal-title");
             swalTitle.style.fontSize = "24px";
