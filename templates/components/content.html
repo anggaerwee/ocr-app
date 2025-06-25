@@ -1,0 +1,9 @@
+{% extends "components/layout.html" %}
+
+{% block content %}
+  {% if view == 'index' %}
+    {% include "index.html" %}
+  {% elif view == 'data' %}
+    {% include "data.html" %}
+  {% endif %}
+{% endblock %}

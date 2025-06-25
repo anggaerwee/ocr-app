@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}{% if subtitle %} - {{ subtitle}}{% endif %}</title>
+  {% include "components/header.html" %}
+</head>
+<body>
+  {% block content %}{% endblock %}
+  {% include "components/footer.html" %}
+</body>
+</html>

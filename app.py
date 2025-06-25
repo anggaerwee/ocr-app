@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for
+from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for, send_file
 from function import process_file, ProductTable, InvoiceBlur, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
 import os
 import csv
 from sqlalchemy.sql import text
 from io import StringIO
 from flask import Response
+from datetime import datetime
+from sqlalchemy.sql import func
 import pytesseract
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
@@ -16,11 +18,11 @@ def home():
     folder = app.config['UPLOAD_FOLDER']
     if os.path.exists(folder):
         files = [f for f in os.listdir(folder) if f.endswith('.csv')]
-    return render_template('index.html', files=files, title='OcrConvert')
+    return render_template('components/content.html', files=files, view='index', title='OcrConvert', subtitle='Upload')
 
 @app.route('/data')
 def data():
-    return render_template('data.html', title='OcrConvert')
+    return render_template('components/content.html', view='data', title='OcrConvert', subtitle='Data')
 
 @app.route('/api/filenames')
 def api_filenames():
@@ -51,32 +53,62 @@ def api_filenames():
         session.close()
 
         
+from datetime import datetime
+
 @app.route('/api/products')
 def api_products():
-    source = request.args.get('source', 'product')
-    if source == 'blur':
-        products = InvoiceBlur.get_all(Session())
-    else:
-        products = ProductTable.get_all(Session())
-    data = [
-        {
-            'id' : p.id,
-            'product_number': p.product_number,
-            'description': p.description,
-            'quantity': p.quantity,
-            'unit_price': p.unit_price,
-            'discount': p.discount,
-            'line_total': p.line_total,
-            'text': p.text,
-            'filename': p.filename,
-            'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
-        }
-        for p in products
-    ]
-    print("[DEBUG] Data to return as JSON:")
-    for item in data:
-        print(item)
-    return jsonify({'data': data})
+    session = Session()
+    try:
+        source = request.args.get('source', 'product')
+        startdt = request.args.get('startdt', '').strip()
+        enddt = request.args.get('enddt', '').strip()
+        filename = request.args.get('filename', '').strip()
+
+        model = InvoiceBlur if source == 'blur' else ProductTable
+        query = session.query(model)
+
+        if filename:
+            query = query.filter(model.filename == filename)
+
+        # Gunakan filter tanggal jika tersedia
+        if startdt:
+            try:
+                start_date = datetime.strptime(startdt, '%Y-%m-%d').date()
+                query = query.filter(func.date(model.createddate) >= start_date)
+            except ValueError:
+                pass
+
+        if enddt:
+            try:
+                end_date = datetime.strptime(enddt, '%Y-%m-%d').date()
+                query = query.filter(func.date(model.createddate) <= end_date)
+            except ValueError:
+                pass
+
+        products = query.all()
+
+        data = [
+            {
+                'id': p.id,
+                'product_number': p.product_number,
+                'description': p.description,
+                'quantity': p.quantity,
+                'unit_price': p.unit_price,
+                'discount': p.discount,
+                'line_total': p.line_total,
+                'text': p.text,
+                'filename': p.filename,
+                'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
+            }
+            for p in products
+        ]
+
+        return jsonify({'data': data})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    finally:
+        session.close()
+
 
 
 @app.route('/submit', methods=['POST'])
@@ -154,11 +186,21 @@ def download(filename):
     folder = app.config['UPLOAD_FOLDER']
     if not filename.lower().endswith('.csv'):
         filename = os.path.splitext(filename)[0] + '.csv'
-    file_path = os.path.join(folder, filename)  
+
+    file_path = os.path.join(folder, filename)
     if not os.path.exists(file_path):
         flash(('error', f'File {filename} tidak ditemukan.'))
         return redirect('/')
-    return send_from_directory(folder, filename, as_attachment=True, mimetype='text/csv')
+
+    current_datetime = datetime.now().strftime("%d-%m-%Y")
+    download_name = f"{os.path.splitext(filename)[0]}-{current_datetime}.csv"
+
+    return send_file(
+        file_path,
+        as_attachment=True,
+        mimetype='text/csv',
+        download_name=download_name
+    )
 
 @app.route('/downloadall', methods=['GET'])
 def download_all():
@@ -188,11 +230,16 @@ def download_all():
             ])
         output = si.getvalue()
         si.close()
+        current_date = datetime.now().strftime("%d-%m-%Y")
+        if source == 'blur':
+            filenamen = f"all_products-blur-{current_date}.csv"
+        else:
+            filenamen = f"all_products-{current_date}.csv"
 
         return Response(
             output,
             mimetype='text/csv',
-            headers={'Content-Disposition': 'attachment;filename=all_products.csv'}
+            headers={'Content-Disposition': f'attachment;filename={filenamen}'}
         )
     finally:
         session.close()

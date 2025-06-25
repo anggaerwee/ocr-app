@@ -1,790 +1,877 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{title }} | Data</title>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='unnamed.png') }}"
-      media="(prefers-color-scheme: light)"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='unnamed.png') }}"
-      media="(prefers-color-scheme: dark)"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-      rel="stylesheet"
-    />
-
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <style>
-      #back-icon,
-      #download-icon {
-        font-size: 16px;
-      }
-      .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 0.375rem 0.75rem;
-        margin-left: 4px;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        color: #0d6efd !important;
-        background-color: #fff !important;
-        transition: all 0.2s;
-      }
-
-      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-        background-color: #e2e6ea !important;
-        color: #0a58ca !important;
-        border-color: #adb5bd;
-      }
-
-      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border-color: #0d6efd !important;
-      }
-
-      .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-        color: #6c757d !important;
-        border-color: #dee2e6;
-        background-color: #f8f9fa !important;
-      }
-      #delete-all-btn {
-        display: flex;
-        align-items: center;
-      }
-
-      .badge {
-        margin-left: 8px;
-      }
-
-      .judul {
-        border-left-width: 4px;
-        border-left-color: #4f46e5;
-      }
-
-      @media (max-width: 640px) {
-        #delete-all-btn,
-        #download-all,
-        #back-button {
-          display: none !important;
-        }
-        #responsive-dropdown {
-          display: block !important;
-        }
-      }
-      @media (min-width: 640px) {
-        #responsive-dropdown {
-          display: none !important;
-        }
-      }
-
-      @media (max-width: 425px) {
-        .judul {
-          display: none;
-        }
-      }
-      @media (max-width: 640px) {
-        .judul {
-          display: block;
-          order: -1;
-          width: 100%;
-          margin-bottom: 1rem;
-          text-align: center;
-          border: none;
-        }
-        .element-top {
-          flex-direction: column;
-          align-items: stretch;
-        }
-        .flex.items-center {
-          flex-direction: column;
-          align-items: stretch;
-        }
-      }
-      @media (max-width: 768px) {
-        .js-example-responsive {
-          display: none !important;
-        }
-
-        #responsive-dropdown {
-          display: block !important;
-        }
-
-        #dropdown-select-container {
-          display: flex !important;
-        }
-      }
-      @media (max-width: 768px) {
-        .js-example-responsive {
-          display: none !important;
-        }
-
-        #responsive-dropdown {
-          display: flex !important;
-        }
-
-        #dropdown-select {
-          display: block !important;
-        }
-      }
-      @keyframes bounce {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-8px);
-        }
-      }
-
-      .group:hover .bounce-target {
-        animation: bounce 0.6s ease-in-out infinite;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-10">
-      <div class="row bg-white" style="border-radius: 5px">
-        <div class="col bg-white p-4 shadow-md rounded-lg">
-          <div
-            class="element-top flex flex-wrap justify-between items-center mb-4 gap-2"
+<div class="container mx-auto px-4 py-10">
+  <div class="row bg-white" style="border-radius: 5px">
+    <div class="col bg-white p-4 shadow-md rounded-lg">
+      <div
+        class="element-top flex flex-wrap justify-between items-center mb-4 gap-2"
+      >
+        <div class="flex flex-row gap-2 items-center w-50">
+          <a
+            href="/"
+            class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
+            id="back-button"
+            accesskey="←"
           >
-            <div class="flex flex-row gap-2 items-center w-50">
+            <span
+              class="transition-all duration-200 flex justify-center"
+              id="back-text"
+              >Kembali</span
+            >
+            <i
+              class="fas fa-arrow-left absolute top-[70%] left-full -translate-y-1/2 transition-all duration-200 opacity-0"
+              id="back-icon"
+            ></i>
+          </a>
+          <button
+            id="download-all"
+            class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-21"
+          >
+            <span
+              class="transition-all duration-200 flex justify-center"
+              id="download-text"
+              >Download All</span
+            >
+            <i
+              class="fas fa-download absolute top-[70%] left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200 opacity-0"
+              id="download-icon"
+            ></i>
+          </button>
+          <select
+            class="js-example-responsive flex-1 overflow-hidden"
+            style="width: 50%"
+          ></select>
+        </div>
+        <div class="d-flex items-center gap-4 mb-4">
+          <button
+            id="delete-all-btn"
+            type="button"
+            class="relative text-red-600 font-semibold py-2 px-6 rounded border border-dashed border-red-600 hover:bg-red-100 hover:shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-2"
+            style="background-color: transparent; display: none"
+          >
+            Delete All
+            <span
+              id="invoice-count-badge"
+              class="absolute -top-3 -right-3 badge rounded-pill bg-warning text-white text-xs px-2"
+              >0</span
+            >
+          </button>
+
+          <h1 class="judul text-2xl font-bold text-gray-800">
+            Data Produk dari CSV
+          </h1>
+        </div>
+        <div
+          class="w-full mt-2"
+          style="display: flex; align-items: center; gap: 10px"
+        >
+          <label for="sourceSelect" style="font-weight: bold; font-size: 16px">
+            Show Data:
+          </label>
+          <select class="select-data" id="sourceSelect" style="width: 150px">
+            <option value="product">product</option>
+            <option value="blur">blur</option>
+          </select>
+
+          <span
+            id="iconRight"
+            style="cursor: pointer; font-size: 18px"
+            title="filter"
+          >
+            <i class="bi bi-caret-right-fill"></i>
+          </span>
+
+          <div id="filterFields">
+            <label for="startDate" style="font-weight: bold; font-size: 16px">
+              Start Date:
+            </label>
+            <div class="position-relative">
+              <input
+                type="text"
+                id="startDate"
+                class="form-control datepicker-clearable"
+                placeholder="Start Date"
+                readonly
+                style="width: 150px; height: 30px; padding-right: 25px"
+              />
               <a
-                href="/"
-                class="inline-block text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-24"
-                id="back-button"
-                accesskey="←"
+                href="#"
+                class="clear-icon"
+                data-clear="#startDate"
+                style="display: none; color: gray"
+                >&times;</a
               >
-                <span
-                  class="transition-all duration-200 flex justify-center"
-                  id="back-text"
-                  >Kembali</span
-                >
-                <i
-                  class="fas fa-arrow-left absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0"
-                  id="back-icon"
-                ></i>
-              </a>
-              <button
-                id="download-all"
-                class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded shadow transition duration-200 relative overflow-hidden w-21"
-              >
-                <span
-                  class="transition-all duration-200 flex justify-center"
-                  id="download-text"
-                  >Download All</span
-                >
-                <i
-                  class="fas fa-download absolute top-1/2 left-full -translate-y-1/2 transition-all duration-200 opacity-0"
-                  id="download-icon"
-                ></i>
-              </button>
-              <select
-                class="js-example-responsive flex-1 overflow-hidden"
-                style="width: 50%"
-              ></select>
             </div>
-            <div class="d-flex items-center gap-4 mb-4">
-              <button
-                id="delete-all-btn"
-                type="button"
-                class="relative text-red-600 font-semibold py-2 px-6 rounded border border-dashed border-red-600 hover:bg-red-100 hover:shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-2"
-                style="background-color: transparent; display: none"
+
+            <label for="endDate" style="font-weight: bold; font-size: 16px">
+              End Date:
+            </label>
+            <div class="position-relative mt-2">
+              <input
+                type="text"
+                id="endDate"
+                class="form-control datepicker-clearable"
+                placeholder="End Date"
+                readonly
+                style="width: 150px; height: 30px; padding-right: 25px"
+              />
+              <a
+                href="#"
+                class="clear-icon"
+                data-clear="#endDate"
+                style="display: none"
+                >&times;</a
               >
-                Delete All
+            </div>
+
+            <label for="dataBy" style="font-weight: bold; font-size: 16px">
+              Data By:
+            </label>
+            <select
+              class="js-example-search flex-1 overflow-hidden"
+              id="dataBy"
+              style="width: 150px"
+            ></select>
+            <button
+              id="btnsearchfil"
+              type="button"
+              class="btn btn-primary d-flex justify-content-center align-items-center"
+              style="height: 30px"
+            >
+              Search
+            </button>
+            <span
+              id="iconLeft"
+              style="cursor: pointer; font-size: 18px; margin-left: 5px"
+            >
+              <i class="bi bi-caret-left-fill"></i>
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="d-flex gap-2 align-items-center dropdown"
+          id="responsive-dropdown"
+          style="display: none"
+        >
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            id="dropdownMenuButton"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+          <select
+            class="form-select flex-gros-1 js-example-responsive flex-1"
+            id="dropdown-select"
+            style="width: 50%"
+          ></select>
+
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li>
+              <a href="/" class="dropdown-item" id="dropdown-back-button">
+                <i class="fas fa-arrow-left me-2"></i>Kembali
+              </a>
+            </li>
+            <li>
+              <button
+                id="dropdown-delete-all-btn"
+                type="button"
+                class="dropdown-item text-danger d-flex align-items-center"
+                style="display: none"
+              >
+                <i class="bi bi-trash me-2"></i>Delete All
                 <span
-                  id="invoice-count-badge"
-                  class="absolute -top-3 -right-3 badge rounded-pill bg-warning text-white text-xs px-2"
+                  id="dropdown-invoice-count-badge"
+                  class="badge rounded-pill bg-warning text-white text-xs ms-2"
                   >0</span
                 >
               </button>
-
-              <h1 class="judul text-2xl font-bold text-gray-800">
-                Data Produk dari CSV
-              </h1>
-            </div>
-            <div class="w-full mt-2">
-              <label for="" style="font-weight: bold; font-size: 16px"
-                >Show Data:</label
-              >
-              <select
-                class="select-data flex-1"
-                id="sourceSelect"
-                style="width: 150px"
-              >
-                <option value="product">product</option>
-                <option value="blur">blur</option>
-              </select>
-            </div>
-
-            <div
-              class="d-flex gap-2 align-items-center dropdown"
-              id="responsive-dropdown"
-              style="display: none"
-            >
+            </li>
+            <li>
               <button
-                class="btn btn-secondary dropdown-toggle"
+                id="dropdown-download-all-btn"
                 type="button"
-                id="dropdownMenuButton"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+                class="dropdown-item text-danger d-flex align-items-center"
+                style="display: none"
               >
-                Menu
+                <i class="fas fa-download me-2"></i>Download All
               </button>
-              <select
-                class="form-select flex-gros-1 js-example-responsive flex-1"
-                id="dropdown-select"
-                style="width: 50%"
-              ></select>
-
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li>
-                  <a href="/" class="dropdown-item" id="dropdown-back-button">
-                    <i class="fas fa-arrow-left me-2"></i>Kembali
-                  </a>
-                </li>
-                <li>
-                  <button
-                    id="dropdown-delete-all-btn"
-                    type="button"
-                    class="dropdown-item text-danger d-flex align-items-center"
-                    style="display: none"
-                  >
-                    <i class="bi bi-trash me-2"></i>Delete All
-                    <span
-                      id="dropdown-invoice-count-badge"
-                      class="badge rounded-pill bg-warning text-white text-xs ms-2"
-                      >0</span
-                    >
-                  </button>
-                </li>
-                <li>
-                  <button
-                    id="dropdown-download-all-btn"
-                    type="button"
-                    class="dropdown-item text-danger d-flex align-items-center"
-                    style="display: none"
-                  >
-                    <i class="fas fa-download me-2"></i>Download All
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div
-            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-300 p-4"
-          >
-            <table
-              id="productTable"
-              class="min-w-full table-auto border-collapse border border-gray-300"
-            >
-              <thead class="bg-gray-200 text-gray-700 border-b border-gray-300">
-                <tr>
-                  <th class="px-4 py-2 border border-gray-300">No</th>
-                  <th class="px-4 py-2 border border-gray-300">Product Id</th>
-                  <th class="px-4 py-2 border border-gray-300">Description</th>
-                  <th class="px-4 py-2 border border-gray-300">Quantity</th>
-                  <th class="px-4 py-2 border border-gray-300">Unit Price</th>
-                  <th class="px-4 py-2 border border-gray-300">Discount %</th>
-                  <th class="px-4 py-2 border border-gray-300">Line Total</th>
-                  <th class="px-4 py-2 border border-gray-300">Created</th>
-                  <th class="px-4 py-2 border border-gray-300">Action</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-300"></tbody>
-            </table>
-          </div>
-          <footer
-            class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2 group"
-          >
-            <div
-              class="container mx-auto text-center text-gray-600 inline-block bounce-target"
-            >
-              <i class="fa fa-copyright mr-1"></i> 2025 -
-              <strong class="font-bold">ConvertData</strong>
-            </div>
-          </footer>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
-    <div
-      class="modal fade"
-      id="dataModal"
-      tabindex="-1"
-      aria-labelledby="dataModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="dataModalLabel">
-              Detail Produk - filename
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body" id="modalContent"></div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-outline-success d-flex align-items-center gap-2 dwcsv"
-              type="button"
-            >
-              <i class="bi bi-download"></i> Download CSV
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-          </div>
+      <div
+        class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-300 p-4"
+      >
+        <table
+          id="productTable"
+          class="min-w-full table-auto border-collapse border border-gray-300"
+        >
+          <thead class="bg-gray-200 text-gray-700 border-b border-gray-300">
+            <tr>
+              <th class="px-4 py-2 border border-gray-300">No</th>
+              <th class="px-4 py-2 border border-gray-300">Product Id</th>
+              <th class="px-4 py-2 border border-gray-300">Description</th>
+              <th class="px-4 py-2 border border-gray-300">Quantity</th>
+              <th class="px-4 py-2 border border-gray-300">Unit Price</th>
+              <th class="px-4 py-2 border border-gray-300">Discount %</th>
+              <th class="px-4 py-2 border border-gray-300">Line Total</th>
+              <th class="px-4 py-2 border border-gray-300">Created</th>
+              <th class="px-4 py-2 border border-gray-300">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-300"></tbody>
+        </table>
+      </div>
+      <footer
+        class="bg-white shadow-md rounded-lg overflow-x-auto border border-gray-100 p-4 mt-2 group"
+      >
+        <div
+          class="container mx-auto text-center text-gray-600 inline-block bounce-target"
+        >
+          <i class="fa fa-copyright mr-1"></i> 2025 -
+          <strong class="font-bold">ConvertData</strong>
         </div>
+      </footer>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="dataModal"
+  tabindex="-1"
+  aria-labelledby="dataModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dataModalLabel">
+          Detail Produk - filename
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" id="modalContent"></div>
+      <div class="modal-footer">
+        <button
+          class="btn btn-outline-success d-flex align-items-center gap-2 dwcsv"
+          type="button"
+        >
+          <i class="bi bi-download"></i> Download CSV
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
       </div>
     </div>
+  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-      document.addEventListener("keydown", function (event) {
-        if (event.altKey && event.key === "ArrowLeft") {
-          document.getElementById("back-button").click();
-        }
-      });
-      $(".js-example-responsive").select2({
-        placeholder: "Pilih Produk",
-        allowClear: true,
-        ajax: {
-          url: "/api/filenames",
-          dataType: "json",
-          delay: 250,
-          data: function (params) {
-            return {
-              q: params.term || "",
-              source: $("#sourceSelect").val() || "product",
-            };
-          },
-          processResults: function (data) {
-            return {
-              results: data.results,
-            };
-          },
-          cache: true,
+<script>
+  document.addEventListener("keydown", function (event) {
+    if (event.altKey && event.key === "ArrowLeft") {
+      document.getElementById("back-button").click();
+    }
+  });
+  $(document).ready(function () {
+    $(".js-example-responsive").select2({
+      placeholder: "Pilih Produk",
+      allowClear: true,
+      ajax: {
+        url: "/api/filenames",
+        dataType: "json",
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term || "",
+            source: $("#sourceSelect").val() || "product",
+          };
         },
-        minimumInputLength: 0,
-        language: {
-          noResults: function () {
-            return "No result found";
-          },
+        processResults: function (data) {
+          return {
+            results: data.results,
+          };
         },
-      });
+        cache: true,
+      },
+      minimumInputLength: 0,
+      language: {
+        noResults: function () {
+          return "No result found";
+        },
+      },
+    });
 
-      $(".js-example-responsive").on("select2:select", function (e) {
-        var selectedData = e.params.data;
-        const selectedId = selectedData.id;
-        $("#dataModalLabel").text("Detail Produk - " + selectedData.text);
-        var modalContent = `
+    $(".js-example-responsive").on("select2:select", function (e) {
+      var selectedData = e.params.data;
+      const selectedId = selectedData.id;
+      $("#dataModalLabel").text("Detail Produk - " + selectedData.text);
+      var modalContent = `
       <p><strong>Nama File:</strong> ${selectedData.text}</p>
       <p><strong>Text:</strong><br><pre style="white-space:pre-wrap;">${
         selectedData.fulltext || ""
       }</pre></p>
   `;
-        $("#modalContent").html(modalContent);
-        $("#dataModal .dwcsv").data("id", selectedId);
-        $("#dataModal .savefile").data("id", selectedId);
-        $("#dataModal").modal("show");
-        $(".js-example-responsive").val(null).trigger("change");
+      $("#modalContent").html(modalContent);
+      $("#dataModal .dwcsv").data("id", selectedId);
+      $("#dataModal .savefile").data("id", selectedId);
+      $("#dataModal").modal("show");
+      $(".js-example-responsive").val(null).trigger("change");
+    });
+
+    $(document).ready(function () {
+      $(".select-data").select2({
+        placeholder: "Pilih Sumber Data",
+        minimumInputLength: -1,
+        width: "resolve",
       });
 
-      $(document).ready(function () {
-        $(".select-data").select2({
-          placeholder: "Pilih Sumber Data",
-          minimumInputLength: -1,
-          width: "resolve",
-        });
+      let currentSource = "product";
 
-        let currentSource = "product";
-
-        var table = $("#productTable").DataTable({
-          ajax: `/api/products?source=${currentSource}`,
-          pageLength: 50,
-          columns: [
-            {
-              data: null,
-              render: function (data, type, row, meta) {
-                return meta.row + 1;
-              },
+      var table = $("#productTable").DataTable({
+        ajax: {
+          url: `/api/products?source=${currentSource}`,
+          data: function (d) {
+            d.currentSource = $("#sourceSelect").val();
+            d.startdt = $("#startDate").val();
+            d.enddt = $("#endDate").val();
+            d.filename = $("#dataBy").val();
+          },
+          dataSrc: "data",
+        },
+        pageLength: 50,
+        columns: [
+          {
+            data: null,
+            render: function (data, type, row, meta) {
+              return meta.row + 1;
             },
-            { data: "product_number" },
-            { data: "description" },
-            { data: "quantity" },
-            {
-              data: "unit_price",
-              render: function (data) {
-                return parseFloat(data).toFixed(2);
-              },
+          },
+          { data: "product_number" },
+          { data: "description" },
+          { data: "quantity" },
+          {
+            data: "unit_price",
+            render: function (data) {
+              return parseFloat(data).toFixed(2);
             },
-            {
-              data: "discount",
-              render: function (data) {
-                return data !== null ? parseFloat(data).toFixed(2) + "%" : "";
-              },
+          },
+          {
+            data: "discount",
+            render: function (data) {
+              return data !== null ? parseFloat(data).toFixed(2) + "%" : "";
             },
-            {
-              data: "line_total",
-              render: function (data) {
-                return parseFloat(data).toFixed(2);
-              },
+          },
+          {
+            data: "line_total",
+            render: function (data) {
+              return parseFloat(data).toFixed(2);
             },
-            { data: "createddate" },
-            {
-              data: "id",
-              render: function (data) {
-                return `
+          },
+          { data: "createddate" },
+          {
+            data: "id",
+            render: function (data) {
+              return `
               <button class="btn btn-danger btn-sm delete-btn" data-id="${data}"><i class="bi bi-trash"></i></button>
               `;
-              },
-            },
-          ],
-          pagingType: "simple_numbers",
-          language: {
-            paginate: {
-              previous: "<i class='bi bi-chevron-left'></i>",
-              next: "<i class='bi bi-chevron-right'></i>",
             },
           },
-          emptyTable: "Tidak ada data yang tersedia",
-          dom:
-            "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-          initComplete: function (settings, json) {
-            if (json.data.length > 0) {
-              $("#delete-all-btn").show();
-              $("#download-all").show();
-            } else {
-              $("#delete-all-btn").hide();
-              $("#download-all").hide();
-            }
+        ],
+        pagingType: "simple_numbers",
+        language: {
+          paginate: {
+            previous: "<i class='bi bi-chevron-left'></i>",
+            next: "<i class='bi bi-chevron-right'></i>",
           },
-        });
-
-        $("#sourceSelect").on("change", function () {
-          currentSource = $(this).val();
-          table.ajax.url("/api/products?source=" + currentSource).load();
-        });
-      });
-
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
         },
-      });
-      $(document).on("click", ".delete-btn", function () {
-        const id = $(this).data("id");
-        const source = $("#sourceSelect").val() || "product";
-        Swal.fire({
-          title: "Yakin ingin menghapus produk ini?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes",
-          cancelButtonText: "No",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          allowEnterKey: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $.ajax({
-              url: `/api/products/${id}?source=${source}`,
-              type: "DELETE",
-              success: function (response) {
-                Toast.fire({
-                  icon: "success",
-                  title: "successfully deleted all data",
-                }).then(function () {
-                  $("#productTable").DataTable().ajax.reload();
-                  const source = $("#sourceSelect").val() || "product";
-                  $.get(`/api/invoice_count?source=${source}`, function (data) {
-                    if (data.count > 0) {
-                      $("#delete-all-btn").show();
-                      $("#download-all").show();
-                      $("#invoice-count-badge").text(
-                        data.count > 99 ? "99+" : data.count
-                      );
-                    } else {
-                      $("#delete-all-btn").hide();
-                      $("#download-all").hide();
-                      $("#invoice-count-badge").text("");
-                    }
-                  });
-                });
-              },
-              error: function (xhr, status, error) {
-                Swal.fire("Gagal!", "Gagal menghapus data.", "error");
-                console.error(error);
-              },
-            });
-          }
-        });
-      });
-
-      $("#download-all").on("click", function () {
-        const source = $("#sourceSelect").val() || "product";
-        Swal.fire({
-          title: "Konfirmasi!",
-          text: "Apakah anda yakin akan mendownload semua data?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ya, Download",
-          allowOutsideClick: false,
-          allowEnterKey: false,
-          allowEscapeKey: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            Swal.fire({
-              title: "Preparing Downloading...",
-              html: `<div style="display: flex; flex-direction: column; align-items: center;">
-            <img src="static/rocket-io.gif" alt="Downloading..." style="width: 120px; height: 120px; margin-bottom: 10px;">
-            <p>Mohon tunggu, file sedang disiapkan...</p>
-          </div>`,
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-              allowEnterKey: false,
-              showConfirmButton: false,
-              showCancelButton: false,
-              didOpen: () => {
-                setTimeout(() => {
-                  window.location.href = `/downloadall?source=${source}`;
-                  Swal.close();
-                }, 1500);
-              },
-            });
-          }
-        });
-      });
-
-      $("#dropdown-download-all-btn").on("click", function () {
-        Swal.fire({
-          title: "Konfirmasi!",
-          text: "Apakah anda yakin akan mendownload semua data?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ya, Download",
-          allowOutsideClick: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/downloadall";
-          }
-        });
-      });
-
-      $("#delete-all-btn").on("click", function () {
-        const source = $("#sourceSelect").val() || "product";
-        Swal.fire({
-          title: "Konfirmasi!",
-          text: "Apakah anda yakin akan menghapus semua data?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes",
-          cancelButtonText: "No",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          allowEnterKey: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $.ajax({
-              url: `/deleteall?source=${source}`,
-              type: "GET",
-              success: function (response) {
-                Toast.fire({
-                  icon: "success",
-                  title: "successfully deleted all data",
-                }).then(function () {
-                  $("#productTable").DataTable().ajax.reload();
-                  $("#delete-all-btn").hide();
-                  $("#download-all").hide();
-                });
-              },
-              error: function (xhr, status, error) {
-                Toast.fire({
-                  icon: "error",
-                  title: "Terjadi kesalahan saat menghapus data.",
-                });
-              },
-            });
-          }
-        });
-      });
-
-      $("#dropdown-delete-all-btn").on("click", function () {
-        Swal.fire({
-          title: "Konfirmasi!",
-          text: "Apakah anda yakin akan menghapus semua data?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ya, Hapus",
-          allowOutsideClick: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $.ajax({
-              url: "/deleteall",
-              type: "GET",
-              success: function (response) {
-                Toast.fire({
-                  icon: "success",
-                  title: "Signed in successfully",
-                }).then(function () {
-                  $("#productTable").DataTable().ajax.reload();
-                  $("#delete-all-btn").hide();
-                  $("#download-all").hide();
-                });
-              },
-              error: function (xhr, status, error) {
-                Toast.fire({
-                  icon: "error",
-                  title: "Terjadi kesalahan saat menghapus data.",
-                });
-              },
-            });
-          }
-        });
-      });
-
-      $(document).ready(function () {
-        $("#back-button").hover(
-          function () {
-            $("#back-text").addClass("translate-x-[-100%] opacity-0");
-            $("#back-icon")
-              .removeClass("left-full opacity-0")
-              .addClass("left-1/2 -translate-x-1/2 opacity-100");
-          },
-          function () {
-            $("#back-text").removeClass("translate-x-[-100%] opacity-0");
-            $("#back-icon")
-              .removeClass("left-1/2 -translate-x-1/2 opacity-100")
-              .addClass("left-full opacity-0");
-          }
-        );
-
-        $("#download-all").hover(
-          function () {
-            $("#download-text").addClass("translate-x-[-100%] opacity-0");
-            $("#download-icon")
-              .removeClass("left-full opacity-0")
-              .addClass("left-1/2 -translate-x-1/2 opacity-100");
-          },
-          function () {
-            $("#download-text").removeClass("translate-x-[-100%] opacity-0");
-            $("#download-icon")
-              .removeClass("left-1/2 -translate-x-1/2 opacity-100")
-              .addClass("left-full opacity-0");
-          }
-        );
-      });
-      function updateInvoicecount() {
-        const source = $("#sourceSelect").val() || "product";
-        $.get(`/api/invoice_count?source=${source}`, function (data) {
-          if (data.count > 0) {
+        emptyTable: "Tidak ada data yang tersedia",
+        dom:
+          "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        initComplete: function (settings, json) {
+          if (json.data.length > 0) {
             $("#delete-all-btn").show();
             $("#download-all").show();
-            $("#invoice-count-badge").text(
-              data.count > 99 ? "99+" : data.count
-            );
           } else {
             $("#delete-all-btn").hide();
             $("#download-all").hide();
-            $("#invoice-count-badge").text("");
           }
-        });
-      }
-      $(document).ready(function () {
-        updateInvoicecount();
+        },
       });
-      $("#sourceSelect").on("change", function () {
-        updateInvoicecount();
-        $("#productTable").DataTable().ajax.reload();
-      });
-      $("#dataModal").on("click", ".dwcsv", function () {
-        const id = $(this).data("id");
 
-        if (!id) {
-          return Toast.fire({
-            icon: "error",
-            title: "Gagal",
-            text: "Id tidak tersedia",
+      $("#sourceSelect").on("change", function () {
+        currentSource = $(this).val();
+        table.ajax.url("/api/products?source=" + currentSource).load();
+      });
+    });
+
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      },
+    });
+    $(document).on("click", ".delete-btn", function () {
+      const id = $(this).data("id");
+      const source = $("#sourceSelect").val() || "product";
+      Swal.fire({
+        title: "Yakin ingin menghapus produk ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `/api/products/${id}?source=${source}`,
+            type: "DELETE",
+            success: function (response) {
+              Toast.fire({
+                icon: "success",
+                title: "successfully deleted all data",
+              }).then(function () {
+                $("#productTable").DataTable().ajax.reload();
+                const source = $("#sourceSelect").val() || "product";
+                $.get(`/api/invoice_count?source=${source}`, function (data) {
+                  if (data.count > 0) {
+                    $("#delete-all-btn").show();
+                    $("#download-all").show();
+                    $("#invoice-count-badge").text(
+                      data.count > 99 ? "99+" : data.count
+                    );
+                  } else {
+                    $("#delete-all-btn").hide();
+                    $("#download-all").hide();
+                    $("#invoice-count-badge").text("");
+                  }
+                });
+              });
+            },
+            error: function (xhr, status, error) {
+              Swal.fire("Gagal!", "Gagal menghapus data.", "error");
+              console.error(error);
+            },
           });
         }
-        const link = document.createElement("a");
-        link.href = `/download/${id}`;
-        link.setAttribute("download", id);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        Toast.fire({
-          icon: "success",
-          title: "Berhasil",
-          text: "File has been saved successfully.",
-        });
-        $("#dataModal").modal("hide");
       });
-    </script>
-  </body>
-</html>
+    });
+
+    $("#download-all").on("click", function () {
+      const source = $("#sourceSelect").val() || "product";
+      Swal.fire({
+        title: "Konfirmasi!",
+        text: "Apakah anda yakin akan mendownload semua data?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, Download",
+        allowOutsideClick: false,
+        allowEnterKey: false,
+        allowEscapeKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: "Preparing Downloading...",
+            html: `<div style="display: flex; flex-direction: column; align-items: center;">
+            <img src="static/rocket-io.gif" alt="Downloading..." style="width: 120px; height: 120px; margin-bottom: 10px;">
+            <p>Mohon tunggu, file sedang disiapkan...</p>
+          </div>`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            showConfirmButton: false,
+            showCancelButton: false,
+            didOpen: () => {
+              setTimeout(() => {
+                window.location.href = `/downloadall?source=${source}`;
+                Swal.close();
+              }, 1500);
+            },
+          });
+        }
+      });
+    });
+
+    $("#dropdown-download-all-btn").on("click", function () {
+      Swal.fire({
+        title: "Konfirmasi!",
+        text: "Apakah anda yakin akan mendownload semua data?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, Download",
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/downloadall";
+        }
+      });
+    });
+
+    $("#delete-all-btn").on("click", function () {
+      const source = $("#sourceSelect").val() || "product";
+      Swal.fire({
+        title: "Konfirmasi!",
+        text: "Apakah anda yakin akan menghapus semua data?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `/deleteall?source=${source}`,
+            type: "GET",
+            success: function (response) {
+              Toast.fire({
+                icon: "success",
+                title: "successfully deleted all data",
+              }).then(function () {
+                $("#productTable").DataTable().ajax.reload();
+                $("#delete-all-btn").hide();
+                $("#download-all").hide();
+              });
+            },
+            error: function (xhr, status, error) {
+              Toast.fire({
+                icon: "error",
+                title: "Terjadi kesalahan saat menghapus data.",
+              });
+            },
+          });
+        }
+      });
+    });
+
+    $("#dropdown-delete-all-btn").on("click", function () {
+      Swal.fire({
+        title: "Konfirmasi!",
+        text: "Apakah anda yakin akan menghapus semua data?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya, Hapus",
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: "/deleteall",
+            type: "GET",
+            success: function (response) {
+              Toast.fire({
+                icon: "success",
+                title: "Signed in successfully",
+              }).then(function () {
+                $("#productTable").DataTable().ajax.reload();
+                $("#delete-all-btn").hide();
+                $("#download-all").hide();
+              });
+            },
+            error: function (xhr, status, error) {
+              Toast.fire({
+                icon: "error",
+                title: "Terjadi kesalahan saat menghapus data.",
+              });
+            },
+          });
+        }
+      });
+    });
+
+    $(document).ready(function () {
+      $("#iconRight").on("click", function () {
+        const iconRight = $("#iconRight");
+        const iconLeft = $("#iconLeft");
+
+        iconLeft.css({ visibility: "hidden", display: "inline-block" });
+        const start = iconRight.offset();
+        const end = iconLeft.offset();
+        iconLeft.hide().css("visibility", "");
+
+        const clone = iconRight
+          .clone()
+          .attr("id", "iconClone")
+          .css({
+            position: "absolute",
+            top: start.top,
+            left: start.left,
+            zIndex: 9999,
+            fontSize: iconRight.css("font-size"),
+          })
+          .appendTo("body");
+
+        iconRight.hide();
+
+        gsap.to(clone, {
+          rotation: 360,
+          left: end.left,
+          top: start.top,
+          duration: 0.7,
+          ease: "power2.inOut",
+          onComplete: function () {
+            clone.remove();
+            iconLeft.show();
+            $("#filterFields").addClass("show");
+
+            gsap.fromTo(
+              "#filterFields input, #filterFields select, #filterFields button",
+              {
+                x: 50,
+                opacity: 0,
+              },
+              {
+                x: 0,
+                opacity: 1,
+                stagger: 0.1,
+                duration: 0.4,
+                ease: "power2.out",
+              }
+            );
+          },
+        });
+      });
+      $("#iconLeft").on("click", function () {
+        const iconLeft = $("#iconLeft");
+        const iconRight = $("#iconRight");
+        const iconClear = $(".clear-icon");
+
+        $("#startDate").val("");
+        $("#endDate").val("");
+        $("#dataBy").val("").trigger("change");
+
+        gsap.to(
+          "#filterFields input, #filterFields select, #filterFields button",
+          {
+            x: 50,
+            opacity: 0,
+            stagger: 0.05,
+            duration: 0.3,
+            ease: "power1.in",
+            onComplete: function () {
+              $("#filterFields").removeClass("show");
+
+              iconRight.show();
+            },
+          }
+        );
+
+        const start = iconLeft.offset();
+        iconRight.css({ visibility: "hidden", display: "inline-block" });
+        const end = iconRight.offset();
+        iconRight.hide().css("visibility", "");
+        const clone = iconLeft
+          .clone()
+          .attr("id", "iconCloneLeft")
+          .css({
+            position: "absolute",
+            top: start.top,
+            left: start.left,
+            zIndex: 9999,
+            fontSize: iconLeft.css("font-size"),
+          })
+          .appendTo("body");
+
+        iconLeft.hide();
+        iconClear.hide();
+        $("#productTable").DataTable().ajax.reload();
+        gsap.to(clone, {
+          rotation: -360,
+          left: end.left,
+          top: start.top,
+          duration: 0.7,
+          ease: "power2.inOut",
+          onComplete: function () {
+            clone.remove();
+            iconRight.show();
+          },
+        });
+      });
+
+      $("#back-button").hover(
+        function () {
+          $("#back-text").addClass("translate-x-[-100%] opacity-0");
+          $("#back-icon")
+            .removeClass("left-full opacity-0")
+            .addClass("left-1/2 -translate-x-1/2 opacity-100");
+        },
+        function () {
+          $("#back-text").removeClass("translate-x-[-100%] opacity-0");
+          $("#back-icon")
+            .removeClass("left-1/2 -translate-x-1/2 opacity-100")
+            .addClass("left-full opacity-0");
+        }
+      );
+
+      $("#download-all").hover(
+        function () {
+          $("#download-text").addClass("translate-x-[-100%] opacity-0");
+          $("#download-icon")
+            .removeClass("left-full opacity-0")
+            .addClass("left-1/2 -translate-x-1/2 opacity-100");
+        },
+        function () {
+          $("#download-text").removeClass("translate-x-[-100%] opacity-0");
+          $("#download-icon")
+            .removeClass("left-1/2 -translate-x-1/2 opacity-100")
+            .addClass("left-full opacity-0");
+        }
+      );
+    });
+    function updateInvoicecount() {
+      const source = $("#sourceSelect").val() || "product";
+      $.get(`/api/invoice_count?source=${source}`, function (data) {
+        if (data.count > 0) {
+          $("#delete-all-btn").show();
+          $("#download-all").show();
+          $("#invoice-count-badge").text(data.count > 99 ? "99+" : data.count);
+        } else {
+          $("#delete-all-btn").hide();
+          $("#download-all").hide();
+          $("#invoice-count-badge").text("");
+        }
+      });
+    }
+    $(document).ready(function () {
+      updateInvoicecount();
+    });
+    $("#sourceSelect").on("change", function () {
+      updateInvoicecount();
+      $("#productTable").DataTable().ajax.reload();
+    });
+    $("#dataModal").on("click", ".dwcsv", function () {
+      const id = $(this).data("id");
+
+      if (!id) {
+        return Toast.fire({
+          icon: "error",
+          title: "Gagal",
+          text: "Id tidak tersedia",
+        });
+      }
+      const link = document.createElement("a");
+      link.href = `/download/${id}`;
+      link.setAttribute("download", id);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      Toast.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "File has been saved successfully.",
+      });
+      $("#dataModal").modal("hide");
+    });
+    const startPicker = flatpickr("#startDate", {
+      dateFormat: "Y-m-d",
+      allowInput: false,
+      onChange: function (selectedDates, dateStr) {
+        if (dateStr) {
+          $("[data-clear='#startDate']").show();
+        } else {
+          $("[data-clear='#startDate']").hide();
+        }
+      },
+    });
+
+    const endPicker = flatpickr("#endDate", {
+      dateFormat: "Y-m-d",
+      allowInput: false,
+      onChange: function (selectedDates, dateStr) {
+        if (dateStr) {
+          $("[data-clear='#endDate']").show();
+        } else {
+          $("[data-clear='#endDate']").hide();
+        }
+      },
+    });
+
+    $(document).on("click", ".clear-icon", function (e) {
+      e.preventDefault();
+      const target = $(this).data("clear");
+      const picker = target === "#startDate" ? startPicker : endPicker;
+      picker.clear();
+      $(this).hide();
+    });
+
+    $(".js-example-search").select2({
+      placeholder: "Pilih Produk",
+      allowClear: true,
+      ajax: {
+        url: "/api/filenames",
+        dataType: "json",
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term || "",
+            source: $("#sourceSelect").val() || "product",
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: $.map(data.results, function (item) {
+              return {
+                id: item.id,
+                text: item.text,
+                title: item.text,
+              };
+            }),
+          };
+        },
+        cache: true,
+      },
+      minimumInputLength: 0,
+      language: {
+        noResults: function () {
+          return "No result found";
+        },
+      },
+      templateResult: function (data) {
+        if (data.loading) return data.text;
+        var $option = $(
+          "<span title='" + data.title + "'>" + data.text + "</span>"
+        );
+        return $option;
+      },
+    });
+
+    let currentSource = "product";
+    let startdt = "";
+    let enddt = "";
+    let filename = "";
+    $("#btnsearchfil").on("click", function () {
+      currentSource = $("#sourceSelect").val();
+      startdt = $("#startDate").val();
+      enddt = $("#endDate").val();
+      filename = $("#dataBy").val();
+
+      $("#productTable").DataTable().ajax.reload();
+    });
+  });
+</script>
