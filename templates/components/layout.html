@@ -4,9 +4,22 @@
   <meta charset="UTF-8">
   <title>{{title}}{% if subtitle %} - {{ subtitle}}{% endif %}</title>
   {% include "components/header.html" %}
+
 </head>
 <body>
-  {% block content %}{% endblock %}
+  <div id="loading-screen">
+    <img src="../../static/loading.gif" alt="" srcset="">
+  </div>
+  <div id="main-content" style="visibility:hidden;">
+    {% block content %}{% endblock %}
+  </div>
+  
   {% include "components/footer.html" %}
+  <script>
+  window.addEventListener("load", function() {
+    document.getElementById("loading-screen").style.display = "none";
+    document.getElementById("main-content").style.visibility = "visible";
+  });
+</script>
 </body>
 </html>

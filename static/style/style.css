@@ -340,3 +340,27 @@
       #download-all{
         width: 150px;
       }
+
+
+/* UNTUK FILE LAYOUT.HTML */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      font-size: 2rem;
+      color: #000;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% {opacity:1;}
+      50% {opacity: 0;}
+    }
