@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{{title}}{% if subtitle %} - {{ subtitle}}{% endif %}</title>
-  {% include "components/header.html" %}
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{title}}{% if subtitle %} - {{ subtitle}}{% endif %}</title>
+    {% include "components/header.html" %}
+  </head>
+  <body>
+    <div id="loading-screen">
+      <img
+        src="{{ url_for('static', filename='loading.gif') }}"
+        alt="Loading..."
+      />
+    </div>
+    <div id="main-content" style="visibility: hidden">
+      {% block content %}{% endblock %}
+    </div>
 
-</head>
-<body>
-  <div id="loading-screen">
-    <img src="../../static/loading.gif" alt="" srcset="">
-  </div>
-  <div id="main-content" style="visibility:hidden;">
-    {% block content %}{% endblock %}
-  </div>
-  
-  {% include "components/footer.html" %}
-  <script>
-  window.addEventListener("load", function() {
-    document.getElementById("loading-screen").style.display = "none";
-    document.getElementById("main-content").style.visibility = "visible";
-  });
-</script>
-</body>
+    <script>
+      $(window).on("load", function () {
+        $("#loading-screen").hide();
+        $("#main-content").css("visibility", "visible");
+      });
+      </script>
+      {% include "components/footer.html" %}
+  </body>
 </html>

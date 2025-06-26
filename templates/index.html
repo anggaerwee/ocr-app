@@ -1,4 +1,6 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-8">
+<div
+  class="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-8"
+>
   <div
     class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
   >
@@ -145,88 +147,85 @@
       <span class="text-xl font-medium font-sans mb-3 block" id="label-area">
         Output OCR - Preview
       </span>
-      <button 
-      id="btn-expand"
-        data-bs-toggle="modal" data-bs-target="#exampleModal"
+      <button
+        id="btn-expand"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
         class="relative group border border-indigo-600 text-indigo-600 bg-white font-semibold py-0.5 px-1.5 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-200 hover:bg-indigo-600 hover:text-indigo transition-colors duration-200 mt-2"
-        style="height: 28px; min-width: 28px;">
+        style="height: 28px; min-width: 28px"
+      >
         <i class="bi bi-arrows-angle-expand"></i>
         <i class="hidden bi bi-arrows-angle-contract"></i>
         <span
-          id="toolexpand" class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-event-none">
-          Expand</span>
+          id="toolexpand"
+          class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-event-none"
+        >
+          Expand</span
+        >
         <span
-          id="toolclose" class="hidden absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-event-none">
-          Close</span>
+          id="toolclose"
+          class="hidden absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-event-none"
+        >
+          Close</span
+        >
       </button>
     </div>
-        <div class="flex items-start gap-4">
-          <textarea
-            class="border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 flex-1"
-            id="text-area"
-            style="
-              width: 100%;
-              min-height: 250px;
-              max-width: 100%;
-              padding: 10px;
-              box-sizing: border-box;
-              resize: vertical;
-            "
-            readonly
-          ></textarea>
-          <div
-            class="button-grup"
-            style="display: flex; flex-direction: column; gap: 1px"
-          >
-            <button
-              id="btn-copy"
-              class="relative group border-2 border-indigo-600 text-indigo-600 bg-white font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-200 hover:bg-indigo-600 hover:text-indigo transition-colors duration-200 mt-2"
-              style="height: 40px"
-            >
-              <i class="fa-regular fa-copy"></i>
-              <span
-                class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-events-none"
-              >
-                Copy
-              </span>
-            </button>
-         
-
-          </div>
-        </div>
-      </div>
-</div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-xl modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        
-      </div>
-      <div class="modal-footer">
+    <div class="flex items-start gap-4">
+      <textarea
+        class="border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 flex-1"
+        id="text-area"
+        style="
+          width: 100%;
+          min-height: 250px;
+          max-width: 100%;
+          padding: 10px;
+          box-sizing: border-box;
+          resize: vertical;
+        "
+        readonly
+      ></textarea>
+      <div
+        class="button-grup"
+        style="display: flex; flex-direction: column; gap: 1px"
+      >
         <button
-              id="btn-copy"
-              class="relative group border-2 border-indigo-600 text-indigo-600 bg-white font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-200 hover:bg-indigo-600 hover:text-indigo transition-colors duration-200 mt-2"
-              style="height: 40px"
-            >
-              <i class="fa-regular fa-copy"></i>
-              <span
-                class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-events-none"
-              >
-                Copy
-              </span>
-            </button>
+          id="btn-copy"
+          class="relative group border-2 border-indigo-600 text-indigo-600 bg-white font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-200 hover:bg-indigo-600 hover:text-indigo transition-colors duration-200 mt-2"
+          style="height: 40px"
+        >
+          <i class="fa-regular fa-copy"></i>
+          <span
+            class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-events-none"
+          >
+            Copy
+          </span>
+        </button>
       </div>
     </div>
   </div>
 </div>
-
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-xl modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+</div>
 <script>
   $(document).ready(function () {
     Dropzone.autoDiscover = false;
@@ -289,55 +288,35 @@
     });
 
     $(document).on("click", "#btn-expand", function () {
-  // Ambil isi text-area
-  const text = $("#text-area").val() || "";
-  // Isi modal-body dengan teks, gunakan <pre> agar format tetap rapi
-  $("#exampleModal .modal-body").html(
-    `<pre style="white-space:pre-wrap; font-size:1.1em; min-height:600px; max-height:90vh; overflow:auto;">${$("<div>").text(text).html()}</pre>`
-  );
-  // Optional: Ganti judul modal jika ingin
-  $("#exampleModalLabel").text("Output OCR - Full View");
-});
-
-   $('#btn-txt').on("click", function() {
-      const text = $('#text-area').val();
-      if (!text) {
-        Toast.fire({icon:"error", text:"tidak ada teks untuk diunduh"})
-      }
-
-      if(text){
-        const blob = new Blob([text], {type: "text/plain"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "extracted_text.txt";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      }else{
-        Toast.fire({icon:"error", text:"tidak ada teks untuk diunduh"})
-      }
-    })
+      const text = $("#text-area").val() || "";
+      $("#exampleModal .modal-body").html(
+        `<pre style="white-space:pre-wrap; font-size:1.1em; min-height:600px; max-height:90vh; overflow:auto;">${$(
+          "<div>"
+        )
+          .text(text)
+          .html()}</pre>`
+      );
+      $("#exampleModalLabel").text("Output OCR - Full View");
+    });
 
     $(document).on("click", "#btn-copy", function () {
-        const text = $("#text-area").val();
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text).then(
-            function () {
-              Toast.fire({icon: "success", text: "Teks disalin ke clipboard"});
-            },
-            function () {
-              Toast.fire({ icon: "error", text: "Gagal menyalin teks" });
-            }
-          );
-        } else {
-          const textarea = document.getElementById("text-area");
-          textarea.select();
-          document.execCommand("copy");
-          Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
-        }
-      });
+      const text = $("#text-area").val();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(
+          function () {
+            Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
+          },
+          function () {
+            Toast.fire({ icon: "error", text: "Gagal menyalin teks" });
+          }
+        );
+      } else {
+        const textarea = document.getElementById("text-area");
+        textarea.select();
+        document.execCommand("copy");
+        Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
+      }
+    });
 
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
@@ -494,7 +473,6 @@
             content: "swal-content",
             confirmButton: "swal-confirm-btn",
             denyButton: "swal-deny-btn",
-            // cancelButton: "swal-cancel-btn",
           },
           didOpen: () => {
             const swalPopup = document.querySelector(".swal-popup");
@@ -539,6 +517,22 @@
           }
         });
       }
+    });
+  });
+  window.addEventListener("load", () => {
+    gsap.from("#wrapper-box", {
+      opacity: 0,
+      y: 50,
+      duration: 1.2,
+      ease: "power3.out",
+    });
+
+    gsap.from(".section-title, .section-paragraph", {
+      opacity: 0,
+      x: -50,
+      duration: 0.8,
+      delay: 0.2,
+      stagger: 0.2,
     });
   });
 </script>
