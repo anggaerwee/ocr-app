@@ -6,7 +6,7 @@ from sqlalchemy.sql import text
 from io import StringIO
 from flask import Response
 from datetime import datetime
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, or_
 import pytesseract
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
@@ -56,6 +56,11 @@ def api_filenames():
 def api_products():
     session = Session()
     try:
+        draw = int(request.args.get("draw", 1))
+        start = int(request.args.get("start", 0))
+        length = int(request.args.get("length", 10))
+        search_value = request.args.get("search[value]", "").strip()
+
         source = request.args.get('source', 'product')
         startdt = request.args.get('startdt', '').strip()
         enddt = request.args.get('enddt', '').strip()
@@ -81,7 +86,18 @@ def api_products():
             except ValueError:
                 pass
 
-        products = query.all()
+        total_records = query.count()
+
+        if search_value:
+            query = query.filter(
+                or_(
+                    model.product_number.ilike(f"%{search_value}%"),
+                    model.description.ilike(f"%{search_value}%"),
+                    model.filename.ilike(f"%{search_value}%"),
+                )
+            )
+        filtered_records = query.count()
+        results = query.offset(start).limit(length).all()
 
         data = [
             {
@@ -96,16 +112,19 @@ def api_products():
                 'filename': p.filename,
                 'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
             }
-            for p in products
+            for p in results
         ]
 
-        return jsonify({'data': data})
+        return jsonify({
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        })
     except Exception as e:
         return jsonify({'error': str(e)})
     finally:
         session.close()
-
-
 
 @app.route('/submit', methods=['POST'])
 def submit_file():

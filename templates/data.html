@@ -343,6 +343,8 @@
       let currentSource = "product";
 
       var table = $("#productTable").DataTable({
+        processing: true,
+        serverSide: true,
         ajax: {
           url: `/api/products?source=${currentSource}`,
           data: function (d) {

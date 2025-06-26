@@ -338,7 +338,18 @@
         gap: 10px;
       }
       #download-all{
-        width: 150px;
+        width: 100%;
+        max-width: 150px;
+      }
+
+      @media(max-width: 768px){
+        #download-all{
+width: 100%;
+    max-width: 150px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
       }
 
 

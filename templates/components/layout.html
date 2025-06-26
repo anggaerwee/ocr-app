@@ -15,13 +15,6 @@
     <div id="main-content" style="visibility: hidden">
       {% block content %}{% endblock %}
     </div>
-
-    <script>
-      $(window).on("load", function () {
-        $("#loading-screen").hide();
-        $("#main-content").css("visibility", "visible");
-      });
-      </script>
       {% include "components/footer.html" %}
   </body>
 </html>
