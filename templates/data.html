@@ -345,6 +345,7 @@
       var table = $("#productTable").DataTable({
         processing: true,
         serverSide: true,
+        scrollX: true,
         ajax: {
           url: `/api/products?source=${currentSource}`,
           data: function (d) {

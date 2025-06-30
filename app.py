@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for, send_file
+from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for, send_file, session
 from function import process_file, ProductTable, InvoiceBlur, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
-import os
+import os, base64
 import csv
-from sqlalchemy.sql import text
-from io import StringIO
+from sqlalchemy.sql import text,func, or_
+from io import StringIO, BytesIO
 from flask import Response
 from datetime import datetime
-from sqlalchemy.sql import func, or_
+from sqlalchemy.orm import sessionmaker
 import pytesseract
+from PIL import Image
+from pdf2image import convert_from_bytes
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
@@ -126,42 +128,55 @@ def api_products():
     finally:
         session.close()
 
+CHUNK_DIR = 'temp_chunks'
 @app.route('/submit', methods=['POST'])
 def submit_file():
     try:
-        files = request.files.getlist('file')
-        full_text = ""
+        uuid = request.form.get('dzuuid')
+        index = int(request.form.get('dzchunkindex', 0))
+        total_chunks = int(request.form.get('dztotalchunkcount', 1))
+        filename = request.form.get('filename')
+        file = request.files.get('file')
 
-        for file in files:
-            if file.filename == '':
-                flash(('Form tidak boleh kosong', ''), 'error')
-                continue
+        if not all([uuid, filename, file]):
+            return jsonify({'error': 'Missing required data'}), 400
 
-            if not (file.filename.endswith('.pdf') or file.filename.endswith('.webp')):
-                flash((f"{file.filename} harus berformat pdf atau webp", ''), 'error')
-                continue
+        chunk_path = os.path.join(CHUNK_DIR, f"{uuid}_{index}")
+        file.save(chunk_path)
 
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filepath)
+        if index + 1 == total_chunks:
+            combined = b''
+            for i in range(total_chunks):
+                chunk_file = os.path.join(CHUNK_DIR, f"{uuid}_{i}")
+                if not os.path.exists(chunk_file):
+                    return jsonify({'error': f'Chunk {i} missing'}), 400
+                with open(chunk_file, 'rb') as f:
+                    combined += f.read()
+                os.remove(chunk_file)
 
-            if file.filename.endswith('.pdf'):
-                from pdf2image import convert_from_path
-                images = convert_from_path(filepath, dpi=205)
-                for page_num, image in enumerate(images, start=1):
-                    custom_config = r'--oem 3 --psm 6'
-                    page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind')
-                    full_text += f"\n\n--- Halaman {page_num} ---\n{page_text}"
-            elif file.filename.endswith('.webp'):
-                text = extract_image_with_ocr(filepath)
-                full_text += text
+            final_stream = BytesIO(combined)
+            final_stream.seek(0)
 
-            flash((f"{file.filename} berhasil diupload. Klik Save untuk proses ke database.", file.filename), 'success')
+            full_text = ""
+            if filename.lower().endswith('.pdf'):
+                images = convert_from_bytes(final_stream.read(), dpi=205)
+                for idx, img in enumerate(images, start=1):
+                    text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
+                    full_text += f"\n\n--- Halaman {idx} ---\n{text}"
+            elif filename.lower().endswith('.webp'):
+                img = Image.open(final_stream)
+                text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
+                full_text = text
+            else:
+                return jsonify({'error': 'Format file tidak didukung'}), 400
 
-        return jsonify({'text': full_text})
+            flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
+            return jsonify({'text': full_text})
+
+        return '', 200
+
     except Exception as e:
-        flash((f"Terjadi kesalahan : {e}", ''), 'error')
-        return '', 500
-
+        return jsonify({'error': str(e)}), 500
 @app.route('/save/<path:filepath>', methods=['POST'])
 def save(filepath):
     try:
