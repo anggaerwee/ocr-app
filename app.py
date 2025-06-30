@@ -168,11 +168,19 @@ def submit_file():
                     text = extract_text_with_ocr(output_path, page_number)
                     full_text += text + "\n"
             elif filename.lower().endswith('.webp'):
+<<<<<<< HEAD
                     # temp_path = os.path.join(CHUNK_DIR, f"{uuid}_final.webp")
                     with open(output_path, "wb") as f:
                         f.write(final_stream.getbuffer())
                     full_text = extract_image_with_ocr(output_path)
                     # os.remove(output_path)
+=======
+                temp_webp_path = os.path.join(CHUNK_DIR, f"{uuid}.webp")
+                with open(temp_webp_path, 'wb') as temp_file:
+                    temp_file.write(final_stream.read())
+                full_text = extract_image_with_ocr(temp_webp_path)
+                os.remove(temp_webp_path)
+>>>>>>> 7f8e37d (30/06/2025)
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
