@@ -6,10 +6,9 @@ from sqlalchemy.sql import text,func, or_
 from io import StringIO, BytesIO
 from flask import Response
 from datetime import datetime
-from sqlalchemy.orm import sessionmaker
 import pytesseract
-from PIL import Image
 from pdf2image import convert_from_bytes
+from PyPDF2 import PdfReader
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
@@ -125,7 +124,7 @@ def api_products():
         })
     except Exception as e:
         return jsonify({'error': str(e)})
-    finally:
+    finally:        
         session.close()
 
 CHUNK_DIR = 'temp_chunks'
@@ -157,26 +156,32 @@ def submit_file():
             final_stream = BytesIO(combined)
             final_stream.seek(0)
 
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            with open(output_path, 'wb') as f:
+                f.write(final_stream.getbuffer())
+
             full_text = ""
             if filename.lower().endswith('.pdf'):
-                images = convert_from_bytes(final_stream.read(), dpi=205)
-                for idx, img in enumerate(images, start=1):
-                    text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
-                    full_text += f"\n\n--- Halaman {idx} ---\n{text}"
+                reader = PdfReader(output_path)
+                num_pages = len(reader.pages)
+                for page_number in range(1, num_pages + 1):
+                    text = extract_text_with_ocr(output_path, page_number)
+                    full_text += text + "\n"
             elif filename.lower().endswith('.webp'):
-                img = Image.open(final_stream)
-                text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
-                full_text = text
+                    # temp_path = os.path.join(CHUNK_DIR, f"{uuid}_final.webp")
+                    with open(output_path, "wb") as f:
+                        f.write(final_stream.getbuffer())
+                    full_text = extract_image_with_ocr(output_path)
+                    # os.remove(output_path)
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
             return jsonify({'text': full_text})
-
         return '', 200
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
 @app.route('/save/<path:filepath>', methods=['POST'])
 def save(filepath):
     try:

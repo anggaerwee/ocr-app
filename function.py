@@ -8,6 +8,8 @@ import pandas as pd
 import csv
 import cv2
 import numpy as np
+from tesserocr import PyTessBaseAPI, PSM
+tessdata_dir = r"C:\Program Files\Tesseract-OCR\tessdata"
 
 from database.db_config import Session, ProductTable, InvoiceBlur
 def parse_row(row_text, full_text, filename):
@@ -83,49 +85,34 @@ def extract_text_with_ocr(file_path, page_number):
 
 def extract_image_with_ocr(image_path):
     try:
-        image = cv2.imread(image_path)
+        image = Image.open(image_path)
+        image = image.convert("L")
 
-        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
-        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-        cl = clahe.apply(l)
-        merged = cv2.merge((cl, a, b))
-        image = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2.7)  # dari 2.0 ke 2.5
 
-        sharpen_kernel = np.array([[-1, -1, -1], [-1, 9.5, -1], [-1, -1, -1]])
-        image = cv2.filter2D(image, -1, sharpen_kernel)
+        brightness = ImageEnhance.Brightness(image)
+        image = brightness.enhance(1.0)
 
-        image = cv2.fastNlMeansDenoisingColored(image, None, 5, 5, 7, 21)
+        sharpener = ImageEnhance.Sharpness(image)
+        image = sharpener.enhance(1.0)
 
-        height, width = image.shape[:2]
-        image = cv2.resize(image, (int(width * 2.5), int(height * 2.5)), interpolation=cv2.INTER_CUBIC)
+        width, height = image.size
+        image = image.resize((width * 7, height * 7), Image.Resampling.LANCZOS)
 
-        output_folder = "output"
-        os.makedirs(output_folder, exist_ok=True)
-        filename = os.path.basename(image_path)
-        filename_no_ext, ext = os.path.splitext(filename)
-        enhanced_path = os.path.join(output_folder, f"{filename_no_ext}_enhanced.webp")
-        cv2.imwrite(enhanced_path, image)
+        image = image.filter(ImageFilter.MedianFilter(size=3))
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=265, threshold=3))
 
-        pil_img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("L")
-        pil_img = pil_img.point(lambda p: 255 if p > 128 else 0)
+        image = image.filter(ImageFilter.DETAIL)
 
-        custom_config = r'--oem 3 --psm 6'
-        extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng+ind')
+        threshold = 128
+        image = image.point(lambda p: 255 if p > threshold else 0)
 
-        extracted_text = re.sub(r"[^\w\s.%,-/#]", " ", extracted_text)
-        extracted_text = re.sub(r'([a-zA-Z])4([a-zA-Z]*)', r'\1e\2', extracted_text)
-        lines = extracted_text.splitlines()
-        cleaned_lines = []
-        for line in lines:
-            line = re.sub(r"[^\w\s.%,-/]", "", line)
-            line = re.sub(r"\s+", " ", line).strip()
-            line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)
-            if line:
-                cleaned_lines.append(line)
+        with PyTessBaseAPI(psm=PSM.SINGLE_BLOCK, path=tessdata_dir) as api:
+            api.SetImage(image)
+            extracted_text = api.GetUTF8Text()
 
-        return "\n".join(cleaned_lines)
-
+        return extracted_text
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None
@@ -153,6 +140,7 @@ def process_file(file_path, mode="product", text_override=None):
         rows = full_text.split("\n")
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
+        print(f"Ekstrak Teks {text}")
         full_text = text
         rows = text.split("\n")
     else:
@@ -167,8 +155,9 @@ def process_file(file_path, mode="product", text_override=None):
         parsed = parse_row(row, full_text, filename)
         if parsed:
             all_rows.append(parsed)
+            print(parsed)
         else:
-            print(f"[PARSE FAIL] Gagal parsing baris: {row}")
+            print(f"Gagal parsing baris: {row}")
 
     if not all_rows:
         if text_override and mode == "blur":
