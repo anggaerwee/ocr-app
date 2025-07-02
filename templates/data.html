@@ -55,9 +55,7 @@
             >
           </button>
 
-          <h1 class="judul text-2xl font-bold text-gray-800">
-            Data Produk
-          </h1>
+          <h1 class="judul text-2xl font-bold text-gray-800">Data Produk</h1>
         </div>
         <div
           class="w-full mt-2"
@@ -258,21 +256,34 @@
         ></button>
       </div>
       <div class="modal-body" id="modalContent"></div>
-      <div class="modal-footer">
-        <button
-          class="btn btn-outline-success d-flex align-items-center gap-2 dwcsv"
-          type="button"
+      <div
+        class="modal-footer w-100 d-flex justify-content-between align-items-center"
+      >
+        <span
+          class="px-3 py-1 fw-semibold text-dark"
+          style="background-color: #d6efff; border-radius: 999px"
         >
-          <i class="bi bi-download"></i> Download CSV
-        </button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Cancel
-        </button>
+          70%
+        </span>
+        <div class="d-flex align-items-center gap-2">
+          <button
+            class="btn btn-outline-success d-flex align-items-center gap-2 dwcsv"
+            type="button"
+          >
+            <i class="bi bi-download"></i> Download CSV
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
 <script>
   document.addEventListener("keydown", function (event) {
     if (event.altKey && event.key === "ArrowLeft") {
@@ -319,7 +330,7 @@
       <p><strong>Text:</strong><br><pre style="white-space:pre-wrap;">${
         selectedData.fulltext || ""
       }</pre></p>
-  `; 
+  `;
       $("#modalContent").html(modalContent);
       $("#dataModal .dwcsv").data("id", selectedId);
       $("#dataModal").modal("show");

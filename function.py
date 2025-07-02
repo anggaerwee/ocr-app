@@ -83,14 +83,14 @@ def extract_text_with_ocr(file_path, page_number):
 
 def extract_image_with_ocr(image_path):
     try:
-        image = Image.open(image_path)
-        image = image.convert("L")
+        image = cv2.imread(image_path)
 
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.7)  # dari 2.0 ke 2.5
-
-        brightness = ImageEnhance.Brightness(image)
-        image = brightness.enhance(1.0)
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+        merged = cv2.merge((cl, a, b))
+        image = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
 
         sharpen_kernel = np.array([[-1, -1, -1], [-1, 9.5, -1], [-1, -1, -1]])
         image = cv2.filter2D(image, -1, sharpen_kernel)
