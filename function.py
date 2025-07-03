@@ -8,7 +8,7 @@ import pandas as pd
 import csv
 import cv2
 import numpy as np
-
+from jiwer import wer
 from database.db_config import Session, ProductTable, InvoiceBlur
 def parse_row(row_text, full_text, filename):
     try:
@@ -110,25 +110,23 @@ def extract_image_with_ocr(image_path):
         pil_img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("L")
         pil_img = pil_img.point(lambda p: 255 if p > 128 else 0)
 
-        custom_config = r'--oem 3 --psm 6'
+
+        custom_config = r'--oem 3 --psm 6' 
         extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng+ind')
 
-        extracted_text = re.sub(r"[^\w\s.%,-/#]", " ", extracted_text)
-        extracted_text = re.sub(r'([a-zA-Z])4([a-zA-Z]*)', r'\1e\2', extracted_text)
-        lines = extracted_text.splitlines()
-        cleaned_lines = []
-        for line in lines:
-            line = re.sub(r"[^\w\s.%,-/]", "", line)
-            line = re.sub(r"\s+", " ", line).strip()
-            line = re.sub(r"(\d)\s+([a-zA-Z])", r"\1 \2", line)
-            if line:
-                cleaned_lines.append(line)
+        original_image = Image.open(image_path).convert("L")
+        original_text = pytesseract.image_to_string(original_image, config=custom_config, lang='eng+ind') 
 
-        return "\n".join(cleaned_lines)
+        ocr_wer = wer(original_text, extracted_text) 
+
+        print(f"Original = {original_text}") 
+        print(f"Ekstrak = {extracted_text}") 
+        print(f"Improvement WER (vs original image): {ocr_wer:.2%}") 
+        return extracted_text, ocr_wer
 
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
-        return None
+        return None, None
 
 def process_file(file_path, mode="product", text_override=None):
     if not os.path.exists(file_path):
@@ -153,9 +151,9 @@ def process_file(file_path, mode="product", text_override=None):
         rows = full_text.split("\n")
     elif file_path.endswith('.webp'):
         text = extract_image_with_ocr(file_path)
-        print(f"Ekstrak Teks {text}")
+        # print(f"Ekstrak Teks {text}")
         full_text = text
-        rows = text.split("\n")
+        rows = text.split("\n") if text else []
     else:
         print(f"File {file_path} tidak didukung")
         return ""

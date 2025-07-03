@@ -290,6 +290,9 @@
           Swal.close();
           if (response.text && response.text.trim() !== "") {
             localStorage.setItem("textData", response.text);
+            if (response.wer !== undefined && response.wer !== null) {
+              localStorage.setItem("werValue", response.wer);
+            }
             localStorage.setItem("reloadedOnce", "true");
             window.location.reload();
           } else {
@@ -354,6 +357,7 @@
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
       const savedText = localStorage.getItem("textData");
+      const werValue = localStorage.getItem("werValue");
 
       if (wasReloaded && savedText) {
         $("#text-area").removeClass("hidden");
@@ -361,7 +365,17 @@
         $("#btn-copy").removeClass("hidden");
         $("#output").removeClass("hidden");
         $("#text-area").val(savedText);
+        if (werValue) {
+          if (werValue) {
+            $("#label-area").append(
+              `<span class="ml-4 text-sm text-indigo-600">WER: ${(
+                parseFloat(werValue) * 100
+              ).toFixed(2)}%</span>`
+            );
+          }
+        }
         localStorage.removeItem("textData");
+        localStorage.removeItem("werValue");
         localStorage.removeItem("reloadedOnce", true);
       }
 

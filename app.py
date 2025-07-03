@@ -164,14 +164,18 @@ def submit_file():
                     text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
                     full_text += f"\n\n--- Halaman {idx} ---\n{text}"
             elif filename.lower().endswith('.webp'):
-                img = Image.open(final_stream)
-                text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
+                temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                with open(temp_path, 'wb') as f:
+                    f.write(final_stream.read())
+                text, ocr_wer = extract_image_with_ocr(temp_path)
                 full_text = text
+                # Hapus file sementara jika perlu
+                os.remove(temp_path)
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-            return jsonify({'text': full_text})
+            return jsonify({'text': full_text, 'wer':ocr_wer})
 
         return '', 200
 
