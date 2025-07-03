@@ -150,7 +150,7 @@ def process_file(file_path, mode="product", text_override=None):
                     print(f"Error reading page {page_number}: {e}")
         rows = full_text.split("\n")
     elif file_path.endswith('.webp'):
-        text = extract_image_with_ocr(file_path)
+        text, ocr_wer = extract_image_with_ocr(file_path)
         # print(f"Ekstrak Teks {text}")
         full_text = text
         rows = text.split("\n") if text else []

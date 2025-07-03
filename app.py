@@ -157,6 +157,10 @@ def submit_file():
             final_stream = BytesIO(combined)
             final_stream.seek(0)
 
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            with open(output_path, 'wb') as f:
+                f.write(final_stream.getbuffer())
+
             full_text = ""
             if filename.lower().endswith('.pdf'):
                 images = convert_from_bytes(final_stream.read(), dpi=205)
@@ -169,8 +173,6 @@ def submit_file():
                     f.write(final_stream.read())
                 text, ocr_wer = extract_image_with_ocr(temp_path)
                 full_text = text
-                # Hapus file sementara jika perlu
-                os.remove(temp_path)
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
