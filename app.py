@@ -9,6 +9,7 @@ from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 import pytesseract
 from PIL import Image
+from jiwer import wer
 from pdf2image import convert_from_bytes
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'output'
@@ -162,22 +163,36 @@ def submit_file():
                 f.write(final_stream.getbuffer())
 
             full_text = ""
+            ocr_wer = None
             if filename.lower().endswith('.pdf'):
                 images = convert_from_bytes(final_stream.read(), dpi=205)
+                full_text = ""
+                original_all = ""
+                enhanced_all = ""
+
                 for idx, img in enumerate(images, start=1):
-                    text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
-                    full_text += f"\n\n--- Halaman {idx} ---\n{text}"
+                    gray = img.convert("L")
+                    binarized = gray.point(lambda p: 255 if p > 128 else 0)
+
+                    original_text = pytesseract.image_to_string(gray, config='--oem 3 --psm 6', lang='eng+ind')
+                    enhanced_text = pytesseract.image_to_string(binarized, config='--oem 3 --psm 6', lang='eng+ind')
+
+                    original_all += original_text + "\n"
+                    enhanced_all += enhanced_text + "\n"
+
+                    full_text += f"\n\n--- Halaman {idx} ---\n{enhanced_text}"
+
+                ocr_wer = wer(original_all.strip(), enhanced_all.strip())
+
             elif filename.lower().endswith('.webp'):
                 temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                with open(temp_path, 'wb') as f:
-                    f.write(final_stream.read())
                 text, ocr_wer = extract_image_with_ocr(temp_path)
                 full_text = text
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-            return jsonify({'text': full_text, 'wer':ocr_wer})
+            return jsonify({'text': full_text, 'wer': ocr_wer})
 
         return '', 200
 
