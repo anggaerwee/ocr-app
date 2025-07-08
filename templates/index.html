@@ -1,4 +1,4 @@
-<img
+<!-- <img
   src="{{ url_for('static', filename='images.jpg') }}"
   class="absolute top-0 left-0 w-32 opacity-10 z-0"
   alt="Decor"
@@ -17,22 +17,17 @@
   src="{{ url_for('static', filename='images.jpg') }}"
   class="absolute bottom-1/4 left-10 w-24 opacity-10 z-0 -rotate-6"
   alt="Decor"
-/>
+/> -->
 <div
-  class="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-white py-8"
+  class="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-white py-20"
 >
+  <h1 class="text-gray-900 text-xl my-10 font-medium title-font">
+    PDF to SQL Data Extraction Tool
+  </h1>
+
   <div
     class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
   >
-    <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">
-      PDF to SQL Data Extraction Tool
-    </h2>
-    <p class="leading-relaxed mb-5 text-gray-600">
-      Projek ini bertujuan untuk membuat alat yang bisa mengambil data dari
-      dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.<br />Mohon
-      toleransi kalo ada typo
-    </p>
-
     {% with messages = get_flashed_messages(with_categories=True) %} {% if
     messages %}
     <div class="my-3" id="alert">
@@ -91,75 +86,67 @@
       alt="Background Image"
     />
 
-    <div
-      class="bg-white border border-gray-300 rounded-lg p-6 flex flex-col relative z-10 shadow-md"
-    >
-      <h3 class="text-xl font-bold text-gray-800 mb-4 relative z-10">
-        {{ title }}
-      </h3>
-
-      <div class="my-3" id="alert">
-        <form
-          class="dropzone"
-          id="fileDropzone"
-          action="/submit"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <div class="dz-message needsclick">
-            <i class="ki-duotone ki-file-up fs-3x text-primary"
-              ><span class="path1"></span><span class="path2"></span
-            ></i>
+    <div class="my-3" id="alert">
+      <form
+        class="dropzone"
+        id="fileDropzone"
+        action="/submit"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <div class="dz-message needsclick">
+          <i class="ki-duotone ki-file-up fs-3x text-primary"
+            ><span class="path1"></span><span class="path2"></span
+          ></i>
+          <div
+            id="upload-hover"
+            class="position-relative d-inline-block overflow-hidden cursor-pointer"
+            style="width: 320px"
+          >
             <div
-              id="upload-hover"
-              class="position-relative d-inline-block overflow-hidden cursor-pointer"
-              style="width: 320px"
+              id="upload-text-container"
+              class="d-flex justify-content-between align-items-center"
+              style="transition: transform 0.4s ease, opacity 0.4s ease"
             >
               <div
-                id="upload-text-container"
-                class="d-flex justify-content-between align-items-center"
-                style="transition: transform 0.4s ease, opacity 0.4s ease"
-              >
-                <div
-                  id="upload-text-left"
-                  class="fs-7 fw-semibold text-gray-900"
-                  style="
-                    white-space: nowrap;
-                    transition: transform 0.4s ease, opacity 0.4s ease;
-                  "
-                >
-                  Drop files here or click to upload.
-                </div>
-                <div
-                  id="upload-text-right"
-                  class="fs-7 fw-semibold text-gray-500"
-                  style="
-                    white-space: nowrap;
-                    transition: transform 0.4s ease, opacity 0.4s ease;
-                  "
-                >
-                  File anda akan otomatis di convert
-                </div>
-              </div>
-              <i
-                id="upload-icon"
-                class="bi bi-cloud-arrow-up-fill position-absolute top-50 start-50"
+                id="upload-text-left"
+                class="fs-7 fw-semibold text-gray-900"
                 style="
-                  font-size: 0;
-                  opacity: 0;
-                  transform: translate(-50%, -50%) scale(0);
-                  transition: font-size 0.4s ease, opacity 0.4s ease,
-                    transform 0.4s ease;
+                  white-space: nowrap;
+                  transition: transform 0.4s ease, opacity 0.4s ease;
                 "
-              ></i>
+              >
+                Drop files here or click to upload.
+              </div>
+              <div
+                id="upload-text-right"
+                class="fs-7 fw-semibold text-gray-500"
+                style="
+                  white-space: nowrap;
+                  transition: transform 0.4s ease, opacity 0.4s ease;
+                "
+              >
+                File anda akan otomatis di convert
+              </div>
             </div>
+            <i
+              id="upload-icon"
+              class="bi bi-cloud-arrow-up-fill position-absolute top-50 start-50"
+              style="
+                font-size: 0;
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+                transition: font-size 0.4s ease, opacity 0.4s ease,
+                  transform 0.4s ease;
+              "
+            ></i>
           </div>
-        </form>
-      </div>
-      <p class="text-xs text-gray-500 mt-3">
-        Masukan file pdf untuk mendownload data csv yang disimpan di PostgreSQL
-      </p>
+        </div>
+      </form>
     </div>
+    <p class="text-xs text-gray-500 mt-3">
+      Masukan file pdf untuk mendownload data csv yang disimpan di PostgreSQL
+    </p>
   </div>
   <hr class="my-8 border-gray-300" />
   <div class="hidden w-full max-w-6xl bg-white rounded-lg p-8" id="output">
@@ -205,6 +192,17 @@
         readonly
       ></textarea>
       <div
+        id="ocr-output"
+        style="
+          white-space: pre-wrap;
+          min-height: 250px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 10px;
+          flex: 1;
+        "
+      ></div>
+      <div
         class="button-grup"
         style="display: flex; flex-direction: column; gap: 1px"
       >
@@ -222,6 +220,20 @@
         </button>
       </div>
     </div>
+
+    <button
+      id="btn-collapse"
+      class="px-2 py-1 border-2 border-indigo-500 bg-indigo-600 font-semibold mt-4 rounded focus:outline-indigo-600 text-white"
+    >
+      Collapse
+    </button>
+  </div>
+
+  <div
+    class="transition-all duration-300 overflow-hidden mt-4"
+    id="tailwind-collapse-content"
+  >
+    <div class="p-4 bg-gray-100 rounded shadow">collapse jancok kontollll</div>
   </div>
 </div>
 <div
@@ -246,6 +258,7 @@
     </div>
   </div>
 </div>
+
 <script>
   $(document).ready(function () {
     Dropzone.autoDiscover = false;
@@ -292,6 +305,12 @@
             localStorage.setItem("textData", response.text);
             if (response.wer !== undefined && response.wer !== null) {
               localStorage.setItem("werValue", response.wer);
+            }
+            if (response.wer_per_line) {
+              localStorage.setItem(
+                "werPerLine",
+                JSON.stringify(response.wer_per_line)
+              );
             }
             localStorage.setItem("reloadedOnce", "true");
             window.location.reload();
@@ -357,26 +376,59 @@
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
       const savedText = localStorage.getItem("textData");
-      const werValue = localStorage.getItem("werValue");
+      const werPerLine = localStorage.getItem("werPerLine");
 
       if (wasReloaded && savedText) {
         $("#text-area").removeClass("hidden");
         $("#label-area").removeClass("hidden");
         $("#btn-copy").removeClass("hidden");
         $("#output").removeClass("hidden");
-        $("#text-area").val(savedText);
-        if (werValue) {
-          if (werValue) {
-            $("#label-area").append(
-              `<span class="ml-4 text-sm text-indigo-600">WER: ${(
-                parseFloat(werValue) * 100
-              ).toFixed(2)}%</span>`
-            );
+
+        if (werPerLine) {
+            try {
+            const data = JSON.parse(werPerLine);
+            let html = "";
+            let plain = "";
+            let hasInaccurate = false;
+            data.forEach(function (row, idx) {
+              const extr = row[1];
+              const wer = row[2];
+
+              if (wer > 0.1) {
+                html += `<span style="background: #ffe0e0; color: #b91c1c; title="Baris kurang akurat (WER: ${(
+                  wer * 100
+                ).toFixed(2)}%)">${$("<div>").text(extr).html()}</span>\n`;
+              } else {
+                html += `${$("<div>").text(extr).html()}\n`;
+              }
+              plain += extr + "\n";
+            });
+            $("#text-area").val(plain);
+            $("#ocr-output").html(html);
+            $("#btn-collapse").show();
+          } catch (e) {
+            $("#text-area").val(savedText);
+            $("#ocr-output").html("");
+            $('#btn-collapse').hide();
           }
+        } else {
+          $("#text-area").val(savedText);
+          $("#ocr-output").html("");
+          $('#btn-collapse').hide();
         }
+
+        if (localStorage.getItem("werValue")) {
+          $("#label-area").append(
+            `<span class="text-sm text-gray-500">WER: ${(
+              parseFloat(localStorage.getItem("werValue")) * 100
+            ).toFixed(2)}%</span>`
+          );
+        }
+
         localStorage.removeItem("textData");
         localStorage.removeItem("werValue");
-        localStorage.removeItem("reloadedOnce", true);
+        localStorage.removeItem("werPerLine");
+        localStorage.removeItem("reloadedOnce");
       }
 
       $("#text-area").on("input", function () {
@@ -418,6 +470,22 @@
           });
         }
       );
+    });
+
+    $(document).ready(function () {
+      $("#tailwind-collapse-content").css({ maxHeight: 0, padding: 0 });
+      let collapsed = true;
+      $("#btn-collapse").on("click", function () {
+        const $content = $("#tailwind-collapse-content");
+        if (collapsed) {
+          $content.css({ maxHeight: "1000px", padding: "" });
+          $(this).text("Collapse");
+        } else {
+          $content.css({ maxHeight: 0, padding: 0 });
+          $(this).text("Expand");
+        }
+        collapsed = !collapsed;
+      });
     });
 
     $(document).on("click", "#saveButton", function (e) {

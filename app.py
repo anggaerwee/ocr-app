@@ -16,6 +16,10 @@ app.config['UPLOAD_FOLDER'] = 'output'
 app.secret_key = 'supersecretkey'
 
 @app.route('/')
+def v_login():
+    return render_template('components/content.html', title='OcrConvert', subtitle='Login', view='login')
+
+@app.route('/convert')
 def home():
     files = []
     folder = app.config['UPLOAD_FOLDER']
@@ -186,13 +190,13 @@ def submit_file():
 
             elif filename.lower().endswith('.webp'):
                 temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                text, ocr_wer = extract_image_with_ocr(temp_path)
+                text, ocr_wer, line_wer_result = extract_image_with_ocr(temp_path)
                 full_text = text
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-            return jsonify({'text': full_text, 'wer': ocr_wer})
+            return jsonify({'text': full_text, 'wer': ocr_wer, 'wer_per_line': line_wer_result})
 
         return '', 200
 
@@ -330,8 +334,11 @@ def invoice_count():
         count = len(ProductTable.get_all(Session()))
     return jsonify({"count": count})
 
+@app.route('/dashboard')
+def v_dashboard():
+    return render_template('components/content.html', title='Dashboard', subtitle='Dashboard',view='dashboard')
 
 if __name__ == "__main__":
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', debug=True, port=5000)

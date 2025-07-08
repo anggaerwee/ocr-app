@@ -6,6 +6,7 @@
     {% include "components/header.html" %}
   </head>
   <body>
+
     <div id="loading-screen">
       <img
         src="{{ url_for('static', filename='loading.gif') }}"
@@ -13,6 +14,20 @@
       />
     </div>
     <div id="main-content" style="visibility: hidden">
+      <header class="text-gray-400 bg-gray-900 body-font fixed-top">
+  <div class="container mx-auto flex flex-wrap p-1 flex-col md:flex-row items-center">
+    <a class="flex title-font font-medium items-center text-white my-2 md:mb-0">
+        <img src="../static/logo.png" class="w-10 h-10 text-white p-1 bg-indigo-500 rounded-full">
+      <span class="ml-3 text-xl">Converter`</span>
+    </a>
+    <nav class="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center">
+      <a class="mr-5 hover:text-white" href="/dashboard">Dashboard</a>
+      <a class="mr-5 hover:text-white" href="/convert">Convert</a>
+    </nav>
+    <button class="inline-flex items-center bg-gray-800 border-0 py-2 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-1 md:mt-0">Log Out
+    </button>
+  </div>
+</header>
       {% block content %}{% endblock %}
     </div>
       {% include "components/footer.html" %}
