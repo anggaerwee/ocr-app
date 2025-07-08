@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for, send_file, session
-from function import process_file, ProductTable, InvoiceBlur, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
-import os, base64
+from flask import Flask, render_template, request, redirect, flash, send_from_directory, jsonify, url_for, send_file, make_response
+from function import process_file, ProductTable, InvoiceBlur, Msuser, Session, write_csv_with_delimiter, extract_text_with_ocr, extract_image_with_ocr
+import bcrypt, os, base64
+from os import listdir
 import csv
 from sqlalchemy.sql import text,func, or_
 from io import StringIO, BytesIO
@@ -11,47 +12,227 @@ import pytesseract
 from PIL import Image
 from jiwer import wer
 from pdf2image import convert_from_bytes
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'output'
-app.secret_key = 'supersecretkey'
+from datetime import timedelta
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, verify_jwt_in_request, set_access_cookies, unset_jwt_cookies
+)
+from flask_jwt_extended.exceptions import NoAuthorizationError
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+app.config['JWT_SECRET_KEY'] = 'very-secret-key-12345'
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_COOKIE_SECURE'] = False
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+app.config['JWT_ERROR_MESSAGE_KEY'] = None
+app.secret_key = 'supersecretkey'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+jwt = JWTManager(app)
+CORS(app, supports_credentials=True)
+
+@jwt.unauthorized_loader
+def custom_unauthorized_response(err_str):
+    return redirect('/')
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return redirect('/')
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return redirect('/')
+
+@jwt.revoked_token_loader
+def revoked_token_callback(jwt_header, jwt_payload):
+    return redirect('/')
+
+@jwt.needs_fresh_token_loader
+def needs_fresh_token_callback(jwt_header, jwt_payload):
+    return redirect('/')
+
+@app.before_request
+def restrict_routes():
+    allowed_paths = ['/', '/api/login', '/static']
+
+    if any(request.path.startswith(path) for path in allowed_paths):
+        return
+
+    try:
+        verify_jwt_in_request()
+        user = get_jwt_identity()
+        if not user:
+            return redirect('/')
+    except:
+        return redirect('/')
+
+    if user and request.path in ['/', '/api/login']:
+        return redirect('/dashboard')
+
+@app.context_processor
+def inject_user():
+    try:
+        verify_jwt_in_request()
+        user = get_jwt_identity()
+    except:
+        user = None
+    return dict(user=user)
+    
 @app.route('/')
-def v_login():
-    return render_template('components/content.html', title='OcrConvert', subtitle='Login', view='login')
+def login_page():
+    try:
+        verify_jwt_in_request()
+        user = get_jwt_identity()
+        if user:
+            return redirect('/dashboard')
+    except:
+        pass
+    response = make_response(render_template('components/content.html', view='auth', title='OcrConvert', subtitle='Sign In'))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Ecpires'] = '0'
+    return response
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+
+    db = Session()
+    try:
+        user = db.query(Msuser).filter(Msuser.usernm == username).first()
+
+        user.isactive = True
+        db.commit()
+        if not user:
+            return jsonify({"msg": "Username tidak ditemukan"}), 401
+        if not bcrypt.checkpw(password.encode('utf-8'), user.pswd.encode('utf-8')):
+            return jsonify({"msg": "Password salah"}), 401
+        
+        token = create_access_token(identity=str(user.userid))
+        response = jsonify({"msg": "Login berhasil", "token": token})
+        set_access_cookies(response, token)
+        return response, 200
+
+    finally:
+        db.close()
+
+@app.route('/logout')
+@jwt_required()  
+def logout():
+    db = Session()
+    try:
+        user_id = get_jwt_identity() 
+        user = db.query(Msuser).filter_by(userid=int(user_id)).first()
+
+        if user:
+            user.isactive = False
+            db.commit()
+    except Exception as e:
+        print("Logout error:", e)
+        db.rollback()
+    finally:
+        db.close()
+
+    response = make_response(redirect('/'))
+    unset_jwt_cookies(response)
+    return response
+
+@app.route('/dashboard')
+@jwt_required()
+def utem():
+    db = Session()
+    try:
+        user_id = get_jwt_identity()
+        user = db.query(Msuser).filter(Msuser.userid == user_id).first()
+        return render_template(
+            'components/content.html',
+            title='OcrConvert',
+            subtitle='Home',
+            view='dashboard',
+            user=user
+        )
+    finally:
+        db.close()
+
 
 @app.route('/convert')
 def home():
-    files = []
-    folder = app.config['UPLOAD_FOLDER']
-    if os.path.exists(folder):
-        files = [f for f in os.listdir(folder) if f.endswith('.csv')]
-    return render_template('components/content.html', files=files, view='index', title='OcrConvert', subtitle='Upload')
-
+    try:
+        verify_jwt_in_request()
+        user = get_jwt_identity()
+        folder = app.config['UPLOAD_FOLDER']
+        files = [f for f in listdir(folder) if f.endswith('.csv')] if os.path.exists(folder) else []
+        response = make_response(render_template('components/content.html', files=files, view='index', title='OcrConvert', subtitle='Upload'))
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    except Exception as e:
+        flash(('error', 'Anda harus login terlebih dahulu.'))
+        return redirect('/')
 @app.route('/data')
+@jwt_required()
 def data():
     return render_template('components/content.html', view='data', title='OcrConvert', subtitle='Data')
 
+# @app.route('/api/filenames')
+# def api_filenames():
+#     session = Session()
+#     try:
+#         search = request.args.get('q', '').strip()
+#         source = request.args.get('source', 'product')
+
+#         table_name ='invoiceblur' if source == 'blur' else 'invoice'
+#         base_query = f"""
+#             SELECT DISTINCT filename, text
+#             FROM {table_name}
+#             WHERE filename IS NOT NULL AND filename != ''
+#         """
+#         if search:
+#             base_query += " AND filename LIKE :search"
+#             results = session.execute(
+#                 text(base_query),
+#                 {"search": f"%{search}%"}
+#             ).fetchall()
+#         else:
+#             results = session.execute(text(base_query)).fetchall()
+#         data = [{'id': row[0], 'text': row[0], 'fulltext': row[1]} for row in results]
+#         return jsonify({'results': data})
+#     except Exception as e:
+#         return jsonify({'error': str(e)})
+#     finally:
+#         session.close()
+
 @app.route('/api/filenames')
+@jwt_required()
 def api_filenames():
     session = Session()
     try:
+        user_id = get_jwt_identity()
+        user = session.query(Msuser).filter(Msuser.userid == user_id).first()
+        if not user:
+            return jsonify({'error': 'User tidak ditemukan'}), 401
+
         search = request.args.get('q', '').strip()
         source = request.args.get('source', 'product')
+        table_name = 'invoiceblur' if source == 'blur' else 'invoice'
 
-        table_name ='invoiceblur' if source == 'blur' else 'invoice'
-        base_query = f"""
-            SELECT DISTINCT filename, text
-            FROM {table_name}
-            WHERE filename IS NOT NULL AND filename != ''
-        """
+        base_query = f"SELECT DISTINCT filename, text FROM {table_name} WHERE filename IS NOT NULL AND filename != ''"
+
+        params = {}
         if search:
             base_query += " AND filename LIKE :search"
-            results = session.execute(
-                text(base_query),
-                {"search": f"%{search}%"}
-            ).fetchall()
-        else:
-            results = session.execute(text(base_query)).fetchall()
+            params['search'] = f"%{search}%"
+
+        # USER BIASA hanya boleh lihat filenya sendiri
+        if user.groupid != 1:
+            base_query += " AND useracid = :user_id"
+
+        results = session.execute(text(base_query), params).fetchall()
+
         data = [{'id': row[0], 'text': row[0], 'fulltext': row[1]} for row in results]
         return jsonify({'results': data})
     except Exception as e:
@@ -59,22 +240,121 @@ def api_filenames():
     finally:
         session.close()
 
+# @app.route('/api/products')
+# @jwt_required()  # ← Penting agar bisa pakai get_jwt_identity()
+# def api_products():
+#     session = Session()
+#     try:
+#         user_id = get_jwt_identity()  # Sekarang bisa digunakan dengan aman
+#         user = session.query(Msuser).filter(Msuser.userid == user_id).first()
+#         if not user:
+#             return jsonify({'error': 'User tidak ditemukan'}), 401
+
+#         groupid = user.groupid
+#         model = InvoiceBlur if request.args.get('source', 'product') == 'blur' else ProductTable
+
+#         # ADMIN
+#         if groupid == 1:
+#             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)
+#         else:
+#             # USER BIASA - hanya lihat data miliknya
+#             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid).filter(model.useracid == user.userid)
+
+#         # Filter tambahan
+#         filename = request.args.get('filename', '').strip()
+#         startdt = request.args.get('startdt', '').strip()
+#         enddt = request.args.get('enddt', '').strip()
+#         search_value = request.args.get("search[value]", "").strip()
+
+#         if filename:
+#             query = query.filter(model.filename == filename)
+#         if startdt:
+#             try:
+#                 start_date = datetime.strptime(startdt, '%Y-%m-%d').date()
+#                 query = query.filter(func.date(model.createddate) >= start_date)
+#             except:
+#                 pass
+#         if enddt:
+#             try:
+#                 end_date = datetime.strptime(enddt, '%Y-%m-%d').date()
+#                 query = query.filter(func.date(model.createddate) <= end_date)
+#             except:
+#                 pass
+
+#         total_records = query.count()
+
+#         if search_value:
+#             query = query.filter(
+#                 or_(
+#                     model.product_number.ilike(f"%{search_value}%"),
+#                     model.description.ilike(f"%{search_value}%"),
+#                     model.filename.ilike(f"%{search_value}%"),
+#                 )
+#             )
+
+#         filtered_records = query.count()
+#         draw = int(request.args.get("draw", 1))
+#         start = int(request.args.get("start", 0))
+#         length = int(request.args.get("length", 10))
+#         results = query.offset(start).limit(length).all()
+
+#         data = []
+#         for item, usernm in results:
+#             row = {
+#                 'id': item.id,
+#                 'product_number': item.product_number,
+#                 'description': item.description,
+#                 'quantity': item.quantity,
+#                 'unit_price': item.unit_price,
+#                 'discount': item.discount,
+#                 'line_total': item.line_total,
+#                 'text': item.text,
+#                 'filename': item.filename,
+#                 'createddate': item.createddate.strftime('%d-%m-%Y %H:%M:%S') if item.createddate else None,
+#             }
+#             if groupid == 1:
+#                 row['usernm'] = usernm
+#             data.append(row)
+
+#         return jsonify({
+#             'draw': draw,
+#             'recordsTotal': total_records,
+#             'recordsFiltered': filtered_records,
+#             'data': data
+#         })
+
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+#     finally:
+#         session.close()
+
 @app.route('/api/products')
+@jwt_required()
 def api_products():
     session = Session()
     try:
-        draw = int(request.args.get("draw", 1))
-        start = int(request.args.get("start", 0))
-        length = int(request.args.get("length", 10))
-        search_value = request.args.get("search[value]", "").strip()
+        user_id = get_jwt_identity()
+        user = session.query(Msuser).filter(Msuser.userid == user_id).first()
+        if not user:
+            return jsonify({'error': 'User tidak ditemukan'}), 401
 
+        groupid = user.groupid
         source = request.args.get('source', 'product')
+        model = InvoiceBlur if source == 'blur' else ProductTable
+
+        # Admin: semua data
+        if groupid == 1:
+            query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)
+        else:
+            # User biasa: hanya data sendiri
+            query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)\
+                .filter(model.useracid == user.userid)
+
+        # Filter tambahan
+        filename = request.args.get('filename', '').strip()
         startdt = request.args.get('startdt', '').strip()
         enddt = request.args.get('enddt', '').strip()
-        filename = request.args.get('filename', '').strip()
-
-        model = InvoiceBlur if source == 'blur' else ProductTable
-        query = session.query(model)
+        search_value = request.args.get("search[value]", "").strip()
 
         if filename:
             query = query.filter(model.filename == filename)
@@ -100,27 +380,31 @@ def api_products():
                 or_(
                     model.product_number.ilike(f"%{search_value}%"),
                     model.description.ilike(f"%{search_value}%"),
-                    model.filename.ilike(f"%{search_value}%"),
+                    model.filename.ilike(f"%{search_value}%")
                 )
             )
+
         filtered_records = query.count()
+        draw = int(request.args.get("draw", 1))
+        start = int(request.args.get("start", 0))
+        length = int(request.args.get("length", 10))
         results = query.offset(start).limit(length).all()
 
-        data = [
-            {
-                'id': p.id,
-                'product_number': p.product_number,
-                'description': p.description,
-                'quantity': p.quantity,
-                'unit_price': p.unit_price,
-                'discount': p.discount,
-                'line_total': p.line_total,
-                'text': p.text,
-                'filename': p.filename,
-                'createddate': p.createddate.strftime('%d-%m-%Y %H:%M:%S') if p.createddate else None
-            }
-            for p in results
-        ]
+        data = []
+        for item, usernm in results:
+            data.append({
+                'id': item.id,
+                'product_number': item.product_number,
+                'description': item.description,
+                'quantity': item.quantity,
+                'unit_price': item.unit_price,
+                'discount': item.discount,
+                'line_total': item.line_total,
+                'text': item.text,
+                'filename': item.filename,
+                'createddate': item.createddate.strftime('%d-%m-%Y %H:%M:%S') if item.createddate else None,
+                'usernm': usernm
+            })
 
         return jsonify({
             'draw': draw,
@@ -128,9 +412,10 @@ def api_products():
             'recordsFiltered': filtered_records,
             'data': data
         })
+
     except Exception as e:
-        return jsonify({'error': str(e)})
-    finally:        
+        return jsonify({'error': str(e)}), 500
+    finally:
         session.close()
 
 CHUNK_DIR = 'temp_chunks'
@@ -204,6 +489,7 @@ def submit_file():
         return jsonify({'error': str(e)}), 500
     
 @app.route('/save/<path:filepath>', methods=['POST'])
+@jwt_required()
 def save(filepath):
     try:
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
@@ -212,8 +498,8 @@ def save(filepath):
         
         mode = request.form.get('mode', 'product').lower()
         text_override = request.form.get('text') if mode == "blur" else None
-
-        csv_filename = process_file(full_path, mode=mode, text_override=text_override)
+        user_id = get_jwt_identity()
+        csv_filename = process_file(full_path, mode=mode, text_override=text_override, useracid=user_id)
 
         if csv_filename == "error_blur":
             return jsonify({
@@ -325,15 +611,34 @@ def delete_all():
     except Exception as e:
         return f"Error: {e}"
     
-@app.route("/api/invoice_count")
-def invoice_count():
-    source = request.args.get('source', 'product')
-    if source == 'blur':
-        count = len(InvoiceBlur.get_all(Session()))
-    else:
-        count = len(ProductTable.get_all(Session()))
-    return jsonify({"count": count})
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
+@app.route("/api/invoice_count")
+@jwt_required()
+def invoice_count():
+    session = Session()
+    try:
+        source = request.args.get('source', 'product')
+        user_id = get_jwt_identity()
+        user = session.query(Msuser).filter_by(userid=user_id).first()
+
+        if not user:
+            return jsonify({'error': 'User tidak ditemukan'}), 401
+
+        model = InvoiceBlur if source == 'blur' else ProductTable
+
+        # ADMIN: Hitung semua data
+        if user.groupid == 1:
+            count = session.query(model).count()
+        else:
+            count = session.query(model).filter_by(useracid=user.userid).count()
+
+        return jsonify({"count": count})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        session.close()
 @app.route('/dashboard')
 def v_dashboard():
     return render_template('components/content.html', title='Dashboard', subtitle='Dashboard',view='dashboard')

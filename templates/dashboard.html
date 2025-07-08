@@ -1,25 +1,55 @@
-
-
-<div class="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-white py-8">
-    <section class="text-gray-600 body-font">
-  <div class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
-    <div class="content-right lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
-      <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">PDF to SQL 
-        <br class="hidden lg:inline-block">Data Extraction Tool
-      </h1>
-      <p class="mb-8 leading-relaxed text-left text-justify">Proyek ini bertujuan untuk membuat alat yang bisa mengambil data dari dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL. Karena beberapa PDF berbentuk gambar atau hasil scan, kita mungkin perlu menggunakan OCR (Optical Character Recognition) serta teknik untuk membersihkan dan menyusun data yang diambil.</p>
-      <div class="flex justify-center">
-        <a href="/convert" class="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">Convert</a>    <button class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg">Get Apps</button>
+<div
+  class="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-white py-8"
+>
+  <section class="text-gray-600 body-font">
+    <div
+      class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center"
+    >
+      <div
+        class="content-right lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center"
+      >
+        {% if user %}
+        <p class="text-lg font-semibold text-indigo-800 mb-2">
+          Welcome, {{ user.usernm }}!
+        </p>
+        {% endif %}
+        <h1
+          class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900"
+        >
+          PDF to SQL <br class="hidden lg:inline-block" />Data Extraction Tool
+        </h1>
+        <p class="mb-8 leading-relaxed text-left text-justify">
+          Proyek ini bertujuan untuk membuat alat yang bisa mengambil data dari
+          dokumen PDF dan mengubahnya ke format yang bisa digunakan di SQL.
+          Karena beberapa PDF berbentuk gambar atau hasil scan, kita mungkin
+          perlu menggunakan OCR (Optical Character Recognition) serta teknik
+          untuk membersihkan dan menyusun data yang diambil.
+        </p>
+        <div class="flex justify-center">
+          <a
+            href="/convert"
+            class="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+            >Convert</a
+          >
+          <button
+            class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg"
+          >
+            Get Apps
+          </button>
+        </div>
+      </div>
+      <div class="content-right lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
+        <img
+          class="object-cover object-center rounded"
+          alt="hero"
+          src="{{ url_for('static', filename='jumbroton.svg') }}"
+        />
       </div>
     </div>
-    <div class="content-right lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
-      <img class="object-cover object-center rounded" alt="hero" src="{{ url_for('static', filename='jumbroton.svg') }}">
-    </div>
-  </div>
-</section>
+  </section>
 </div>
 <script>
-window.addEventListener("pageReady", () => {
+  window.addEventListener("pageReady", () => {
     gsap.from("content-right", {
       opacity: 0,
       y: 100,
@@ -33,6 +63,14 @@ window.addEventListener("pageReady", () => {
       duration: 0.8,
       delay: 0.2,
       stagger: 0.2,
+    });
+
+    gsap.from(".content-right p", {
+      opacity: 0,
+      y: -30,
+      duration: 1,
+      delay: 0.1,
+      ease: "power2.out",
     });
   });
 </script>

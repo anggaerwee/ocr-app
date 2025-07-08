@@ -1,10 +1,5 @@
 <!-- <img
   src="{{ url_for('static', filename='images.jpg') }}"
-  class="absolute top-0 left-0 w-32 opacity-10 z-0"
-  alt="Decor"
-/>
-<img
-  src="{{ url_for('static', filename='images.jpg') }}"
   class="absolute bottom-0 right-0 w-32 opacity-10 z-0"
   alt="Decor"
 />
@@ -489,82 +484,95 @@
     });
 
     $(document).on("click", "#saveButton", function (e) {
-      e.preventDefault();
-      const filepath = $(this).data("filecsv");
-      const $saveBtn = $(this);
-      const $downloadBtn = $("#downloadButton");
+  e.preventDefault();
+  const filepath = $(this).data("filecsv");
+  const $saveBtn = $(this);
+  const $downloadBtn = $("#downloadButton");
 
-      Swal.fire({
-        title: "Menyimpan...",
-        html: `
+  const token = localStorage.getItem("token"); // Pastikan token disimpan sebagai 'access_token'
+
+  Swal.fire({
+    title: "Menyimpan...",
+    html: `
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
         <p>Please wait, is saving to the database...</p>
       </div>
     `,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  });
 
-      $.ajax({
-        url: `/save/${filepath}`,
-        type: "POST",
-        data: {},
-        success: function (response) {
-          if (response.status === "success") {
+  $.ajax({
+    url: `/save/${filepath}`,
+    type: "POST",
+    data: {mode: "product"},
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    success: function (response) {
+      if (response.status === "success") {
+        Swal.close();
+        Toast.fire({ icon: "success", text: response.message });
+        $saveBtn.hide();
+        $downloadBtn
+          .attr("href", `/download/${response.csv}`)
+          .removeClass("hidden");
+        localStorage.removeItem("textData");
+      } else if (response.status === "error_blur") {
+        const extractedText = $("#text-area").val();
+        // Lanjutkan kirim ke blur mode
+        $.ajax({
+          url: `/save/${filepath}`,
+          type: "POST",
+          data: {
+            mode: "blur",
+            text: extractedText
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          success: function (res) {
             Swal.close();
-            Toast.fire({ icon: "success", text: response.message });
-            $saveBtn.hide();
-            $downloadBtn
-              .attr("href", `/download/${response.csv}`)
-              .removeClass("hidden");
-            localStorage.removeItem("textData");
-          } else if (response.status === "error_blur") {
-            const extractedText = $("#text-area").val();
-            $.post(
-              `/save/${filepath}`,
-              { mode: "blur", text: extractedText },
-              function (res) {
-                Swal.close();
-                if (res.status === "success") {
-                  Toast.fire({
-                    icon: "success",
-                    text: "Data Telah Disimpan ke Table blur",
-                  });
-                  $saveBtn.hide();
-                  $downloadBtn
-                    .attr("href", `/download/${res.csv}`)
-                    .removeClass("hidden");
-                  localStorage.removeItem("textData");
-                } else {
-                  Toast.fire({ icon: "error", text: res.message });
-                }
-              }
-            ).fail(function (xhr) {
-              Swal.close();
-              Swal.fire({
-                icon: "error",
-                title: "Error",
-                text:
-                  xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
+            if (res.status === "success") {
+              Toast.fire({
+                icon: "success",
+                text: "Data Telah Disimpan ke Table blur",
               });
-            });
-          } else {
+              $saveBtn.hide();
+              $downloadBtn
+                .attr("href", `/download/${res.csv}`)
+                .removeClass("hidden");
+              localStorage.removeItem("textData");
+            } else {
+              Toast.fire({ icon: "error", text: res.message });
+            }
+          },
+          error: function (xhr) {
             Swal.close();
-            Toast.fire({ icon: "error", text: response.message });
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
+            });
           }
-        },
-        error: function (xhr) {
-          Swal.close();
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: xhr.responseJSON?.message || "Terjadi kesalahan.",
-          });
-        },
+        });
+      } else {
+        Swal.close();
+        Toast.fire({ icon: "error", text: response.message });
+      }
+    },
+    error: function (xhr) {
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: xhr.responseJSON?.message || "Terjadi kesalahan.",
       });
-    });
+    },
+  });
+});
 
     $(document).on("click", "#showdatabtn", function (e) {
       const $saveBtn = $("#saveButton");
@@ -650,4 +658,17 @@
       stagger: 0.2,
     });
   });
+  $.ajax({
+    type: 'GET',
+    url: '/dashboard',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem("token")}`
+    },
+    success: function(data) {
+    },
+    error: function(xhr, status, error) {
+      window.location.href = "/";
+    }
+  });
+
 </script>

@@ -1,0 +1,302 @@
+<style>
+  body {
+    color: #000;
+    overflow-x: hidden;
+    height: 100%;
+    background-color: #b0bec5;
+    background-repeat: no-repeat;
+  }
+
+  .auth-card0 {
+    box-shadow: 0px 4px 8px 0px #757575;
+    border-radius: 0px;
+  }
+
+  .auth-card2 {
+    margin: 0px 40px;
+  }
+
+  .auth-logo {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: 0;
+    width: 150px;
+    height: 75px;
+    margin-top: 20px;
+    margin-left: 35px;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20158.75%2052.917%22%20width=%22600%22%20height=%22200%22%3E%3Ctext%20style=%22font-size:35.9673px;line-height:1.25;font-family:sans-serif;letter-spacing:0;stroke-width:.897283%22%20x=%22-2.795%22%20y=%2224.584%22%20transform=%22scale(.6169%201.621)%22%3E%3Ctspan%20x=%22-2.795%22%20y=%2224.584%22%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;stroke-width:.897283'%3E%3Ctspan%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;fill:%231ba1e2;fill-opacity:1;stroke-width:.897283'%3EUniform%3C/tspan%3E%3Ctspan%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;fill:%23fc0;fill-opacity:1;stroke-width:.897283'%3ESoftware%3C/tspan%3E%3C/tspan%3E%3C/text%3E%3C/svg%3E");
+  }
+  .auth-image {
+    width: 360px;
+    height: 280px;
+  }
+
+  .auth-border-line {
+    border-right: 1px solid #eeeeee;
+  }
+
+  .auth-google {
+    background-color: #ffffff;
+    color: #4285f4;
+    font-size: 18px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .auth-google:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .auth-line {
+    height: 1px;
+    width: 45%;
+    background-color: #e0e0e0;
+    margin-top: 10px;
+  }
+
+  .auth-or {
+    width: 10%;
+    font-weight: bold;
+  }
+
+  .auth-text-sm {
+    font-size: 14px !important;
+  }
+
+  ::placeholder {
+    color: #bdbdbd;
+    opacity: 1;
+    font-weight: 300;
+  }
+
+  :-ms-input-placeholder {
+    color: #bdbdbd;
+    font-weight: 300;
+  }
+
+  ::-ms-input-placeholder {
+    color: #bdbdbd;
+    font-weight: 300;
+  }
+
+  input,
+  textarea {
+    padding: 10px 12px 10px 12px;
+    border: 1px solid lightgrey;
+    border-radius: 2px;
+    margin-bottom: 5px;
+    margin-top: 2px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #2c3e50;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  input:focus,
+  textarea:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border: 1px solid #304ffe;
+    outline-width: 0;
+  }
+
+  button:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    outline-width: 0;
+  }
+
+  a {
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .btn-blue {
+    background-color: #1a237e;
+    width: 150px;
+    color: #fff;
+    border-radius: 2px;
+  }
+
+  .btn-blue:hover {
+    background-color: #000;
+    cursor: pointer;
+  }
+
+  .bg-blue {
+    color: #fff;
+    background-color: #1a237e;
+  }
+
+  @media screen and (max-width: 991px) {
+    .auth-logo {
+      margin-left: 0px;
+      background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20158.75%2052.917%22%20width=%22600%22%20height=%22200%22%3E%3Ctext%20style=%22font-size:35.9673px;line-height:1.25;font-family:sans-serif;letter-spacing:0;stroke-width:.897283%22%20x=%22-2.795%22%20y=%2224.584%22%20transform=%22scale(.6169%201.621)%22%3E%3Ctspan%20x=%22-2.795%22%20y=%2224.584%22%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;stroke-width:.897283'%3E%3Ctspan%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;fill:%231ba1e2;fill-opacity:1;stroke-width:.897283'%3EUniform%3C/tspan%3E%3Ctspan%20style='font-style:italic;font-variant:normal;font-weight:700;font-stretch:normal;font-size:35.9673px;font-family:times%20new%20roman;-inkscape-font-specification:%22Times%20New%20Roman,%20Bold%20Italic%22;fill:%23fc0;fill-opacity:1;stroke-width:.897283'%3ESoftware%3C/tspan%3E%3C/tspan%3E%3C/text%3E%3C/svg%3E");
+    }
+
+    .auth-image {
+      width: 300px;
+      height: 220px;
+    }
+
+    .auth-border-line {
+      border-right: none;
+    }
+
+    .auth-card2 {
+      border-top: 1px solid #eeeeee !important;
+      margin: 0px 15px;
+    }
+  }
+  #alert-box {
+  display: none;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+</style>
+<div class="container-fluid px-1 px-md-5 px-lg-1 px-xl-5 py-5 mx-auto">
+  <div class="card auth-card0 border-0">
+    <div class="row d-flex">
+      <div class="col-lg-6">
+        <div class="card1 pb-5">
+          <div class="row">
+            <div class="auth-logo"></div>
+          </div>
+          <div class="row px-3 justify-content-center mt-4 mb-5 auth-border-line">
+            <img src="https://i.imgur.com/uNGdWHi.png" class="auth-image" />
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="auth-card2 card border-0 px-4 py-5">
+          <div class="row mb-4 px-3">
+            <h6 class="mb-0 mr-4 mt-2">Sign in with</h6>
+            <div class="auth-google text-center mr-3" onclick="google()">
+              <div class="bi bi-google"></div>
+            </div>
+          </div>
+          <div class="row px-3 mb-4">
+            <div class="auth-line"></div>
+            <small class="auth-or text-center">Or</small>
+            <div class="auth-line"></div>
+          </div>
+          <div class="row px-3">
+            <label class="mb-1"><h6 class="mb-0 auth-text-sm">Username</h6></label>
+            <input type="text" id="user" placeholder="Masukkan username" />
+          </div>
+          <div class="row px-3">
+            <label class="mb-1"><h6 class="mb-0 auth-text-sm">Password</h6></label>
+            <div class="input-group">
+              <input
+                type="password"
+                id="pass"
+                class="form-control"
+                placeholder="Masukkan password"
+              />
+              <span
+                class="input-group-text"
+                id="togglePassword"
+                style="cursor: pointer"
+                ><i class="bi bi-eye-slash" id="eyeIcon"></i
+              ></span>
+            </div>
+          </div>
+          <div class="mb-4"></div>
+          <div class="row mb-3 px-3">
+            <button
+              id="login-btn"
+              type="submit"
+              class="btn btn-primary w-40 max-w-xs py-2 text-white font-semibold shadow-md transition duration-200 ease-in-out hover:bg-blue-700 rounded"
+            >
+              <i class="fa fa-sign-in mr-2"></i> Login
+            </button>
+          </div>
+          <div id="error" class="text-center text-red-500 mt-2 hidden"></div>
+        </div>
+        <div id="alert-box" class="alert alert-success" role="alert">
+          <i class="bx bx-error-circle"></i> <span id="alert-msg"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $("#login-btn").on("click", function () {
+      const username = $("#user").val().trim();
+      const password = $("#pass").val().trim();
+
+      if (!username && !password) {
+        showAlert("Username dan password tidak boleh kosong!");
+        return;
+      }
+      if (!username) {
+        showAlert("Username tidak boleh kosong!");
+        return;
+      }
+      if (!password) {
+        showAlert("Password tidak boleh kosong!");
+        return;
+      }
+
+      $.ajax({
+        type: "POST",
+        url: "/api/login",
+        contentType: "application/json",
+        data: JSON.stringify({ username, password }),
+        xhrFields: {
+          withCredentials: true,
+        },
+        success: function (data) {
+          showAlert("Login berhasil!", "success");
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1500);
+        },
+        error: function (xhr) {
+          const msg = xhr.responseJSON?.msg || "Login gagal";
+          showAlert(msg);
+        },
+      });
+    });
+    $("#togglePassword").on("click", function () {
+      const passInput = $("#pass");
+      const eyeIcon = $("#eyeIcon");
+      const type = passInput.attr("type") === "password" ? "text" : "password";
+      passInput.attr("type", type);
+      eyeIcon.toggleClass("bi-eye bi-eye-slash");
+    });
+  });
+  function showAlert(message, type = "danger") {
+  const alertBox = $("#alert-box");
+  alertBox.removeClass("alert-success alert-danger").addClass(`alert-${type}`);
+  $("#alert-msg").text(message);
+  alertBox.fadeIn();
+
+  setTimeout(() => {
+    alertBox.fadeOut();
+  }, 2000);
+}
+function google() {
+  Swal.fire({
+    title: "Google Login",
+    text: "Fitur ini belum tersedia.\nMohon Tunggu pembaruan selanjutnya.",
+    icon: "info",
+    confirmButtonText: "OK",
+  });
+}
+</script>
