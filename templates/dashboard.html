@@ -10,7 +10,7 @@
       >
         {% if user %}
         <p class="text-lg font-semibold text-indigo-800 mb-2">
-          Welcome, {{ user.usernm }}!
+          Welcome, {{ user.usernm|capitalize }}!
         </p>
         {% endif %}
         <h1

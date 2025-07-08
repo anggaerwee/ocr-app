@@ -261,7 +261,7 @@
       url: "/submit",
       chunking: true,
       forceChunking: true,
-      chunkSize: 16 * 1024,
+      chunkSize: 1024 * 1024,
       retryChunks: true,
       retryChunksLimit: 3,
       parallelChunkUploads: true,
@@ -489,7 +489,7 @@
   const $saveBtn = $(this);
   const $downloadBtn = $("#downloadButton");
 
-  const token = localStorage.getItem("token"); // Pastikan token disimpan sebagai 'access_token'
+  const token = localStorage.getItem("token");
 
   Swal.fire({
     title: "Menyimpan...",

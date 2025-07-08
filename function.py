@@ -25,62 +25,10 @@ def login_user(db_session: SQLSession, username: str, password: str):
 
     return None
 
-def parse_row(row_text, full_text, filename):
-    try:
-        row_text = re.sub(r"[“![|~=j__—]", "", row_text)
-        row_text = re.sub(r"\s{2,}", " ", row_text).strip() 
-        parts = row_text.split()
-        if len(parts) < 5:
-            return None
-
-        line_total_str = parts[-1]
-        possible_discount_str = parts[-2]
-
-        if "%" in possible_discount_str:
-            description_end_index = -4
-            quantity_str = parts[-4]
-            unit_price_str = parts[-3]
-            discount_str = possible_discount_str
-        else:
-            description_end_index = -3
-            quantity_str = parts[-3]
-            unit_price_str = parts[-2]
-            discount_str = None
-
-        if re.match(r"^p\S*$", parts[0], re.IGNORECASE) or re.match(r"^\d{4,6}$", parts[0]):
-            product_number = parts[0]
-            description_parts = parts[1:description_end_index]
-        else:
-            product_number = ""
-            description_parts = parts[0:description_end_index]
-
-        description = " ".join(description_parts).strip().lstrip('/')
-
-        quantity = int(re.sub(r"[^\d]", "", quantity_str))
-        unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
-        line_total = float(re.sub(r"[^\d.]", "", line_total_str))
-        discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else None
-
-        return (
-            product_number,
-            description,
-            quantity,
-            "{:.2f}".format(unit_price),
-            "{:.2f}".format(discount) if discount is not None else None,
-            "{:.2f}".format(line_total),
-            full_text,
-            filename,
-        )
-    
-    except Exception as e:
-        print(f"Baris gagal di parsing: {e}")
-        return None
-    
-
 # def parse_row(row_text, full_text, filename):
 #     try:
 #         row_text = re.sub(r"[“![|~=j__—]", "", row_text)
-#         row_text = re.sub(r"\s{2,}", " ", row_text).strip()
+#         row_text = re.sub(r"\s{2,}", " ", row_text).strip() 
 #         parts = row_text.split()
 #         if len(parts) < 5:
 #             return None
@@ -108,25 +56,96 @@ def parse_row(row_text, full_text, filename):
 
 #         description = " ".join(description_parts).strip().lstrip('/')
 
-#         quantity = int(re.sub(r"[^\d]", "", quantity_str) or 0)
-#         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str) or 0.0)
-#         line_total = float(re.sub(r"[^\d.]", "", line_total_str) or 0.0)
-#         discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else 0.0
+#         quantity = int(re.sub(r"[^\d]", "", quantity_str))
+#         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
+#         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
+#         discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else None
 
-#         return {
-#             'product_number': product_number,
-#             'description': description,
-#             'quantity': quantity,
-#             'unit_price': unit_price,
-#             'discount': discount,
-#             'line_total': line_total,
-#             'text': full_text,
-#             'filename': filename
-#         }
-
+#         return (
+#             product_number,
+#             description,
+#             quantity,
+#             "{:.2f}".format(unit_price),
+#             "{:.2f}".format(discount) if discount is not None else None,
+#             "{:.2f}".format(line_total),
+#             full_text,
+#             filename,
+#         )
+    
 #     except Exception as e:
-#         print(f"[PARSE FAIL] Baris gagal di parsing: {e}")
+#         print(f"Baris gagal di parsing: {e}")
 #         return None
+    
+# def safe_int(value):
+#     try:
+#         return int(re.sub(r"[^\d]", "", value))
+#     except:
+#         return 0
+
+# def safe_float(value):
+#     try:
+#         return float(re.sub(r"[^\d.]", "", value))
+#     except:
+#         return 0.0
+
+def parse_row(row_text, full_text, filename):
+    try:
+        # Bersihkan karakter aneh dan whitespace berlebih
+        row_text = re.sub(r"[“![|~=j__—]", "", row_text)
+        row_text = re.sub(r"\s{2,}", " ", row_text).strip()
+
+        # Split baris jadi bagian
+        parts = row_text.split()
+        if len(parts) < 5:
+            print(f"[PARSE SKIP] Jumlah bagian terlalu sedikit: {parts}")
+            return None
+
+        line_total_str = parts[-1]
+        possible_discount_str = parts[-2]
+
+        if "%" in possible_discount_str:
+            description_end_index = -4
+            quantity_str = parts[-4]
+            unit_price_str = parts[-3]
+            discount_str = possible_discount_str
+        else:
+            description_end_index = -3
+            quantity_str = parts[-3]
+            unit_price_str = parts[-2]
+            discount_str = None
+
+        if re.match(r"^p\S*$", parts[0], re.IGNORECASE) or re.match(r"^\d{4,6}$", parts[0]):
+            product_number = parts[0]
+            description_parts = parts[1:description_end_index]
+        else:
+            product_number = ""
+            description_parts = parts[0:description_end_index]
+
+        description = " ".join(description_parts).strip().lstrip('/')
+
+        # Konversi angka
+        quantity = int(re.sub(r"[^\d]", "", quantity_str) or "0")
+        unit_price = float(re.sub(r"[^\d.]", "", unit_price_str) or "0")
+        line_total = float(re.sub(r"[^\d.]", "", line_total_str) or "0")
+        discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else 0.0
+
+        parsed_data = {
+            'product_number': product_number,
+            'description': description,
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'discount': discount,
+            'line_total': line_total,
+            'text': full_text,
+            'filename': filename
+        }
+
+        print(f"[PARSE OK] {parsed_data}")
+        return parsed_data
+
+    except Exception as e:
+        print(f"[PARSE FAIL] Baris gagal di parsing: '{row_text}' | Error: {e}")
+        return None
 
 def extract_text_with_ocr(file_path, page_number):
     try:
@@ -193,7 +212,23 @@ def extract_image_with_ocr(image_path):
 
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
-        return None, None
+        return None, None   
+
+def wer_per_line(original_text, extracted_text):
+    """
+    Menghitung WER per baris antara original_text dan extracted_text.
+    Return: list of (original, extracted, wer_value)
+    """
+    original_lines = [line.strip() for line in original_text.splitlines() if line.strip()]
+    extracted_lines = [line.strip() for line in extracted_text.splitlines() if line.strip()]
+    max_len = max(len(original_lines), len(extracted_lines))
+    results = []
+    for i in range(max_len):
+        orig = original_lines[i] if i < len(original_lines) else ""
+        extr = extracted_lines[i] if i < len(extracted_lines) else ""
+        wer_value = wer(orig, extr)
+        results.append((orig, extr, wer_value))
+    return results
 
 # def process_file(file_path, mode="product", text_override=None, useracid=None):
 #     if not os.path.exists(file_path):
@@ -364,7 +399,15 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
         return "error_blur"
 
     try:
-        csv_rows = [row[:6] for row in all_rows]  # gunakan bagian tuple saja
+        csv_rows = [[
+            row['product_number'],
+            row['description'],
+            row['quantity'],
+            row['unit_price'],
+            row['discount'],
+            row['line_total']
+        ] for row in all_rows]
+
         folder = os.path.dirname(file_path)
         csvname = os.path.splitext(filename)[0] + '.csv'
         csv_path = os.path.join(folder, csvname)
@@ -376,13 +419,19 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
         return "error_blur"
 
 
+# def write_csv_with_delimiter(filename, allrows, delimiter):
+#     with open(filename, mode="w", newline="", encoding="utf-8") as file:
+#         df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"]) 
+#         df.to_csv(file, index=False, sep=delimiter, header=True)
+#         writer = csv.writer(file, delimiter=delimiter,)
+#         writer.writerows(allrows)
+        
 def write_csv_with_delimiter(filename, allrows, delimiter):
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        df = pd.DataFrame(columns=["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"]) 
-        df.to_csv(file, index=False, sep=delimiter, header=True)
-        writer = csv.writer(file, delimiter=delimiter,)
+        writer = csv.writer(file, delimiter=delimiter)
+        writer.writerow(["Product Number", "Description", "Quantity", "Unit Price", "Discount", "Line Total"])
         writer.writerows(allrows)
-        
+
 # def process_row(rows, useracid):
 #     session = Session()
 #     for parsed_row in rows:
