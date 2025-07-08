@@ -133,9 +133,9 @@ def parse_row(row_text, full_text, filename):
             'product_number': product_number,
             'description': description,
             'quantity': quantity,
-            'unit_price': unit_price,
-            'discount': discount,
-            'line_total': line_total,
+            'unit_price': round(unit_price, 2),
+            'discount': round(discount, 2),
+            'line_total': round(line_total, 2),
             'text': full_text,
             'filename': filename
         }

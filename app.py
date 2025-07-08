@@ -227,7 +227,6 @@ def api_filenames():
             base_query += " AND filename LIKE :search"
             params['search'] = f"%{search}%"
 
-        # USER BIASA hanya boleh lihat filenya sendiri
         if user.groupid != 1:
             base_query += " AND useracid = :user_id"
 
@@ -522,6 +521,7 @@ def submit_file():
                 f.write(final_stream.getbuffer())
 
             full_text = ""
+            ocr_wer = ""
             if filename.lower().endswith('.pdf'):
                 images = convert_from_bytes(final_stream.read(), dpi=205)
                 for idx, img in enumerate(images, start=1):
