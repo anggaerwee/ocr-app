@@ -104,13 +104,13 @@ def api_login():
     try:
         user = db.query(Msuser).filter(Msuser.usernm == username).first()
 
-        user.isactive = True
-        db.commit()
         if not user:
             return jsonify({"msg": "Username tidak ditemukan"}), 401
         if not bcrypt.checkpw(password.encode('utf-8'), user.pswd.encode('utf-8')):
             return jsonify({"msg": "Password salah"}), 401
         
+        user.isactive = True
+        db.commit()
         token = create_access_token(identity=str(user.userid))
         response = jsonify({"msg": "Login berhasil", "token": token})
         set_access_cookies(response, token)
@@ -178,34 +178,6 @@ def home():
 def data():
     return render_template('components/content.html', view='data', title='OcrConvert', subtitle='Data')
 
-# @app.route('/api/filenames')
-# def api_filenames():
-#     session = Session()
-#     try:
-#         search = request.args.get('q', '').strip()
-#         source = request.args.get('source', 'product')
-
-#         table_name ='invoiceblur' if source == 'blur' else 'invoice'
-#         base_query = f"""
-#             SELECT DISTINCT filename, text
-#             FROM {table_name}
-#             WHERE filename IS NOT NULL AND filename != ''
-#         """
-#         if search:
-#             base_query += " AND filename LIKE :search"
-#             results = session.execute(
-#                 text(base_query),
-#                 {"search": f"%{search}%"}
-#             ).fetchall()
-#         else:
-#             results = session.execute(text(base_query)).fetchall()
-#         data = [{'id': row[0], 'text': row[0], 'fulltext': row[1]} for row in results]
-#         return jsonify({'results': data})
-#     except Exception as e:
-#         return jsonify({'error': str(e)})
-#     finally:
-#         session.close()
-
 @app.route('/api/filenames')
 @jwt_required()
 def api_filenames():
@@ -239,93 +211,6 @@ def api_filenames():
     finally:
         session.close()
 
-# @app.route('/api/products')
-# @jwt_required()  # ← Penting agar bisa pakai get_jwt_identity()
-# def api_products():
-#     session = Session()
-#     try:
-#         user_id = get_jwt_identity()  # Sekarang bisa digunakan dengan aman
-#         user = session.query(Msuser).filter(Msuser.userid == user_id).first()
-#         if not user:
-#             return jsonify({'error': 'User tidak ditemukan'}), 401
-
-#         groupid = user.groupid
-#         model = InvoiceBlur if request.args.get('source', 'product') == 'blur' else ProductTable
-
-#         # ADMIN
-#         if groupid == 1:
-#             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)
-#         else:
-#             # USER BIASA - hanya lihat data miliknya
-#             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid).filter(model.useracid == user.userid)
-
-#         # Filter tambahan
-#         filename = request.args.get('filename', '').strip()
-#         startdt = request.args.get('startdt', '').strip()
-#         enddt = request.args.get('enddt', '').strip()
-#         search_value = request.args.get("search[value]", "").strip()
-
-#         if filename:
-#             query = query.filter(model.filename == filename)
-#         if startdt:
-#             try:
-#                 start_date = datetime.strptime(startdt, '%Y-%m-%d').date()
-#                 query = query.filter(func.date(model.createddate) >= start_date)
-#             except:
-#                 pass
-#         if enddt:
-#             try:
-#                 end_date = datetime.strptime(enddt, '%Y-%m-%d').date()
-#                 query = query.filter(func.date(model.createddate) <= end_date)
-#             except:
-#                 pass
-
-#         total_records = query.count()
-
-#         if search_value:
-#             query = query.filter(
-#                 or_(
-#                     model.product_number.ilike(f"%{search_value}%"),
-#                     model.description.ilike(f"%{search_value}%"),
-#                     model.filename.ilike(f"%{search_value}%"),
-#                 )
-#             )
-
-#         filtered_records = query.count()
-#         draw = int(request.args.get("draw", 1))
-#         start = int(request.args.get("start", 0))
-#         length = int(request.args.get("length", 10))
-#         results = query.offset(start).limit(length).all()
-
-#         data = []
-#         for item, usernm in results:
-#             row = {
-#                 'id': item.id,
-#                 'product_number': item.product_number,
-#                 'description': item.description,
-#                 'quantity': item.quantity,
-#                 'unit_price': item.unit_price,
-#                 'discount': item.discount,
-#                 'line_total': item.line_total,
-#                 'text': item.text,
-#                 'filename': item.filename,
-#                 'createddate': item.createddate.strftime('%d-%m-%Y %H:%M:%S') if item.createddate else None,
-#             }
-#             if groupid == 1:
-#                 row['usernm'] = usernm
-#             data.append(row)
-
-#         return jsonify({
-#             'draw': draw,
-#             'recordsTotal': total_records,
-#             'recordsFiltered': filtered_records,
-#             'data': data
-#         })
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-#     finally:
-#         session.close()
 
 @app.route('/api/products')
 @jwt_required()
@@ -417,76 +302,6 @@ def api_products():
     finally:
         session.close()
 
-# CHUNK_DIR = 'temp_chunks'
-# @app.route('/submit', methods=['POST'])
-# def submit_file():
-#     try:
-#         uuid = request.form.get('dzuuid')
-#         index = int(request.form.get('dzchunkindex', 0))
-#         total_chunks = int(request.form.get('dztotalchunkcount', 1))
-#         filename = request.form.get('filename')
-#         file = request.files.get('file')
-
-#         if not all([uuid, filename, file]):
-#             return jsonify({'error': 'Missing required data'}), 400
-
-#         chunk_path = os.path.join(CHUNK_DIR, f"{uuid}_{index}")
-#         file.save(chunk_path)
-
-#         if index + 1 == total_chunks:
-#             combined = b''
-#             for i in range(total_chunks):
-#                 chunk_file = os.path.join(CHUNK_DIR, f"{uuid}_{i}")
-#                 if not os.path.exists(chunk_file):
-#                     return jsonify({'error': f'Chunk {i} missing'}), 400
-#                 with open(chunk_file, 'rb') as f:
-#                     combined += f.read()
-#                 os.remove(chunk_file)
-
-#             final_stream = BytesIO(combined)
-#             final_stream.seek(0)
-
-#             output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#             with open(output_path, 'wb') as f:
-#                 f.write(final_stream.getbuffer())
-
-#             full_text = ""
-#             ocr_wer = None
-#             if filename.lower().endswith('.pdf'):
-#                 images = convert_from_bytes(final_stream.read(), dpi=205)
-#                 full_text = ""
-#                 original_all = ""
-#                 enhanced_all = ""
-
-#                 for idx, img in enumerate(images, start=1):
-#                     gray = img.convert("L")
-#                     binarized = gray.point(lambda p: 255 if p > 128 else 0)
-
-#                     original_text = pytesseract.image_to_string(gray, config='--oem 3 --psm 6', lang='eng+ind')
-#                     enhanced_text = pytesseract.image_to_string(binarized, config='--oem 3 --psm 6', lang='eng+ind')
-
-#                     original_all += original_text + "\n"
-#                     enhanced_all += enhanced_text + "\n"
-
-#                     full_text += f"\n\n--- Halaman {idx} ---\n{enhanced_text}"
-
-#                 ocr_wer = wer(original_all.strip(), enhanced_all.strip())
-
-#             elif filename.lower().endswith('.webp'):
-#                 temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#                 text, ocr_wer, line_wer_result = extract_image_with_ocr(temp_path)
-#                 full_text = text
-#             else:
-#                 return jsonify({'error': 'Format file tidak didukung'}), 400
-
-#             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-#             return jsonify({'text': full_text, 'wer': ocr_wer, 'wer_per_line': line_wer_result})
-
-#         return '', 200
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 CHUNK_DIR = 'temp_chunks'
 @app.route('/submit', methods=['POST'])
 def submit_file():
@@ -519,7 +334,6 @@ def submit_file():
             output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             with open(output_path, 'wb') as f:
                 f.write(final_stream.getbuffer())
-
             full_text = ""
             ocr_wer = ""
             if filename.lower().endswith('.pdf'):

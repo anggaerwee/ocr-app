@@ -55,7 +55,6 @@
           <a
             href="/data"
             type="button"
-            target="_blank"
             class="text-green-800 font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-300"
             id="showdatabtn"
             >Tampilkan Data</a
@@ -322,7 +321,6 @@
         toast.onmouseleave = Swal.resumeTimer;
       },
     });
-
     $(document).on("click", "#btn-expand", function () {
       const text = $("#text-area").val() || "";
       $("#exampleModal .modal-body").html(

@@ -2,6 +2,7 @@
   body {
     color: #000;
     overflow-x: hidden;
+    margin-top: 100px;
     height: 100%;
     background-color: #b0bec5;
     background-repeat: no-repeat;
@@ -67,7 +68,7 @@
     font-weight: bold;
   }
 
-  .auth-text-sm {
+  .text-sm {
     font-size: 14px !important;
   }
 
@@ -159,14 +160,45 @@
       margin: 0px 15px;
     }
   }
-  #alert-box {
-  display: none;
-  text-align: center;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 5px;
-}
+  .custom-alert {
+    display: none;
+    margin-top: 15px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease-in-out;
+  }
 
+  .custom-alert i {
+    font-size: 20px;
+    vertical-align: middle;
+  }
+
+  .custom-alert.success {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+  }
+
+  .custom-alert.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  .custom-success {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+  }
+  #login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 </style>
 <div class="container-fluid px-1 px-md-5 px-lg-1 px-xl-5 py-5 mx-auto">
   <div class="card auth-card0 border-0">
@@ -176,7 +208,9 @@
           <div class="row">
             <div class="auth-logo"></div>
           </div>
-          <div class="row px-3 justify-content-center mt-4 mb-5 auth-border-line">
+          <div
+            class="row px-3 justify-content-center mt-4 mb-5 auth-border-line"
+          >
             <img src="https://i.imgur.com/uNGdWHi.png" class="auth-image" />
           </div>
         </div>
@@ -184,7 +218,7 @@
       <div class="col-lg-6">
         <div class="auth-card2 card border-0 px-4 py-5">
           <div class="row mb-4 px-3">
-            <h6 class="mb-0 mr-4 mt-2">Sign in with</h6>
+            <h6 class="mb-0 mr-4">Sign in with</h6>
             <div class="auth-google text-center mr-3" onclick="google()">
               <div class="bi bi-google"></div>
             </div>
@@ -195,11 +229,22 @@
             <div class="auth-line"></div>
           </div>
           <div class="row px-3">
-            <label class="mb-1"><h6 class="mb-0 auth-text-sm">Username</h6></label>
-            <input type="text" id="user" placeholder="Masukkan username" />
+            <label class="mb-1">
+              <h6 class="mb-0 text-sm">Username</h6>
+            </label>
+            <div class="input-group">
+              <input
+                type="text"
+                id="user"
+                class="form-control"
+                placeholder="Masukkan username"
+              />
+            </div>
           </div>
           <div class="row px-3">
-            <label class="mb-1"><h6 class="mb-0 auth-text-sm">Password</h6></label>
+            <label class="mb-1 my-2">
+              <h6 class="mb-0 text-sm">Password</h6>
+            </label>
             <div class="input-group">
               <input
                 type="password"
@@ -211,8 +256,9 @@
                 class="input-group-text"
                 id="togglePassword"
                 style="cursor: pointer"
-                ><i class="bi bi-eye-slash" id="eyeIcon"></i
-              ></span>
+              >
+                <i class="bi bi-eye-slash" id="eyeIcon"></i>
+              </span>
             </div>
           </div>
           <div class="mb-4"></div>
@@ -227,76 +273,119 @@
           </div>
           <div id="error" class="text-center text-red-500 mt-2 hidden"></div>
         </div>
-        <div id="alert-box" class="alert alert-success" role="alert">
-          <i class="bx bx-error-circle"></i> <span id="alert-msg"></span>
+        <div id="alert-box" class="custom-alert">
+          <i id="alert-icon" class="bx"></i>
+          <span id="alert-msg"></span>
         </div>
       </div>
     </div>
   </div>
-</div>
-<script>
-  $(document).ready(function () {
-    $("#login-btn").on("click", function () {
-      const username = $("#user").val().trim();
-      const password = $("#pass").val().trim();
+  <script>
+    $(document).ready(function () {
+      $("#login-btn").on("click", function () {
+        const username = $("#user").val().trim();
+        const password = $("#pass").val().trim();
 
-      if (!username && !password) {
-        showAlert("Username dan password tidak boleh kosong!");
-        return;
-      }
-      if (!username) {
-        showAlert("Username tidak boleh kosong!");
-        return;
-      }
-      if (!password) {
-        showAlert("Password tidak boleh kosong!");
-        return;
-      }
+        if (!username && !password) {
+          showAlert("Username dan password tidak boleh kosong!", "danger");
+          return;
+        }
+        if (!username) {
+          showAlert("Username tidak boleh kosong!", "danger");
+          return;
+        }
+        if (!password) {
+          showAlert("Password tidak boleh kosong!", "danger");
+          return;
+        }
 
-      $.ajax({
-        type: "POST",
-        url: "/api/login",
-        contentType: "application/json",
-        data: JSON.stringify({ username, password }),
-        xhrFields: {
-          withCredentials: true,
-        },
-        success: function (data) {
-          showAlert("Login berhasil!", "success");
-          setTimeout(() => {
-            window.location.href = "/dashboard";
-          }, 1500);
-        },
-        error: function (xhr) {
-          const msg = xhr.responseJSON?.msg || "Login gagal";
-          showAlert(msg);
-        },
+        $("#login-btn").prop("disabled", true);
+
+        $.ajax({
+          type: "POST",
+          url: "/api/login",
+          contentType: "application/json",
+          dataType: "json",
+          data: JSON.stringify({ username, password }),
+          xhrFields: {
+            withCredentials: true,
+          },
+          success: function (data, textStatus, xhr) {
+            console.log("status:", xhr.status);
+            showAlert("Login berhasil!", "success", true);
+
+            setTimeout(() => {
+              window.location.href = "/dashboard";
+            }, 1500);
+          },
+          error: function (xhr) {
+            const msg =
+              xhr.responseJSON?.msg || "Terjadi kesalahan saat login.";
+            const status = xhr.status;
+            let type = "danger";
+
+            if (status === 401) {
+              type = "danger";
+            } else if (status >= 400 && status < 500) {
+              type = "warning";
+            } else if (status >= 500) {
+              type = "danger";
+            }
+
+            showAlert(msg, type);
+          },
+          complete: function () {
+            $("#login-btn").prop("disabled", false);
+          },
+        });
+      });
+      $("#togglePassword").on("click", function () {
+        const passInput = $("#pass");
+        const eyeIcon = $("#eyeIcon");
+        const type =
+          passInput.attr("type") === "password" ? "text" : "password";
+        passInput.attr("type", type);
+        eyeIcon.toggleClass("bi-eye bi-eye-slash");
       });
     });
-    $("#togglePassword").on("click", function () {
-      const passInput = $("#pass");
-      const eyeIcon = $("#eyeIcon");
-      const type = passInput.attr("type") === "password" ? "text" : "password";
-      passInput.attr("type", type);
-      eyeIcon.toggleClass("bi-eye bi-eye-slash");
-    });
-  });
-  function showAlert(message, type = "danger") {
-  const alertBox = $("#alert-box");
-  alertBox.removeClass("alert-success alert-danger").addClass(`alert-${type}`);
-  $("#alert-msg").text(message);
-  alertBox.fadeIn();
+    function showAlert(message, type = "danger") {
+      const alertBox = $("#alert-box");
+      const alertIcon = $("#alert-icon");
+      const loginBtn = $("#login-btn");
 
-  setTimeout(() => {
-    alertBox.fadeOut();
-  }, 2000);
-}
-function google() {
-  Swal.fire({
-    title: "Google Login",
-    text: "Fitur ini belum tersedia.\nMohon Tunggu pembaruan selanjutnya.",
-    icon: "info",
-    confirmButtonText: "OK",
-  });
-}
-</script>
+      loginBtn.prop("disabled", true);
+
+      alertBox
+        .removeClass(
+          "custom-alert custom-success custom-danger custom-warning custom-info"
+        )
+        .addClass(`custom-alert custom-${type}`);
+
+      const iconClass = {
+        success: "bx bx-check-circle",
+        danger: "bx bx-error-circle",
+        warning: "bx bx-error",
+        info: "bx bx-info-circle",
+      };
+      alertIcon.removeClass().addClass(iconClass[type] || "bx bx-info-circle");
+
+      $("#alert-msg").text(message);
+      alertBox.fadeIn();
+
+      setTimeout(() => {
+        alertBox.fadeOut(() => {
+          loginBtn.prop("disabled", false);
+        });
+      }, 1500);
+    }
+
+    function google() {
+      Swal.fire({
+        title: "Google Login",
+        text: "Fitur ini belum tersedia.\nMohon Tunggu pembaruan selanjutnya.",
+        icon: "info",
+        confirmButtonText: "OK",
+      });
+    }
+  </script>
+</div>
