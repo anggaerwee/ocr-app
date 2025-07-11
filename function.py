@@ -29,47 +29,29 @@ def parse_row(row_text, full_text, filename):
     try:
         row_text = re.sub(r"[“![|~=j__—]", "", row_text)
         row_text = re.sub(r"\s{2,}", " ", row_text).strip()
+
         parts = row_text.split()
         if len(parts) < 5:
             return None
 
-        last_num_idx = None
-        for i in range(len(parts)-1, -1, -1):
-            if re.match(r"^\d+(\.\d+)?$", parts[i]):
-                last_num_idx = i
-                break
-        if last_num_idx is None or last_num_idx < 2:
-            return None
+        product_number = parts[0]
+        line_total_str = parts[-1]
 
-        line_total_str = parts[last_num_idx]
-
-        discount = 0.0
-        has_discount = False
-
-        possible_discount = parts[last_num_idx - 1]
-        if re.match(r"^\d+(\.\d+)?%?$", possible_discount):
-            has_discount = True
-            discount_str = possible_discount.replace("%", "")
-            discount = float(discount_str)
-            unit_price_str = parts[last_num_idx - 2]
-            quantity_str = parts[last_num_idx - 3]
-            desc_end = last_num_idx - 3
+        if len(parts) >= 6 and "%" in parts[-2]:
+            discount_str = parts[-2]
+            unit_price_str = parts[-3]
+            quantity_str = parts[-4]
+            description = " ".join(parts[1:-4]).strip().lstrip('/')
         else:
-            unit_price_str = parts[last_num_idx - 1]
-            quantity_str = parts[last_num_idx - 2]
-            desc_end = last_num_idx - 2
+            discount_str = "0%"
+            unit_price_str = parts[-2]
+            quantity_str = parts[-3]
+            description = " ".join(parts[1:-3]).strip().lstrip('/')
 
-        if re.match(r"^p\S*$", parts[0], re.IGNORECASE) or re.match(r"^\d{4,6}$", parts[0]):
-            product_number = parts[0]
-            description_parts = parts[1:desc_end]
-        else:
-            product_number = ""
-            description_parts = parts[0:desc_end]
-
-        description = " ".join(description_parts).strip().lstrip('/')
         quantity = int(re.sub(r"[^\d]", "", quantity_str))
         unit_price = float(re.sub(r"[^\d.]", "", unit_price_str))
         line_total = float(re.sub(r"[^\d.]", "", line_total_str))
+        discount = float(re.sub(r"[^\d.]", "", discount_str)) if discount_str else 0.0
 
         parsed_data = {
             'product_number': product_number,
@@ -82,32 +64,25 @@ def parse_row(row_text, full_text, filename):
             'filename': filename
         }
 
+        # print(f"[PARSE OK] {parsed_data}")
         return parsed_data
 
     except Exception as e:
-        print(f"[PARSE ERROR] Baris gagal: '{row_text}' | Error: {e}")
+        print(f"Baris gagal di parsing: '{row_text}' | Error: {e}")
         return None
 
-
-def extract_text_with_ocr(file_path, page_number):
+def extract_text_with_ocr(image):
     try:
-        images = convert_from_path(file_path, first_page=page_number, last_page=page_number, dpi=500)
+        custom_config = r'--oem 3 --psm 6'
+        page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
 
-        if not images:
-            print(f"Tidak ada halaman yang dapat diproses dari file {file_path}")
-            return None
-        
-        extracted_text = ""
-        for image in images:
-            
-            custom_config = r'--oem 3 --psm 6'
-            page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng+ind')
-            extracted_text += page_text 
-        
-        return extracted_text.strip()
+        ocr_wer = wer(page_text, page_text) if page_text.strip() else 1.0 
+
+        return page_text, ocr_wer
+
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
-        return None
+        return "", 1.0
 
 def extract_image_with_ocr(image_path):
     try:
@@ -140,10 +115,10 @@ def extract_image_with_ocr(image_path):
 
 
         custom_config = r'--oem 3 --psm 6' 
-        extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng+ind')
+        extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng')
 
         original_image = Image.open(image_path).convert("L")
-        original_text = pytesseract.image_to_string(original_image, config=custom_config, lang='eng+ind') 
+        original_text = pytesseract.image_to_string(original_image, config=custom_config, lang='eng') 
 
         ocr_wer = wer(original_text, extracted_text) 
 
@@ -184,15 +159,13 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
         full_text = text_override
         rows = text_override.split("\n")
     elif file_path.endswith('.pdf'):
-        with pdfplumber.open(file_path) as pdf:
-            for page_number, page in enumerate(pdf.pages, start=1):
-                try:
-                    text = extract_text_with_ocr(file_path, page_number)
-                    if text:
-                        full_text += text + "\n"
-                except Exception as e:
-                    print(f"Error reading page {page_number}: {e}")
-        rows = full_text.split("\n")
+        images = convert_from_path(file_path, dpi=500)
+        for img in images:
+            text, ocr_wer = extract_text_with_ocr(img)
+            if text:
+                full_text += f"\n{text}"
+        rows = full_text.split("\n") if full_text else []
+
     elif file_path.endswith('.webp'):
         text, ocr_wer = extract_image_with_ocr(file_path)
         full_text = text
@@ -202,6 +175,7 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
         return "error_blur"
 
     filename = os.path.basename(file_path)
+    print(f"[All ROWS] {all_rows}")
     for row in rows:
         row = row.strip()
         if not row:
@@ -209,7 +183,7 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
         parsed = parse_row(row, full_text, filename)
         if parsed:
             all_rows.append(parsed)
-            print(parsed)
+            # print(parsed)
         else:
             print(f"[PARSE FAIL] Gagal parsing baris: {row}")
 

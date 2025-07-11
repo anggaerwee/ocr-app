@@ -19,6 +19,7 @@ from flask_jwt_extended import (
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from pdf2image import convert_from_path
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
@@ -201,6 +202,7 @@ def api_filenames():
 
         if user.groupid != 1:
             base_query += " AND useracid = :user_id"
+            params['user_id'] = user.userid
 
         results = session.execute(text(base_query), params).fetchall()
 
@@ -210,7 +212,6 @@ def api_filenames():
         return jsonify({'error': str(e)})
     finally:
         session.close()
-
 
 @app.route('/api/products')
 @jwt_required()
@@ -334,24 +335,37 @@ def submit_file():
             output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             with open(output_path, 'wb') as f:
                 f.write(final_stream.getbuffer())
+
             full_text = ""
             ocr_wer = ""
+
             if filename.lower().endswith('.pdf'):
-                images = convert_from_bytes(final_stream.read(), dpi=205)
-                for idx, img in enumerate(images, start=1):
-                    text = pytesseract.image_to_string(img, config='--oem 3 --psm 6', lang='eng+ind')
-                    full_text += f"\n\n--- Halaman {idx} ---\n{text}"
+                pages = convert_from_path(output_path, dpi=500)
+                total_pages = len(pages)
+
+                wer_list = []
+                full_text_parts = []
+
+                for image in pages:
+                    text, page_wer = extract_text_with_ocr(image)
+                    if text is None:
+                        text = ""
+                        page_wer = 1.0
+                    full_text_parts.append(text)
+                    wer_list.append(page_wer)
+
+                full_text = "\n".join(full_text_parts)
+                ocr_wer = sum(wer_list) / len(wer_list) if wer_list else 1.0
+
             elif filename.lower().endswith('.webp'):
-                temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                with open(temp_path, 'wb') as f:
-                    f.write(final_stream.read())
-                text, ocr_wer = extract_image_with_ocr(temp_path)
+                text, ocr_wer = extract_image_with_ocr(output_path)
                 full_text = text
+
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-            return jsonify({'text': full_text, 'wer':ocr_wer})
+            return jsonify({'text': full_text, 'wer': ocr_wer})
 
         return '', 200
 
