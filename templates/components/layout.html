@@ -18,8 +18,8 @@
     <a class="mr-5 hover:text-white {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/convert' else '' }}" href="/convert">Convert</a>
     <a class="mr-5 hover:text-white {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/data' else '' }}" href="/data">Data</a>
   </nav>
-  <a href="/logout" class="inline-flex items-center bg-gray-800 border-0 py-2 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-1 md:mt-0">Log Out
-  </a>
+  <button type="submit" id="btn-logout" class="inline-flex items-center bg-gray-800 border-0 py-2 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-1 md:mt-0">Log Out
+  </button>
   </nav>
     {% endif %}
     <div id="loading-screen">
@@ -35,4 +35,39 @@
     </div>
       {% include "components/footer.html" %}
   </body>
+  <script>
+    $("#btn-logout").on('click', function(){
+      Swal.fire({
+      title: "Log Out?",
+      text: "Apakah anda yakin melakukan log out!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Log out!",
+      cancelButtonText: "Tidak",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url:'/logout',
+          method:'GET',
+          success: function(){
+            Swal.fire({
+              title:"Berhasil",
+              text:"Anda telah logout",
+              icon:"success",
+              timer:1500,
+              showConfirmButton:false
+            }).then(() =>  {
+              window.location.href = "/";
+            });
+          },
+          error: function(){
+            Swal.fire("Error", "Gagal logout!", "error");
+          }
+        });
+      }
+    });
+    })
+  </script>
 </html>

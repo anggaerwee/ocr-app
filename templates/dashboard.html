@@ -6,7 +6,7 @@
       class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center"
     >
       <div
-        class="content-right lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center"
+        class="content-left lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center"
       >
         {% if user %}
         <p class="text-lg font-semibold text-indigo-800 mb-2">
@@ -50,27 +50,20 @@
 </div>
 <script>
   window.addEventListener("pageReady", () => {
-    gsap.from("content-right", {
+    gsap.from(".content-right", {
       opacity: 0,
-      y: 100,
-      duration: 1.2,
-      ease: "power3.out",
-    });
-
-    gsap.from("content-right", {
-      opacity: 0,
-      x: -50,
+      x: 50,
       duration: 0.8,
       delay: 0.2,
       stagger: 0.2,
     });
 
-    gsap.from(".content-right p", {
+    gsap.from(".content-left", {
       opacity: 0,
-      y: -30,
-      duration: 1,
-      delay: 0.1,
-      ease: "power2.out",
+      x: -50,
+      duration: 0.8,
+      delay: 0.2,
+      stagger: 0.2,
     });
   });
 </script>
