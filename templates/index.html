@@ -19,7 +19,7 @@
   <h1 class="text-gray-900 text-xl my-10 font-medium title-font">
     PDF to SQL Data Extraction Tool
   </h1>
-
+ 
   <div
     class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
   >
@@ -67,7 +67,7 @@
           >
             Save
           </a>
-
+ 
           {% endif %}
         </div>
       </div>
@@ -79,7 +79,7 @@
       class="image-corner-bg"
       alt="Background Image"
     />
-
+ 
     <div class="my-3" id="alert">
       <form
         class="dropzone"
@@ -238,7 +238,7 @@
     </div>
   </div>
 </div>
-
+ 
 <script>
   $(document).ready(function () {
     Dropzone.autoDiscover = false;
@@ -271,14 +271,14 @@
             allowEnterKey: false,
             showConfirmButton: false,
           });
-
+ 
           formData.append("dzuuid", file.upload.uuid);
           formData.append("dzchunkindex", file.upload.currentChunk);
           formData.append("dztotalchunkcount", file.upload.totalChunkCount);
           formData.append("dztotalfilesize", file.size);
           formData.append("filename", file.name);
         });
-
+ 
         this.on("success", function (file, response) {
           Swal.close();
           if (response.text && response.text.trim() !== "") {
@@ -298,7 +298,7 @@
             $("#text-area").val("Tidak ada data yang diekstrak.");
           }
         });
-
+ 
         this.on("error", function (file, errorMessage) {
           Swal.fire({
             icon: "error",
@@ -309,7 +309,7 @@
         });
       },
     });
-
+ 
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
@@ -332,7 +332,7 @@
       );
       $("#exampleModalLabel").text("Output OCR - Full View");
     });
-
+ 
     $(document).on("click", "#btn-copy", function () {
       const text = $("#text-area").val();
       if (navigator.clipboard) {
@@ -351,18 +351,18 @@
         Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
       }
     });
-
+ 
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
       const savedText = localStorage.getItem("textData");
       const werPerLine = localStorage.getItem("werPerLine");
-
+ 
       if (wasReloaded && savedText) {
         $("#text-area").removeClass("hidden");
         $("#label-area").removeClass("hidden");
         $("#btn-copy").removeClass("hidden");
         $("#output").removeClass("hidden");
-
+ 
         if (werPerLine) {
             try {
             const data = JSON.parse(werPerLine);
@@ -372,7 +372,7 @@
             data.forEach(function (row, idx) {
               const extr = row[1];
               const wer = row[2];
-
+ 
               if (wer > 0.1) {
                 html += `<span style="background: #ffe0e0; color: #b91c1c; title="Baris kurang akurat (WER: ${(
                   wer * 100
@@ -395,7 +395,7 @@
           $("#ocr-output").html("");
           $('#btn-collapse').hide();
         }
-
+ 
         if (localStorage.getItem("werValue")) {
           $("#label-area").append(
             `<span class="text-sm text-gray-500">WER: ${(
@@ -403,17 +403,17 @@
             ).toFixed(2)}%</span>`
           );
         }
-
+ 
         localStorage.removeItem("textData");
         localStorage.removeItem("werValue");
         localStorage.removeItem("werPerLine");
         localStorage.removeItem("reloadedOnce");
       }
-
+ 
       $("#text-area").on("input", function () {
         localStorage.setItem("textData", $(this).val());
       });
-
+ 
       $("#close").on("click", function () {
         $("#alert").hide();
       });
@@ -450,7 +450,7 @@
         }
       );
     });
-
+ 
     $(document).ready(function () {
       $("#tailwind-collapse-content").css({ maxHeight: 0, padding: 0 });
       let collapsed = true;
@@ -466,15 +466,15 @@
         collapsed = !collapsed;
       });
     });
-
+ 
     $(document).on("click", "#saveButton", function (e) {
   e.preventDefault();
   const filepath = $(this).data("filecsv");
   const $saveBtn = $(this);
   const $downloadBtn = $("#downloadButton");
-
+ 
   const token = localStorage.getItem("token");
-
+ 
   Swal.fire({
     title: "Menyimpan...",
     html: `
@@ -487,7 +487,7 @@
     allowOutsideClick: false,
     allowEscapeKey: false,
   });
-
+ 
   $.ajax({
     url: `/save/${filepath}`,
     type: "POST",
@@ -557,7 +557,7 @@
     },
   });
 });
-
+ 
     $(document).on("click", "#showdatabtn", function (e) {
       const $saveBtn = $("#saveButton");
       if ($saveBtn.is(":visible")) {
@@ -586,16 +586,16 @@
             swalPopup.style.background = "#f0f0f0";
             swalPopup.style.borderRadius = "10px";
             swalPopup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.2)";
-
+ 
             const swalTitle = document.querySelector(".swal-title");
             swalTitle.style.fontSize = "24px";
             swalTitle.style.fontWeight = "bold";
             swalTitle.style.color = "#333";
-
+ 
             const swalContent = document.querySelector(".swal-content");
             swalContent.style.fontSize = "18px";
             swalContent.style.color = "#666";
-
+ 
             const swalConfirmBtn = document.querySelector(".swal-confirm-btn");
             swalConfirmBtn.style.background = "#4CAF50";
             swalConfirmBtn.style.color = "#fff";
@@ -603,7 +603,7 @@
             swalConfirmBtn.style.padding = "10px 20px";
             swalConfirmBtn.style.borderRadius = "5px";
             swalConfirmBtn.style.cursor = "pointer";
-
+ 
             const swalDenyBtn = document.querySelector(".swal-deny-btn");
             swalDenyBtn.style.background = "#FF9800";
             swalDenyBtn.style.color = "#fff";
@@ -633,7 +633,7 @@
       duration: 1.2,
       ease: "power3.out",
     });
-
+ 
     gsap.from("h2, p", {
       opacity: 0,
       x: -50,
@@ -654,5 +654,5 @@
       window.location.href = "/";
     }
   });
-
+ 
 </script>

@@ -227,15 +227,12 @@ def api_products():
         source = request.args.get('source', 'product')
         model = InvoiceBlur if source == 'blur' else ProductTable
 
-        # Admin: semua data
         if groupid == 1:
             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)
         else:
-            # User biasa: hanya data sendiri
             query = session.query(model, Msuser.usernm).join(Msuser, Msuser.userid == model.useracid)\
                 .filter(model.useracid == user.userid)
 
-        # Filter tambahan
         filename = request.args.get('filename', '').strip()
         startdt = request.args.get('startdt', '').strip()
         enddt = request.args.get('enddt', '').strip()
@@ -347,7 +344,8 @@ def submit_file():
                 full_text_parts = []
 
                 for image in pages:
-                    text, page_wer = extract_text_with_ocr(image)
+                    # text, page_wer = extract_text_with_ocr(image)
+                    text, page_wer, wer_line = extract_text_with_ocr(image)
                     if text is None:
                         text = ""
                         page_wer = 1.0
@@ -358,14 +356,14 @@ def submit_file():
                 ocr_wer = sum(wer_list) / len(wer_list) if wer_list else 1.0
 
             elif filename.lower().endswith('.webp'):
-                text, ocr_wer = extract_image_with_ocr(output_path)
+                text, ocr_wer, wer_line = extract_image_with_ocr(output_path)
                 full_text = text
 
             else:
                 return jsonify({'error': 'Format file tidak didukung'}), 400
 
             flash((f"{filename} berhasil diupload. Klik Save untuk proses ke database.", filename), 'success')
-            return jsonify({'text': full_text, 'wer': ocr_wer})
+            return jsonify({'text': full_text, 'wer': ocr_wer, 'wer_per_line':wer_line})
 
         return '', 200
 
@@ -511,7 +509,6 @@ def invoice_count():
 
         model = InvoiceBlur if source == 'blur' else ProductTable
 
-        # ADMIN: Hitung semua data
         if user.groupid == 1:
             count = session.query(model).count()
         else:
