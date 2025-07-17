@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime, 
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
 
-DATABASE_URL = "postgresql://postgres:achmad1312@localhost:5432/convertdata"
+DATABASE_URL = "postgresql://postgres:anggarizki@localhost:5432/convertdata"
 engine = create_engine(
     DATABASE_URL,
     connect_args={"options": "-c timezone=Asia/Jakarta"}

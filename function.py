@@ -1,6 +1,6 @@
 import pdfplumber
 import pytesseract
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 import re
 from pdf2image import convert_from_path
 import os
@@ -12,6 +12,7 @@ from jiwer import wer
 from sqlalchemy.orm import Session as SQLSession
 from werkzeug.security import check_password_hash
 from database.db_config import Session, ProductTable, InvoiceBlur, Msuser
+
 def parse_row(row_text, full_text, filename):
     try:
         row_text = re.sub(r"[“![|~=j__—]", "", row_text)
@@ -68,73 +69,40 @@ def parse_row(row_text, full_text, filename):
         print(f"Baris gagal di parsing: '{row_text}' | Error: {e}")
         return None
 
-# def extract_text_with_ocr(image):
-#     try:
-#         custom_config = r'--oem 3 --psm 6'
-#         page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
-
-#         ocr_wer = wer(page_text, page_text) if page_text.strip() else 1.0 
-
-#         return page_text, ocr_wer
-
-#     except Exception as e:
-#         print(f"Error extracting text with OCR: {e}")
-#         return "", 1.0
-
-# def extract_image_with_ocr(image_path):
-#     try:
-#         image = cv2.imread(image_path)
-
-#         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-#         l, a, b = cv2.split(lab)
-#         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-#         cl = clahe.apply(l)
-#         merged = cv2.merge((cl, a, b))
-#         image = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
-
-#         sharpen_kernel = np.array([[-1, -1, -1], [-1, 9.5, -1], [-1, -1, -1]])
-#         image = cv2.filter2D(image, -1, sharpen_kernel)
-
-#         image = cv2.fastNlMeansDenoisingColored(image, None, 5, 5, 7, 21)
-
-#         height, width = image.shape[:2]
-#         image = cv2.resize(image, (int(width * 2.5), int(height * 2.5)), interpolation=cv2.INTER_CUBIC)
-
-#         output_folder = "output"
-#         os.makedirs(output_folder, exist_ok=True)
-#         filename = os.path.basename(image_path)
-#         filename_no_ext, ext = os.path.splitext(filename)
-#         enhanced_path = os.path.join(output_folder, f"{filename_no_ext}_enhanced.webp")
-#         cv2.imwrite(enhanced_path, image)
-
-#         pil_img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("L")
-#         pil_img = pil_img.point(lambda p: 255 if p > 128 else 0)
-
-
-#         custom_config = r'--oem 3 --psm 6' 
-#         extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng')
-
-#         original_image = Image.open(image_path).convert("L")
-#         original_text = pytesseract.image_to_string(original_image, config=custom_config, lang='eng') 
-
-#         ocr_wer = wer(original_text, extracted_text) 
-
-#         print(f"Original = {original_text}") 
-#         print(f"Ekstrak = {extracted_text}") 
-#         print(f"Improvement WER (vs original image): {ocr_wer:.2%}") 
-#         return extracted_text, ocr_wer
-
-#     except Exception as e:
-#         print(f"Error extracting text with OCR: {e}")
-#         return None, None   
-
 def extract_text_with_ocr(image):
     try:
         custom_config = r'--oem 3 --psm 6'
-        page_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
 
-        ocr_wer = wer(page_text, page_text) if page_text.strip() else 1.0 
-        line_wer = wer_per_line(page_text, page_text)
+        open_cv_image = np.array(image)
+        if open_cv_image.ndim == 3:
+            open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)
+
+        height, width = open_cv_image.shape[:2]
+        open_cv_image = cv2.resize(open_cv_image, (int(width * 2.5), int(height * 2.5)), interpolation=cv2.INTER_CUBIC)
+
+        gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+
+        kernel = np.ones((5, 5), np.uint8)
+        cleaned = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
+
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(cleaned)
+
+        _, binary = cv2.threshold(enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        denoised = cv2.fastNlMeansDenoising(binary, h=30)
+
+        final_image = Image.fromarray(denoised)
+
+        page_text = pytesseract.image_to_string(final_image, config=custom_config, lang='eng')
+
+        original_text = pytesseract.image_to_string(image, config=custom_config, lang='eng')
+        ocr_wer = wer(original_text, page_text) if original_text.strip() else 1.0
+        line_wer = wer_per_line(original_text, page_text)
+
+        print(f"Original = {original_text}")
+        print(f"Ekstrak = {page_text}")
+        print(f"Improvement WER (vs original image): {ocr_wer:.2%}")
 
         return page_text, ocr_wer, line_wer
 
@@ -209,7 +177,7 @@ def wer_per_line(original_text, extracted_text):
         results.append((orig, extr, wer_value))
     return results
 
-def process_file(file_path, mode="product", text_override=None, useracid=None):
+def process_file(file_path, mode="product", text_override=None, useracid=None, wer_per_line=None):
     if not os.path.exists(file_path):
         print(f"File {file_path} tidak ditemukan")
         return
@@ -217,9 +185,16 @@ def process_file(file_path, mode="product", text_override=None, useracid=None):
     all_rows = []
     full_text = ""
 
-    if text_override:
-        full_text = text_override
-        rows = text_override.split("\n")
+    if text_override and wer_per_line:
+        print("[INFO] Menggunakan wer_per_line hasil edit (tanpa OCR ulang)")
+        try:
+            # Ambil baris hasil edit dari wer_per_line
+            rows = [row[1].strip() for row in wer_per_line if len(row) >= 2 and row[1].strip()]
+            full_text = text_override  # tetap gunakan untuk konteks global di parse_row
+        except Exception as e:
+            print(f"[ERROR] Gagal parsing wer_per_line: {e}")
+            return "error_blur"
+
     elif file_path.endswith('.pdf'):
         images = convert_from_path(file_path, dpi=500)
         for img in images:

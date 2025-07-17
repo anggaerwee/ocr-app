@@ -20,6 +20,7 @@ from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from pdf2image import convert_from_path
+import json
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
@@ -377,11 +378,26 @@ def save(filepath):
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filepath)
         if not os.path.exists(full_path):
             return jsonify({'status': 'error', 'message': f"File {filepath} tidak ditemukan."}), 404
-        
+
         mode = request.form.get('mode', 'product').lower()
         text_override = request.form.get('text') if mode == "blur" else None
+        wer_per_line_raw = request.form.get("wer_per_line")
         user_id = get_jwt_identity()
-        csv_filename = process_file(full_path, mode=mode, text_override=text_override, useracid=user_id)
+
+        wer_per_line = None
+        if wer_per_line_raw:
+            try:
+                wer_per_line = json.loads(wer_per_line_raw)
+            except Exception as e:
+                return jsonify({'status': 'error', 'message': f"WER data invalid: {str(e)}"}), 400
+
+        csv_filename = process_file(
+            full_path,
+            mode=mode,
+            text_override=text_override,
+            useracid=user_id,
+            wer_per_line=wer_per_line
+        )
 
         if csv_filename == "error_blur":
             return jsonify({

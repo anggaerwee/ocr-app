@@ -19,7 +19,7 @@
   <h1 class="text-gray-900 text-xl my-10 font-medium title-font">
     PDF to SQL Data Extraction Tool
   </h1>
- 
+
   <div
     class="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full relative z-10 shadow-md ms-2 me-2"
   >
@@ -67,7 +67,7 @@
           >
             Save
           </a>
- 
+
           {% endif %}
         </div>
       </div>
@@ -79,7 +79,7 @@
       class="image-corner-bg"
       alt="Background Image"
     />
- 
+
     <div class="my-3" id="alert">
       <form
         class="dropzone"
@@ -212,6 +212,18 @@
             Copy
           </span>
         </button>
+        <button
+          id="btn-save-edits"
+          class="relative group border-2 border-indigo-600 text-indigo-600 bg-white font-semibold py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-200 hover:bg-indigo-600 hover:text-indigo transition-colors duration-200 mt-2"
+          style="height: 40px"
+        >
+          <i class="fa-solid fa-pen"></i>
+          <span
+            class="absolute left-2/2 -translate-x-1/2 -top-8 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 pointer-events-none"
+          >
+            Edit
+          </span>
+        </button>
       </div>
     </div>
   </div>
@@ -238,7 +250,7 @@
     </div>
   </div>
 </div>
- 
+
 <script>
   $(document).ready(function () {
     Dropzone.autoDiscover = false;
@@ -271,14 +283,14 @@
             allowEnterKey: false,
             showConfirmButton: false,
           });
- 
+
           formData.append("dzuuid", file.upload.uuid);
           formData.append("dzchunkindex", file.upload.currentChunk);
           formData.append("dztotalchunkcount", file.upload.totalChunkCount);
           formData.append("dztotalfilesize", file.size);
           formData.append("filename", file.name);
         });
- 
+
         this.on("success", function (file, response) {
           Swal.close();
           if (response.text && response.text.trim() !== "") {
@@ -298,7 +310,7 @@
             $("#text-area").val("Tidak ada data yang diekstrak.");
           }
         });
- 
+
         this.on("error", function (file, errorMessage) {
           Swal.fire({
             icon: "error",
@@ -309,7 +321,7 @@
         });
       },
     });
- 
+
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
@@ -332,7 +344,7 @@
       );
       $("#exampleModalLabel").text("Output OCR - Full View");
     });
- 
+
     $(document).on("click", "#btn-copy", function () {
       const text = $("#text-area").val();
       if (navigator.clipboard) {
@@ -351,30 +363,33 @@
         Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
       }
     });
- 
+
     $(document).ready(function () {
       const wasReloaded = localStorage.getItem("reloadedOnce");
       const savedText = localStorage.getItem("textData");
       const werPerLine = localStorage.getItem("werPerLine");
- 
+
       if (wasReloaded && savedText) {
+        let editableLines = {}; 
+
         $("#text-area").removeClass("hidden");
         $("#label-area").removeClass("hidden");
         $("#btn-copy").removeClass("hidden");
         $("#output").removeClass("hidden");
- 
+
         if (werPerLine) {
-            try {
+          try {
             const data = JSON.parse(werPerLine);
             let html = "";
             let plain = "";
             let hasInaccurate = false;
+
             data.forEach(function (row, idx) {
               const extr = row[1];
               const wer = row[2];
- 
+
               if (wer > 0.1) {
-                html += `<span style="background: #ffe0e0; color: #b91c1c; title="Baris kurang akurat (WER: ${(
+                html += `<span class="editable-line" contenteditable="true" data-index="${idx}" style="background: #ffe0e0; color: #b91c1c;" title="Baris kurang akurat (WER: ${(
                   wer * 100
                 ).toFixed(2)}%)">${$("<div>").text(extr).html()}</span>\n`;
               } else {
@@ -382,20 +397,46 @@
               }
               plain += extr + "\n";
             });
+
             $("#text-area").val(plain);
             $("#ocr-output").html(html);
             $("#btn-collapse").show();
           } catch (e) {
             $("#text-area").val(savedText);
             $("#ocr-output").html("");
-            $('#btn-collapse').hide();
+            $("#btn-collapse").hide();
           }
         } else {
           $("#text-area").val(savedText);
           $("#ocr-output").html("");
-          $('#btn-collapse').hide();
+          $("#btn-collapse").hide();
         }
- 
+
+        $(document).on("blur", ".editable-line", function () {
+          const idx = $(this).data("index");
+          const newText = $(this).text();
+          editableLines[idx] = newText;
+        });
+
+        $(document).on("click", "#btn-save-edits", function () {
+          const savedData =
+            JSON.parse(localStorage.getItem("werPerLine")) || [];
+
+          for (const [idxStr, newText] of Object.entries(editableLines)) {
+            const idx = parseInt(idxStr)
+            if (Array.isArray(savedData[idx])) {
+              savedData[idx][1] = newText;
+              savedData[idx][2] = 0;
+            }
+          }
+          
+          localStorage.setItem("werPerLine", JSON.stringify(savedData));
+          
+          Swal.fire("Tersimpan", "Perubahan telah disimpan", "success")
+          console.log("Editable lines =", editableLines);
+          console.log("Saved data =", savedData);
+        });
+
         if (localStorage.getItem("werValue")) {
           $("#label-area").append(
             `<span class="text-sm text-gray-500">WER: ${(
@@ -403,17 +444,17 @@
             ).toFixed(2)}%</span>`
           );
         }
- 
+
         localStorage.removeItem("textData");
         localStorage.removeItem("werValue");
-        localStorage.removeItem("werPerLine");
+        // localStorage.removeItem("werPerLine");
         localStorage.removeItem("reloadedOnce");
       }
- 
+
       $("#text-area").on("input", function () {
         localStorage.setItem("textData", $(this).val());
       });
- 
+
       $("#close").on("click", function () {
         $("#alert").hide();
       });
@@ -450,7 +491,7 @@
         }
       );
     });
- 
+
     $(document).ready(function () {
       $("#tailwind-collapse-content").css({ maxHeight: 0, padding: 0 });
       let collapsed = true;
@@ -466,98 +507,106 @@
         collapsed = !collapsed;
       });
     });
- 
+
     $(document).on("click", "#saveButton", function (e) {
-  e.preventDefault();
-  const filepath = $(this).data("filecsv");
-  const $saveBtn = $(this);
-  const $downloadBtn = $("#downloadButton");
- 
-  const token = localStorage.getItem("token");
- 
-  Swal.fire({
-    title: "Menyimpan...",
-    html: `
+      e.preventDefault();
+      const filepath = $(this).data("filecsv");
+      const $saveBtn = $(this);
+      const $downloadBtn = $("#downloadButton");
+      const updatedWerPerLine = localStorage.getItem("werPerLine");
+      const extractedText = $("#text-area").val();
+
+      const token = localStorage.getItem("token");
+
+      Swal.fire({
+        title: "Menyimpan...",
+        html: `
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img src="static/searchdocument.gif" alt="Loading..." style="width: 300px; height: 100px; margin-bottom: 10px;">
         <p>Please wait, is saving to the database...</p>
       </div>
     `,
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-  });
- 
-  $.ajax({
-    url: `/save/${filepath}`,
-    type: "POST",
-    data: {mode: "product"},
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    success: function (response) {
-      if (response.status === "success") {
-        Swal.close();
-        Toast.fire({ icon: "success", text: response.message });
-        $saveBtn.hide();
-        $downloadBtn
-          .attr("href", `/download/${response.csv}`)
-          .removeClass("hidden");
-        localStorage.removeItem("textData");
-      } else if (response.status === "error_blur") {
-        const extractedText = $("#text-area").val();
-        // Lanjutkan kirim ke blur mode
-        $.ajax({
-          url: `/save/${filepath}`,
-          type: "POST",
-          data: {
-            mode: "blur",
-            text: extractedText
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          success: function (res) {
-            Swal.close();
-            if (res.status === "success") {
-              Toast.fire({
-                icon: "success",
-                text: "Data Telah Disimpan ke Table blur",
-              });
-              $saveBtn.hide();
-              $downloadBtn
-                .attr("href", `/download/${res.csv}`)
-                .removeClass("hidden");
-              localStorage.removeItem("textData");
-            } else {
-              Toast.fire({ icon: "error", text: res.message });
-            }
-          },
-          error: function (xhr) {
-            Swal.close();
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: xhr.responseJSON?.message || "Gagal menyimpan ke mode blur.",
-            });
-          }
-        });
-      } else {
-        Swal.close();
-        Toast.fire({ icon: "error", text: response.message });
-      }
-    },
-    error: function (xhr) {
-      Swal.close();
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: xhr.responseJSON?.message || "Terjadi kesalahan.",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       });
-    },
-  });
-});
- 
+
+      $.ajax({
+        url: `/save/${filepath}`,
+        type: "POST",
+        data: {
+          mode: "blur",
+          text: extractedText,
+          wer_per_line: updatedWerPerLine 
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        success: function (response) {
+          if (response.status === "success") {
+            Swal.close();
+            Toast.fire({ icon: "success", text: response.message });
+            $saveBtn.hide();
+            $downloadBtn
+              .attr("href", `/download/${response.csv}`)
+              .removeClass("hidden");
+            localStorage.removeItem("textData");
+          } else if (response.status === "error_blur") {
+            const extractedText = $("#text-area").val();
+            // Lanjutkan kirim ke blur mode
+            $.ajax({
+              url: `/save/${filepath}`,
+              type: "POST",
+              data: {
+                mode: "blur",
+                text: extractedText,
+              },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              success: function (res) {
+                Swal.close();
+                if (res.status === "success") {
+                  Toast.fire({
+                    icon: "success",
+                    text: "Data Telah Disimpan ke Table blur",
+                  });
+                  $saveBtn.hide();
+                  $downloadBtn
+                    .attr("href", `/download/${res.csv}`)
+                    .removeClass("hidden");
+                  localStorage.removeItem("textData");
+                } else {
+                  Toast.fire({ icon: "error", text: res.message });
+                }
+              },
+              error: function (xhr) {
+                Swal.close();
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text:
+                    xhr.responseJSON?.message ||
+                    "Gagal menyimpan ke mode blur.",
+                });
+              },
+            });
+          } else {
+            Swal.close();
+            Toast.fire({ icon: "error", text: response.message });
+          }
+        },
+        error: function (xhr) {
+          Swal.close();
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: xhr.responseJSON?.message || "Terjadi kesalahan.",
+          });
+        },
+      });
+    });
+
     $(document).on("click", "#showdatabtn", function (e) {
       const $saveBtn = $("#saveButton");
       if ($saveBtn.is(":visible")) {
@@ -586,16 +635,16 @@
             swalPopup.style.background = "#f0f0f0";
             swalPopup.style.borderRadius = "10px";
             swalPopup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.2)";
- 
+
             const swalTitle = document.querySelector(".swal-title");
             swalTitle.style.fontSize = "24px";
             swalTitle.style.fontWeight = "bold";
             swalTitle.style.color = "#333";
- 
+
             const swalContent = document.querySelector(".swal-content");
             swalContent.style.fontSize = "18px";
             swalContent.style.color = "#666";
- 
+
             const swalConfirmBtn = document.querySelector(".swal-confirm-btn");
             swalConfirmBtn.style.background = "#4CAF50";
             swalConfirmBtn.style.color = "#fff";
@@ -603,7 +652,7 @@
             swalConfirmBtn.style.padding = "10px 20px";
             swalConfirmBtn.style.borderRadius = "5px";
             swalConfirmBtn.style.cursor = "pointer";
- 
+
             const swalDenyBtn = document.querySelector(".swal-deny-btn");
             swalDenyBtn.style.background = "#FF9800";
             swalDenyBtn.style.color = "#fff";
@@ -633,7 +682,7 @@
       duration: 1.2,
       ease: "power3.out",
     });
- 
+
     gsap.from("h2, p", {
       opacity: 0,
       x: -50,
@@ -643,16 +692,14 @@
     });
   });
   $.ajax({
-    type: 'GET',
-    url: '/dashboard',
+    type: "GET",
+    url: "/dashboard",
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    success: function(data) {
-    },
-    error: function(xhr, status, error) {
+    success: function (data) {},
+    error: function (xhr, status, error) {
       window.location.href = "/";
-    }
+    },
   });
- 
 </script>
