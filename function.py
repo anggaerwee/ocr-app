@@ -188,9 +188,8 @@ def process_file(file_path, mode="product", text_override=None, useracid=None, w
     if text_override and wer_per_line:
         print("[INFO] Menggunakan wer_per_line hasil edit (tanpa OCR ulang)")
         try:
-            # Ambil baris hasil edit dari wer_per_line
             rows = [row[1].strip() for row in wer_per_line if len(row) >= 2 and row[1].strip()]
-            full_text = text_override  # tetap gunakan untuk konteks global di parse_row
+            full_text = text_override 
         except Exception as e:
             print(f"[ERROR] Gagal parsing wer_per_line: {e}")
             return "error_blur"
