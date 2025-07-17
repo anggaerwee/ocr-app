@@ -1,12 +1,18 @@
 <script>
-  $(window).on("load", function () {
-    setTimeout(() => {
-      $("#loading-screen").hide();
-      $("#main-content").css("visibility", "visible");
-      const event = new Event("pageReady");
-      window.dispatchEvent(event);
-    }, 500);
-  });
+$(window).on("load", function () {
+    const loading = $("#loading-screen");
+    if (loading.length) {
+        loading.css({
+            transition: "opacity 0.3s ease",
+            opacity: 0
+        });
+        setTimeout(function () {
+            loading.hide();
+            $("#main-content").css("visibility", "visible");
+            $(window).trigger("pageReady");
+        }, 300);
+    }
+});
   const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
