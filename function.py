@@ -159,6 +159,7 @@ def extract_image_with_ocr(image_path):
     except Exception as e:
         print(f"Error extracting text with OCR: {e}")
         return None, None
+    
 def wer_per_line(original_text, extracted_text):
     """
     Menghitung WER per baris antara original_text dan extracted_text.
@@ -184,10 +185,9 @@ def process_file(file_path, mode="product", text_override=None, useracid=None, w
     full_text = ""
 
     if wer_per_line:
-        print("[INFO] Menggunakan wer_per_line hasil edit (tanpa OCR ulang)")
         try:
             rows = [row[1].strip() for row in wer_per_line if len(row) >= 2 and row[1].strip()]
-            full_text = text_override if text_override else "\n".join(rows)
+            full_text = "\n".join(rows)
 
             filename = os.path.basename(file_path)
             for row in rows:
@@ -197,71 +197,12 @@ def process_file(file_path, mode="product", text_override=None, useracid=None, w
                 else:
                     print(f"[PARSE FAIL] Gagal parsing baris: {row}")
 
-            if not all_rows:
-                print("[ERROR] Tidak ada baris valid setelah edit WER.")
-                return "error_blur"
-
-            try:
-                if mode == "blur":
-                    process_row_blur(all_rows, useracid)
-                else:
-                    process_row(all_rows, useracid)
-            except Exception as e:
-                print(f"[ERROR] Gagal menyimpan hasil parsing ke database: {e}")
-                return "error_blur"
-
-            try:
-                csv_rows = [[
-                    row['product_number'],
-                    row['description'],
-                    row['quantity'],
-                    row['unit_price'],
-                    row['discount'],
-                    row['line_total']
-                ] for row in all_rows]
-
-                folder = os.path.dirname(file_path)
-                csvname = os.path.splitext(filename)[0] + '.csv'
-                csv_path = os.path.join(folder, csvname)
-                write_csv_with_delimiter(csv_path, csv_rows, ";")
-                print(f"[CSV] Disimpan ke: {csv_path}")
-                return csvname
-            except Exception as e:
-                print(f"[ERROR] Gagal menyimpan CSV: {e}")
-                return "error_blur"
-
+            return after_parse(all_rows, full_text, filename, useracid, text_override, mode, file_path)
         except Exception as e:
-            print(f"[ERROR] Gagal parsing wer_per_line: {e}")
+            print(f"[ERROR] Gagal menyimpan CSV: {e}")
             return "error_blur"
-
-    elif file_path.endswith('.pdf'):
-        images = convert_from_path(file_path, dpi=500)
-        for img in images:
-            text, ocr_wer, wer_per_line = extract_text_with_ocr(img)
-            if text:
-                full_text += f"\n{text}"
-        rows = full_text.split("\n") if full_text else []
-
-    elif file_path.endswith('.webp'):
-        text, ocr_wer, wer_per_line = extract_image_with_ocr(file_path)
-        full_text = text
-        rows = text.split("\n") if text else []
-    else:
-        print(f"File {file_path} tidak didukung")
-        return "error_blur"
-
-    filename = os.path.basename(file_path)
-    print(f"[All ROWS] {all_rows}")
-    for row in rows:
-        row = row.strip()
-        if not row:
-            continue
-        parsed = parse_row(row, full_text, filename)
-        if parsed:
-            all_rows.append(parsed)
-        else:
-            print(f"[PARSE FAIL] Gagal parsing baris: {row}")
-
+    
+def after_parse(all_rows, full_text, filename, useracid, text_override, mode, file_path):
     if not all_rows:
         if text_override and mode == "blur":
             print("[INFO] Tidak ada parsing valid, simpan seluruh text ke invoiceblur.")

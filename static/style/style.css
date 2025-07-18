@@ -403,6 +403,14 @@ width: 100%;
   animation: slideOutFade 0.4s ease forwards;
 }
 
+/* .custom-shape-divider-bottom-1752462819{
+  z-index: 9999;
+} */
+
+.card-auth, .copyright {
+  z-index: 999;
+}
+
 @keyframes slideInFade {
   0% {
     transform: translateY(-20px);

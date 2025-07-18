@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{title}}{% if subtitle %} - {{ subtitle}}{% endif %}</title>
     {% include "components/header.html" %}
   </head>
@@ -9,14 +9,14 @@
     {% if user %}
     <nav class="text-gray-400 bg-gray-900 body-font fixed-top">
 <div class="container mx-auto flex flex-wrap p-1 flex-col md:flex-row items-center">
-  <a class="flex title-font font-medium items-center text-white my-2 md:mb-0">
+  <a class="flex title-font font-medium items-center text-white my-2 text-decoration-none md:mb-0">
       <img src="{{ url_for('static', filename='logo.png') }}" class="w-10 h-10 text-white p-1 bg-indigo-500 rounded-full">
     <span class="ml-3 text-xl">Converter`</span>
   </a>
   <nav class="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center">
-    <a class="mr-5 hover:text-white {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/dashboard' else '' }}" href="/dashboard">Dashboard</a>
-    <a class="mr-5 hover:text-white {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/convert' else '' }}" href="/convert">Convert</a>
-    <a class="mr-5 hover:text-white {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/data' else '' }}" href="/data">Data</a>
+    <a class="mr-5 hover:text-white text-decoration-none {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/dashboard' else '' }}" href="/dashboard">Dashboard</a>
+    <a class="mr-5 hover:text-white text-decoration-none {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/convert' else '' }}" href="/convert">Convert</a>
+    <a class="mr-5 hover:text-white text-decoration-none {{ 'text-white font-semibold border-b-2 border-white' if request.path == '/data' else '' }}" href="/data">Data</a>
   </nav>
   <button type="button" id="btn-logout" class="inline-flex items-center bg-gray-800 border-0 py-2 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-1 md:mt-0">Log Out
   </button>

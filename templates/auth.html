@@ -6,14 +6,14 @@
     </svg>
 </div>
 
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-  <div class="flex flex-wrap w-full max-w-5xl bg-white shadow-md rounded-xl overflow-hidden">
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+  <div class="card-auth flex flex-col md:flex-col lg:flex-row w-full max-w-5xl bg-white shadow-md rounded-xl overflow-hidden lg:max-w-4xl md:max-w-2xl sm:w-full">
     
-    <div class="w-full md:w-1/2 hidden md:block">
+    <div class="hidden lg:block lg:w-1/2">
       <img src="{{ url_for('static', filename='login.svg' ) }}" alt="Login Image" class="w-full h-full object-cover">
     </div>
     
-    <div class="w-full md:w-1/2 p-8">
+    <div class="w-full lg:w-1/2 p-8">
       <h2 class="text-gray-900 text-2xl font-semibold mb-2 text-center">{{ title }} - <span class="text-indigo-600">{{ subtitle }}</span></h2>
       <p class="leading-relaxed mb-5 text-gray-600 text-center">Masukan user dan password untuk login</p>
       
@@ -51,7 +51,7 @@
       </div>
     </div>
   </div>
-  <p class="mt-3 font-semibold font-sans">Copyright © 2025 Yoma Solutions</p>
+  <p class="copyright mt-3 font-semibold font-sans text-center">Copyright © 2025 Yoma Solutions</p>
 </div>
 
   <div id="alert-box" class="custom-alert">
