@@ -141,11 +141,9 @@ def extract_image_with_ocr(image_path):
         pil_img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("L")
         pil_img = pil_img.point(lambda p: 255 if p > 128 else 0)
 
-        # OCR
         custom_config = r'--oem 3 --psm 6'
         extracted_text = pytesseract.image_to_string(pil_img, config=custom_config, lang='eng')
 
-        # Original WER comparison
         original_image = Image.open(image_path).convert("L")
         original_text = pytesseract.image_to_string(original_image, config=custom_config, lang='eng')
 
@@ -185,11 +183,53 @@ def process_file(file_path, mode="product", text_override=None, useracid=None, w
     all_rows = []
     full_text = ""
 
-    if text_override and wer_per_line:
+    if wer_per_line:
         print("[INFO] Menggunakan wer_per_line hasil edit (tanpa OCR ulang)")
         try:
             rows = [row[1].strip() for row in wer_per_line if len(row) >= 2 and row[1].strip()]
-            full_text = text_override 
+            full_text = text_override if text_override else "\n".join(rows)
+
+            filename = os.path.basename(file_path)
+            for row in rows:
+                parsed = parse_row(row, full_text, filename)
+                if parsed:
+                    all_rows.append(parsed)
+                else:
+                    print(f"[PARSE FAIL] Gagal parsing baris: {row}")
+
+            if not all_rows:
+                print("[ERROR] Tidak ada baris valid setelah edit WER.")
+                return "error_blur"
+
+            try:
+                if mode == "blur":
+                    process_row_blur(all_rows, useracid)
+                else:
+                    process_row(all_rows, useracid)
+            except Exception as e:
+                print(f"[ERROR] Gagal menyimpan hasil parsing ke database: {e}")
+                return "error_blur"
+
+            try:
+                csv_rows = [[
+                    row['product_number'],
+                    row['description'],
+                    row['quantity'],
+                    row['unit_price'],
+                    row['discount'],
+                    row['line_total']
+                ] for row in all_rows]
+
+                folder = os.path.dirname(file_path)
+                csvname = os.path.splitext(filename)[0] + '.csv'
+                csv_path = os.path.join(folder, csvname)
+                write_csv_with_delimiter(csv_path, csv_rows, ";")
+                print(f"[CSV] Disimpan ke: {csv_path}")
+                return csvname
+            except Exception as e:
+                print(f"[ERROR] Gagal menyimpan CSV: {e}")
+                return "error_blur"
+
         except Exception as e:
             print(f"[ERROR] Gagal parsing wer_per_line: {e}")
             return "error_blur"

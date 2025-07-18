@@ -314,7 +314,7 @@
         });
 
         this.on("error", function (file, errorMessage) {
-          Swal.fire({
+          Toast.fire({
             icon: "error",
             title: "Error!",
             text: "Terjadi kesalahan saat upload",
@@ -335,6 +335,36 @@
         toast.onmouseleave = Swal.resumeTimer;
       },
     });
+
+    $(document).on("click", "#btn-copy", function () {
+      const text = $("#text-area").val();
+      const icon = $(this).find("i");
+
+      function resetIcon() {
+        icon.removeClass().addClass("fa-regular fa-copy");
+      }
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(
+          function () {
+            Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
+            icon.removeClass().addClass("fas fa-check");
+            setTimeout(resetIcon, 2000);
+          },
+          function () {
+            Toast.fire({ icon: "error", text: "Gagal menyalin teks" });
+          }
+        );
+      } else {
+        const textarea = document.getElementById("text-area");
+        textarea.select();
+        document.execCommand("copy");
+        Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
+        icon.removeClass().addClass("fas fa-check");
+        setTimeout(resetIcon, 1500);
+      }
+    });
+
     $(document).on("click", "#btn-expand", function () {
       const text = $("#text-area").val() || "";
       $("#exampleModal .modal-body").html(
@@ -369,15 +399,9 @@
       if (changed) {
         $("#editsaveon").removeClass().addClass("fas fa-edit");
         $("#editbtn-tooltip").text("Edit");
-        $("#editbtnon").removeAttr("disabled");
-        $("#editbtnon").prop("disabled", false);
       } else {
-        $("#editsaveon")
-          .removeClass()
-          .addClass("bx bx-save")
-          .attr("id", "saveButton");
+        $("#editsaveon").removeClass().addClass("bx bx-save");
         $("#editbtn-tooltip").text("Save");
-        $("#editbtnon").prop("disabled", true);
       }
     });
 
@@ -411,40 +435,10 @@
         });
 
         $("#editsaveon").removeClass().addClass("bx bx-save");
-
-        $("#editbtnon").prop("disabled", true);
+        $("#editbtn-tooltip").text("Save");
         $("#ocr-output").attr("contenteditable", "false");
       } else {
         $("#saveButton").trigger("click");
-      }
-    });
-
-    $(document).on("click", "#btn-copy", function () {
-      const text = $("#text-area").val();
-      const icon = $(this).find("i");
-
-      function resetIcon() {
-        icon.removeClass().addClass("fa-regular fa-copy");
-      }
-
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(
-          function () {
-            Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
-            icon.removeClass().addClass("fas fa-check");
-            setTimeout(resetIcon, 2000);
-          },
-          function () {
-            Toast.fire({ icon: "error", text: "Gagal menyalin teks" });
-          }
-        );
-      } else {
-        const textarea = document.getElementById("text-area");
-        textarea.select();
-        document.execCommand("copy");
-        Toast.fire({ icon: "success", text: "Teks disalin ke clipboard" });
-        icon.removeClass().addClass("fas fa-check");
-        setTimeout(resetIcon, 1500);
       }
     });
 

@@ -380,7 +380,7 @@ def save(filepath):
             return jsonify({'status': 'error', 'message': f"File {filepath} tidak ditemukan."}), 404
 
         mode = request.form.get('mode', 'product').lower()
-        text_override = request.form.get('text') if mode == "blur" else None
+        text_override = request.form.get('text')
         wer_per_line_raw = request.form.get("wer_per_line")
         user_id = get_jwt_identity()
 
