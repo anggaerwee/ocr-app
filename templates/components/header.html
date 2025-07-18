@@ -1,11 +1,17 @@
 <script
-  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+  src="{{ url_for('static', filename='js/jquery.min.js') }}"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
   crossorigin="anonymous"
   referrerpolicy="no-referrer"
 ></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link
+  href="{{ url_for('static', filename='css/tailwind.min.css') }}"
+  rel="stylesheet"
+/>
+<link
+  href="{{ url_for('static', filename='css/boxicons.min.css') }}"
+  rel="stylesheet"
+/>
 <link
   rel="icon"
   href="{{ url_for('static', filename='unnamed.png') }}"
@@ -19,55 +25,59 @@
 
 <link
   rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-  integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-  crossorigin="anonymous"
+  href="{{ url_for('static', filename='css/all.min.css') }}"
   referrerpolicy="no-referrer"
 />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  href="{{ url_for('static', filename='css/font-awesome.min.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"
 />
 
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
 />
 
 <link
   rel="stylesheet"
-  href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+  href="{{ url_for('static', filename='css/jquery.dataTables.min.css') }}"
 />
 <link
   rel="stylesheet"
-  href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"
+  href="{{ url_for('static', filename='css/dataTables.bootstrap5.min.css') }}"
 />
 
 <link
-  href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+  href="{{ url_for('static', filename='css/select2.min.css') }}"
   rel="stylesheet"
 />
 
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+  href="{{ url_for('static', filename='css/flatpickr.min.css') }}"
 />
 
 <link
-  href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css"
+  href="{{ url_for('static', filename='css/dropzone.css') }}"
   rel="stylesheet"
   type="text/css"
 />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/notyf.min.css') }}"
+/>
+<script src="{{ url_for('static', filename='js/dropzone-min.js') }}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="{{ url_for('static', filename='js/notyf.min.js') }}"></script>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/toastify.min.css') }}"
+/>
+<script src="{{ url_for('static', filename='js/toastify-js.js') }}"></script>
 
 <link
   rel="stylesheet"

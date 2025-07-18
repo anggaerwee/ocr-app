@@ -49,21 +49,21 @@
   </section>
 </div>
 <script>
-  window.addEventListener("pageReady", () => {
-    gsap.from(".content-right", {
-      opacity: 0,
-      x: 50,
-      duration: 0.8,
-      delay: 0.2,
-      stagger: 0.2,
-    });
-
-    gsap.from(".content-left", {
-      opacity: 0,
-      x: -50,
-      duration: 0.8,
-      delay: 0.2,
-      stagger: 0.2,
-    });
+  document.addEventListener("DOMContentLoaded", () => {
+  gsap.from(".content-right", {
+    opacity: 0,
+    x: 50,
+    duration: 0.8,
+    delay: 0.2,
+    stagger: 0.2,
   });
+
+  gsap.from(".content-left", {
+    opacity: 0,
+    x: -50,
+    duration: 0.8,
+    delay: 0.2,
+    stagger: 0.2,
+  });
+});
 </script>
